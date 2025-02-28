@@ -13,4 +13,10 @@ const User = {
 };
 
 module.exports = User;
- 
+// createUser: (username, password, callback) => {
+//   const query = 'INSERT INTO users (username, password) VALUES (?, ?)';
+//   db.query(query, [username, password], (err, results) => {
+//     if (err) return callback(err, null);
+//     callback(null, { id: results.insertId, username: username });
+//   });
+// }

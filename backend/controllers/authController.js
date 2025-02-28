@@ -4,6 +4,8 @@ const User = require('../models/user');
 
 const authController = {
   register: (req, res) => {
+    console.log("Received body:", req.body);
+
     const { username, password } = req.body;
 
     User.findByUsername(username, (err, results) => {
@@ -11,9 +13,16 @@ const authController = {
       if (results.length > 0) {
         return res.status(400).json({ error: "Username already exists" });
       }
-      User.createUser(username, password, (err) => {
+      User.createUser(username, password, (err, newUser) => {
         if (err) return res.status(500).json({ error: "Error creating user"});
-        return res.status(201).json({ message: "User created successfully"});
+
+
+        const userId = results.insertId;
+        console.log("fddfd body:", results.insertId, username);
+        const token = jwt.sign({ id: results.insertId, username: username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        console.log("Token:", token);
+
+        return res.status(201).json({ token });
       });
     });
   },
@@ -40,6 +49,21 @@ const authController = {
       return res.status(200).json({ token });
       // return res.status(201).json({ message: "User logged successfully"});
     });
+  },
+
+  verify: (req, res) => {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+
+  try {
+    jwt.verify(token, process.env.JWT_SECRET);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(403).json({ error: 'Invalid token' });
+  }
   }
 };
 

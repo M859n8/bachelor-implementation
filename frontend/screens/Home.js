@@ -1,17 +1,34 @@
 import { StatusBar } from 'expo-status-bar';
-import { View, Text, Button, FlatList, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
-import { useNavigation } from "@react-navigation/native"
+import { View, Text, Button, FlatList, TouchableOpacity, StyleSheet, useWindowDimensions, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 
 const tests = ["FacialRecognition", "ComplexFigure", "VisualOrganization"];
 
-export default function Home() {
+export default function Home({ setIsAuthenticated }) {
 
     const navigation = useNavigation();
     const { width } = useWindowDimensions();
     const numColumns = width < 600 ? 2 : width < 900 ? 3 : 4;
+
+    const handleLogout = async () => {
+        try {
+          await AsyncStorage.removeItem('authToken'); // Видаляємо токен
+          Alert.alert('Logged out', 'You have been logged out successfully.');
+    
+          setIsAuthenticated(false);  // Оновлюємо стан авторизації
+        //   navigation.navigate('Login');
+        } catch (error) {
+          console.error('Logout error:', error);
+          Alert.alert('Error', 'Something went wrong while logging out.');
+        }
+      };
     
     return (
         <View style={styles.container}>
+            <Button title="Logout" onPress={handleLogout} />
             <FlatList
                 data={tests}
                 key={numColumns}
