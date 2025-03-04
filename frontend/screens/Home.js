@@ -5,7 +5,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
-const tests = ["FacialRecognition", "ComplexFigure", "VisualOrganization"];
+const tests = [ "Balance","BellsCancelation","BlockDesign",
+    "ComplexFigure", "Drawing", "FacialRecognition", "LineTracking",
+    "Steadiness","TransferringPennies", "VisualOrganization"];
 
 export default function Home({ setIsAuthenticated }) {
 

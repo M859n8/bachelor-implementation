@@ -1,5 +1,6 @@
-const db = require('../db-config');
-const bcrypt = require('bcryptjs');
+// user.js
+import bcrypt from 'bcryptjs';
+import db from '../db-config.js';
 
 const User = {
   createUser: (username, password, callback) => {
@@ -12,7 +13,8 @@ const User = {
   }
 };
 
-module.exports = User;
+export default User;
+
 // createUser: (username, password, callback) => {
 //   const query = 'INSERT INTO users (username, password) VALUES (?, ?)';
 //   db.query(query, [username, password], (err, results) => {

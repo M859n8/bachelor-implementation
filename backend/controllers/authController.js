@@ -1,10 +1,9 @@
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const User = require('../models/user');
-
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import User from '../models/user.js';
 const authController = {
   register: (req, res) => {
-    console.log("Received body:", req.body);
+    // console.log("Received body:", req.body);
 
     const { username, password } = req.body;
 
@@ -28,7 +27,7 @@ const authController = {
   },
 
   login: (req, res) => {
-    console.log("Received body:", req.body);
+    // console.log("Received body:", req.body);
 
     const { username, password } = req.body;
 
@@ -67,4 +66,5 @@ const authController = {
   }
 };
 
-module.exports = authController;
+
+export default authController; 

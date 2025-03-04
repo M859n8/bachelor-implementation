@@ -1,4 +1,4 @@
-const connection = require('./db-config');
+import connection from './db-config.js';
 
 // Створення бази даних і таблиці
 const createDatabaseAndTables = `

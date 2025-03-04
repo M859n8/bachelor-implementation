@@ -1,11 +1,12 @@
-const express = require('express');
-const cors = require('cors');
-// const connection = require('./db-config');
+import express from 'express';
+import cors from 'cors';// const connection = require('./db-config');
 
 const app = express();
 const port = process.env.PORT || 5000;
 
-const authRoutes = require('./routes/authRoutes');
+import authRoutes from './routes/authRoutes.js';
+import testRoutes from './routes/testRoutes.js';
+
 
 // app.use(cors());
 app.use(cors({
@@ -20,8 +21,9 @@ app.get('/', (req, res) => {
   });
   
 app.use('/api/auth', authRoutes);
-// app.post('/register', authController.register);
-// app.post('/login', authController.login);
+app.use('/api/result', testRoutes);
+
+
 
 
 // Starting server
