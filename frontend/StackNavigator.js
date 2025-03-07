@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createStackNavigator } from "@react-navigation/stack"
+import { useNavigation } from '@react-navigation/native';
 import Home from "./screens/Home";
 import Login from './screens/Login';
 
@@ -24,6 +25,7 @@ const Stack = createStackNavigator();
 export default function StackNavigator() {
 
   const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const navigation = useNavigation();  
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -31,6 +33,8 @@ export default function StackNavigator() {
       
       if (!token) {
         setIsAuthenticated(false);
+        // navigation.replace("Login"); // Якщо токен невалідний — перенаправлення на логін
+
         return;
       }
   
@@ -41,17 +45,19 @@ export default function StackNavigator() {
           headers: { Authorization: `Bearer ${token}` },
         });
   
-        if (response.ok) {
-          setIsAuthenticated(true);
+        if (response.status === 200) {
+          // navigation.replace("Home"); // Якщо токен валідний — відкриваємо головну сторінку
+        setIsAuthenticated(true);
+
         } else {
-          await AsyncStorage.removeItem('authToken');
-          console.log("else response not ok");
-          
-          setIsAuthenticated(false);
+          // navigation.replace("Login"); // Якщо токен невалідний — перенаправлення на логін
+        setIsAuthenticated(false);
+
         }
       } catch (error) {
         console.error('Auth check failed:', error);
         console.log("catched error ");
+        // navigation.replace("Login"); // Якщо токен невалідний — перенаправлення на логін
 
         setIsAuthenticated(false);
       }
@@ -63,11 +69,11 @@ export default function StackNavigator() {
   return (
     <Stack.Navigator screenOptions={{headersShown: false}}>
         {isAuthenticated ? (
-        //  Захищені екрани (тільки для авторизованих)
-        <Stack.Group>
+        // {/* //  Захищені екрани (тільки для авторизованих) */}
+        <Stack.Group> 
           {/* <Stack.Screen name="Home" component={Home} /> */}
           <Stack.Screen name="Home" >
-            {props => <Home {...props} setIsAuthenticated={setIsAuthenticated} />}
+            {props => <Home {...props} setIsAuthenticated={setIsAuthenticated} />} 
           </Stack.Screen>
           <Stack.Screen name="Balance" component={Balance} />
           <Stack.Screen name="BellsCancelation" component={BellsCancelation} />
@@ -80,15 +86,16 @@ export default function StackNavigator() {
           <Stack.Screen name="TransferringPennies" component={TransferringPennies} />
           <Stack.Screen name="VisualOrganization" component={VisualOrganization} />
         </Stack.Group>
-      ) : (
-        //  Публічні екрани (авторизація)
+        ) : ( 
         <Stack.Group>
           <Stack.Screen name="Login">
             {props => <Login {...props} setIsAuthenticated={setIsAuthenticated} />}
-          </Stack.Screen>
-          {/* <Stack.Screen name="Register" component={Register} /> */}
+          </Stack.Screen> 
+          {/* <Stack.Screen name="Login" component={Login} /> */}
+
+          {/* <Stack.Screen name="Register" component={Register} />  */}
         </Stack.Group>
-      )}
+      )} 
 
     </Stack.Navigator>
   );

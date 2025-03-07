@@ -1,12 +1,14 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Modal, Button } from 'react-native';
+import { StyleSheet, Text, View, Modal, Button, Image } from 'react-native';
 import { useState } from 'react';
+import DropArea from '../../shared/DropArea.js';
+
 
 export default function TransferringPennies({route}) {
   const [modalVisible, setModalVisible] = useState(true);
   return (
       <View style={styles.container}>
-          <Modal
+          {/* <Modal
               animationType="slide"
               transparent={true}
               visible={modalVisible}
@@ -15,8 +17,14 @@ export default function TransferringPennies({route}) {
                   <Text style={styles.modalText}>Правила тесту: Прочитайте інструкцію перед початком.</Text>
                   <Button title="Почати" onPress={() => setModalVisible(false)} />
               </View>
-          </Modal>
+          </Modal> */}
+
+
           <Text style={styles.screenText}>{route.name} Screen</Text>
+          {/* <Image source={require('../../assets/pennies/sideCoin.svg')} /> */}
+          {/* <Image source={require('../../assets/pennies/penny.svg')} /> */}
+          <DropArea title='Drop Area' elements='null'/>
+
       </View>
   );
 }

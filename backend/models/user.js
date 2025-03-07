@@ -5,7 +5,12 @@ import db from '../db-config.js';
 const User = {
   createUser: (username, password, callback) => {
     const hashedPassword = bcrypt.hashSync(password, 10);
-    db.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword], callback);
+    db.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword], (err, results) => {
+      if(err){
+        return callback(err, null);
+      }
+      callback(null, results.insertId);
+    });
   },
 
   findByUsername: (username, callback) => {

@@ -12,13 +12,16 @@ const authController = {
       if (results.length > 0) {
         return res.status(400).json({ error: "Username already exists" });
       }
-      User.createUser(username, password, (err, newUser) => {
+      User.createUser(username, password, (err, userId) => {
         if (err) return res.status(500).json({ error: "Error creating user"});
 
+        if (!userId) {
+          return res.status(500).json({ error: "User ID is missing" });
+        }
 
-        const userId = results.insertId;
-        console.log("fddfd body:", results.insertId, username);
-        const token = jwt.sign({ id: results.insertId, username: username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        // const userId = results.insertId;
+        console.log("register body:", userId, username);
+        const token = jwt.sign({ id: userId, username: username }, process.env.JWT_SECRET, { expiresIn: '1h' });
         console.log("Token:", token);
 
         return res.status(201).json({ token });
