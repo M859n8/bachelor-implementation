@@ -28,18 +28,26 @@ export default function Penny({ index, setActiveCoin }) {
     //     }
     // };
 
-    const position = useRef(new Animated.ValueXY({ x: 10, y: 10 })).current;
+    const position = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
 
     const panResponder = useRef(
         PanResponder.create({
             onStartShouldSetPanResponder: () => true,
             onPanResponderGrant: () => {
                 setActiveCoin(index); // Записуємо, яку монету взяли
+                console.log(`active index is : ${index}`);
+                position.setOffset({ x: position.x._value, y: position.y._value }); 
+                position.setValue({ x: 0, y: 0 }); // Скидаємо dx/dy, щоб рух був відносно нової точки
+       
             },
-            onPanResponderMove: (_, gesture) => {
-                position.setValue({ x: gesture.dx, y: gesture.dy });
+            onPanResponderMove:  Animated.event(
+                [null, { dx: position.x, dy: position.y }],
+                { useNativeDriver: false }
+            ),
+            onPanResponderRelease: () => {
+                setActiveCoin(null);
+                position.flattenOffset(); // Записуємо нові координати як початкову точку
             },
-            onPanResponderRelease: () => {},
         })
     ).current;
 

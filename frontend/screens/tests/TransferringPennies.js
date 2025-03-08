@@ -1,10 +1,12 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Modal, Button, Image } from 'react-native';
+import { StyleSheet, Text, View, Modal, Button, Image, Dimensions } from 'react-native';
 import { useState } from 'react';
 import DropArea from '../../shared/DropArea.js';
 import Penny from '../../shared/Penny.js';
 
-
+const screenWidth = Dimensions.get("window").width;
+const screenHeight = Dimensions.get("window").height;
+const coinSize = screenWidth * 0.15; // Розмір монетки (~15% ширини екрану)
 
 export default function TransferringPennies({route}) {
 
@@ -17,9 +19,9 @@ export default function TransferringPennies({route}) {
 //     { index: 3, status: 'left' },
 
 	const [elements, setElements] = useState([
-		{ index: 1, status: 'left' },
-		{ index: 2, status: 'left' },
-		{ index: 3, status: 'left' },
+		{ id: 1, status: 'left' },
+		{ id: 2, status: 'left' },
+		{ id: 3, status: 'left' },
     // додаємо скільки потрібно монеток
   ]);
   const [coinsR, setCoinsR] = useState([]);
@@ -57,14 +59,25 @@ export default function TransferringPennies({route}) {
 			  setActiveCoin={setActiveCoin}
 
           /> */}
-		  <View style={styles.coinContainer}>
-            {elements.map(
-                (element, index) =>
-                    (
-                        <Penny key={index} index={element.index} setActiveCoin={setActiveCoin} />
-                    )
-            )}
-        </View>
+            <View style={styles.gameArea}>
+            <View style={styles.dropArea}>
+                <Text style={styles.areaText}>Ліва зона</Text>
+                    {elements
+                        .filter((el) => el.status === "left")
+                        .map((el) => (
+                            <Penny key={el.id} index={el.id} setActiveCoin={setActiveCoin} />
+                        ))}
+            </View>
+            {/* Права зона для монеток */}
+            <View style={styles.dropArea}>
+                    <Text style={styles.areaText}>Права зона</Text>
+                    {elements
+                        .filter((el) => el.status === "right")
+                        .map((el) => (
+                            <Penny key={el.id} index={el.id} setActiveCoin={setActiveCoin} />
+                        ))}
+                </View>
+            </View>
 		{/* <h1> Active card {activeCoin}</h1> */}
 		<Text>Active coin: {activeCoin !== null ? activeCoin : 'None'}</Text>
       </View>
@@ -72,32 +85,46 @@ export default function TransferringPennies({route}) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center'
-  },
-  screenText: {
-      fontSize: 24
-  },
-  modalContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)'
-  },
-  modalText: {
-      fontSize: 20,
-      backgroundColor: 'white',
-      padding: 20,
-      borderRadius: 10,
-      textAlign: 'center'
-  },
+    container: {
+        flex: 1, /*займає весь простів*/
+        justifyContent: 'center', /*вирівнює центр по вертикалі*/
+        alignItems: 'center', /* вирівнює по горизонталі*/
+        backgroundColor: "#f5f5f5"
+    },
+    screenText: {
+        fontSize: 24
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+    },
+    modalText: {
+        fontSize: 20,
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 10,
+        textAlign: 'center'
+    },
 
-  dropAreaL: {
-
-  },
-  dropAreaR: {
-
-  }
+    gameArea: {
+        flexDirection: "row",
+        width: "100%",
+        justifyContent: "space-between",
+        paddingHorizontal: 20,
+    },
+    dropArea: {
+        width: screenWidth * 0.4, // Ширина зон ~40% екрану
+        height: screenHeight * 0.6, // Висота зони ~60% екрану
+        backgroundColor: "#d3d3d3",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 10,
+    },
+    areaText: {
+        fontSize: 18,
+        fontWeight: "bold",
+        marginBottom: 10,
+    },
 });
