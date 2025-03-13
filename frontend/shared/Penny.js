@@ -41,12 +41,22 @@ export default function Penny({ index, setActiveCoin, height, width, moveCoin, r
     };
     /////////////////////////////////////////////////////////////////////
 
+    const droppedCoin = useRef(false);
+    const droppedCoinPoints = useRef([]);
+    // Додаємо точку error
+    const registerDroppedCoin = (x, y) => { 
+        droppedCoinPoints.current.push({ x, y });
+        console.log("Error points:", droppedCoinPoints.current);
+
+    };
+
+
     
     const startTime = useRef(0); //щоб оновлювалося одразу і не чекало рендерингу як у юзстейт
     const endTimeBackup = useRef(0);
 
 
-    const collectCoinData = (coinId, startCoords, endCoords, error = null, changeHandMoment = null) => {
+    const collectCoinData = (coinId, startCoords, endCoords, error = null) => {
         const endTime = Date.now();
 
 
@@ -55,14 +65,13 @@ export default function Penny({ index, setActiveCoin, height, width, moveCoin, r
 
         // console.log(`Start time is ${startTime.current}, end time is ${endTime}, time taken is ${timeTaken}, time between tries ${betweenTries}, backup end time ${endTimeBackup.current}`);
     
-        console.log("Hand change points:", handChangePoints);
 
         const coinData = {
             id: coinId,
             start_coordinates: {x : startCoords.x, y: startCoords.y},
             end_coordinates: { x: endCoords.x , y: endCoords.y},
             time: timeTaken,
-            errors: error ? [{ type: error.type, coordinates: error.coordinates }] : [],
+            errors: droppedCoinPoints.current,
             // change_hand_moment: changeHandMoment,
             hand_change_points: handChangePoints.current,
             round: round
@@ -75,11 +84,14 @@ export default function Penny({ index, setActiveCoin, height, width, moveCoin, r
         setCoinData((prevData) => [...prevData, coinData]); 
 
         console.log("Hand change points:", handChangePoints);
+        console.log("Error points:", droppedCoinPoints.current);
+
 
         // console.log("Data : ", coinData);
         endTimeBackup.current = endTime;
     };
     
+
 
     const panResponder = useRef(
         PanResponder.create({
@@ -89,9 +101,22 @@ export default function Penny({ index, setActiveCoin, height, width, moveCoin, r
                 setActiveCoin(index); // Записуємо, яку монету взяли
                 startTime.current = Date.now(); // Оновлюється без виклику ререндеру
 
+                if(droppedCoin.current){
+                    console.log("#########Помилка!");
+                    registerDroppedCoin(position.x._value, position.y._value);
+                    console.log(`error points detail ${position.x._value}`);
+                }
+                droppedCoin.current = true;
+
+
                 // console.log(`active index is : ${index}`);
                 position.setOffset({ x: position.x._value, y: position.y._value }); //save current pos
                 position.setValue({ x: 0, y: 0 }); // Скидаємо dx/dy, щоб рух був відносно нової точки
+
+                
+
+                
+               
             },
             onPanResponderMove:(event, gestureState) =>{
                 const speed = Math.sqrt(gestureState.vx ** 2 + gestureState.vy ** 2); // Загальна швидкість
@@ -117,7 +142,6 @@ export default function Penny({ index, setActiveCoin, height, width, moveCoin, r
 
                     // Реєструємо місце зміни руки
                     registerHandChange(position.x._value, position.y._value);
-        console.log("Hand change points:", handChangePoints);
 
                 }
 
