@@ -16,6 +16,11 @@ export default function TransferringPennies({route}) {
 
   const [modalVisible, setModalVisible] = useState(true);
 
+  // const [coinData, setCoinData] = useState({ coinData: [] }); // Структура з coins
+  const [coinData, setCoinData] = useState([] ); // Структура з coins
+
+
+
    // Масиви монеток для лівої і правої сторін
 //    const [coinsL, setCoinsL] = useState([
 //     { index: 1, status: 'left' },
@@ -36,21 +41,18 @@ export default function TransferringPennies({route}) {
 
   const moveCoin = (id, newStatus) => {
     setElements((prevElements) => {
-      console.log("Before update:", prevElements);
+      // console.log("Before update:", prevElements);
       
       const updatedElements = prevElements.map((el) =>
           el.id === id ? { ...el, status: newStatus } : el
       );
   
-      console.log("After update:", updatedElements);
-
-      // Викликаємо checkRoundCompletion ПІСЛЯ оновлення
-    //   setTimeout(() => {
-    //     checkRoundCompletion();
-    // }, 0);
+      // console.log("After update:", updatedElements);
+      
+      
       
       return updatedElements;
-  });
+    });
   
     // console.log(`new element ${id} new status ${newStatus}  round ${round}`);
     // {elements.map((el) => { console.log(`actual  elem ${el.id} ${el.status}`)  })}
@@ -71,8 +73,8 @@ export default function TransferringPennies({route}) {
 
 
   const checkRoundCompletion = () => {
-    console.log('got here');
-    {elements.map((el) => { console.log(`actual  elem ${el.id} ${el.status}`)})}
+    // console.log('got here');
+    // {elements.map((el) => { console.log(`actual  elem ${el.id} ${el.status}`)})}
 
     if (round === 1) {
       const allInRightZone = elements.every((el) => el.status === 'right');
@@ -91,19 +93,18 @@ export default function TransferringPennies({route}) {
         console.log('G.A.M.E O.V.E.R');
 
         setGameOver(true); // Гра завершена
-        // sendDataToBackend();
+        sendDataToBackend();
 
       }
 
-    }else{
-      console.log('still same');
     }
   };
 
-  const sendDataToBackend = async (coinData) => {
+  const sendDataToBackend = async () => {
     const token = await AsyncStorage.getItem('authToken');
-    setIsLoading(true);  // Тільки зараз починаємо показувати завантаження
+    // console.log("Coin data being sent: ", coinData);
 
+    //  треба буде десь якось дані про час мвж вибором монеток протягом раунду брати. можна це навіть на бекенді робити
     try {
       const response = await fetch('http://localhost:5000/api/result/pennies/saveResults', {
           method: 'POST',
@@ -112,7 +113,7 @@ export default function TransferringPennies({route}) {
               'Authorization': `Bearer ${token}`
 
           },
-          body: JSON.stringify(coinData),
+          body: JSON.stringify({coinData}), //надсилаємо саме об'єкт
       })
       if (response.ok) {
         Alert.alert('Успіх', 'Ваша відповідь успішно надіслана!');
@@ -146,6 +147,7 @@ export default function TransferringPennies({route}) {
             <Text style={styles.areaText}>Ліва зона</Text>
             
             {round === 1 && elements.map((el) => (
+              
                 <Penny 
                     key={el.id} 
                     index={el.id} 
@@ -154,7 +156,10 @@ export default function TransferringPennies({route}) {
                     width={coinSize}
                     moveCoin={moveCoin}
                     checkRoundCompletion={checkRoundCompletion}
-                    round={round}/>
+                    round={round}
+                    setCoinData={setCoinData}
+                    
+                    />
             ))}
         </View>
         {/* Права зона для монеток */}
@@ -170,7 +175,9 @@ export default function TransferringPennies({route}) {
                 width={coinSize}
                 moveCoin={moveCoin}
                 checkRoundCompletion={checkRoundCompletion}
-                round={round}/>                    
+                round={round}
+                setCoinData={setCoinData}
+                />                    
         ))}
         </View>
         </View>

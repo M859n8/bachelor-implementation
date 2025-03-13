@@ -4,12 +4,35 @@ const userResponses = {}; // Тимчасове сховище відповід�
 const transferringPenniesController ={
     // Збереження відповіді в локальний масив
   saveResults: (req, res) => {
-    const { image_id, text_response } = req.body;
+    console.log("got here");
+    console.log("Request body: ", req.body);
+    
+    const  coinData  = req.body;
     const user_id = req.user.id;
-    if (!user_id || !image_id || !text_response) {
+    if (!user_id ) {
+      console.log("Missing token");
 
       return res.status(400).json({ error: "Missing required fields" });
     }
+    if (!coinData) {
+      console.log("Missing coin data");
+
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+     // Перевірка координат
+    //  coinData.forEach(coin => {
+    //   if (!coin.start_coordinates || !coin.start_coordinates.x || !coin.start_coordinates.y) {
+    //       return res.status(400).json({ error: "Invalid start coordinates" });
+    //   }else{
+    //     console.log('valid1');
+    //   }
+    //   if (!coin.end_coordinates || !coin.end_coordinates.x || !coin.end_coordinates.y) {
+    //       return res.status(400).json({ error: "Invalid end coordinates" });
+    //   }else{
+    //     console.log('valid2');
+
+    //   }
+  // });
 
     // Якщо ще немає запису для користувача – створюємо
     if (!userResponses[user_id]) {
@@ -17,7 +40,10 @@ const transferringPenniesController ={
     }
 
     // Зберігаємо відповідь у тимчасовий масив
-    userResponses[user_id].push({ image_id, text_response });
+    userResponses[user_id].push({coinData });
+    // console.log("Data : ", coinData);
+    console.log("Received Data: ", JSON.stringify(coinData, null, 2));
+
 
     res.json({ message: "Response saved locally" });
   },
