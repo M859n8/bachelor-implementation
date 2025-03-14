@@ -2,12 +2,31 @@
 import stringSimilarity from "string-similarity";
 const userResponses = {}; // Тимчасове сховище відповідей користувачі
 const correctAnswers = {
-  1: ["ball", "tennis ball", "cut ball"],
-  2: ["cat", "kitten", "small cat"],
-  3: ["dog", "puppy", "small dog"],
-  4: ["dog", "puppy", "small dog"],
-  5: ["dog", "puppy", "small dog"],
-  6: ["dog", "puppy", "small dog"],
+   1: ["fish", "", ""],
+   2: ["saw", "", ""],
+   3: ["table", "desk", ""],
+   4: ["airplane", "plane", "jet"],
+   5: ["ball", "tennis ball", "cut ball"],
+   6: ["axe", "hatchet", "cleaver"],
+   7: ["dog", "puppy", "small dog", "hound"],
+   8: ["car", "truck", "freight vehicl", "lorry", "van"],
+   9: ["cup", "mug", "chalice"],
+  10: ["hand", "palm", "fist"],
+  11: ["apple", "tomato", "fruit"],
+  12: ["rabit", "hare", "bunny"],
+  13: ["scissors", "shears", "clippers"],
+  14: ["cane", "walking stick", "staff"],
+  15: ["lighthouse", " beacon", "pharos"],
+  16: ["kettle", "teapot", "boiler"],
+  17: ["armchair", "chair","couch",  "sofa"],
+  18: ["candle", "candlestick", "torch", "lantern"],
+  19: ["teapot", "kettle"],
+  20: ["cat", "kitten", "small cat"],
+  21: ["flower","blossom", "plant"],
+  22: ["mouse", "rodent", "rat"],
+  23: ["book", "textbook", "volume"],
+  24: ["key"],
+  25: ["ring", "diamond ring", "engagement ring"],
 
 
 };
