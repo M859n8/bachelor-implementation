@@ -2,6 +2,7 @@
 const userResponses = {}; // Тимчасове сховище відповідей користувачі
 
 const transferringPenniesController ={
+	
     // Збереження відповіді в локальний масив
   saveResults: (req, res) => {
     console.log("got here");
@@ -9,6 +10,7 @@ const transferringPenniesController ={
     
     const  coinData  = req.body;
     const user_id = req.user.id;
+	
     if (!user_id ) {
       console.log("Missing token");
 
@@ -42,10 +44,16 @@ const transferringPenniesController ={
     // Зберігаємо відповідь у тимчасовий масив
     userResponses[user_id].push({coinData });
     // console.log("Data : ", coinData);
-    console.log("Received Data: ", JSON.stringify(coinData, null, 2));
+    // console.log("Received Data: ", JSON.stringify(coinData, null, 2));
 
-
-    res.json({ message: "Response saved locally" });
+	// Видаляємо дані користувача після збереження
+	console.log("Before delete:", JSON.stringify(userResponses, null, 2));
+	delete userResponses[user_id];
+	console.log("After delete:", JSON.stringify(userResponses, null, 2));
+	console.trace("Trace: Execution reached 'end'");
+	res.json({ message: "Response saved locally" });
+	return;
+    // res.json({ message: "Response saved locally" });
   },
 
     // Обчислення загального % правильності і збереження в БД
