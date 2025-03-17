@@ -3,14 +3,17 @@ import { StyleSheet, Text, View, Modal, Button, Image, TouchableOpacity  } from 
 import { useState, useEffect } from 'react';
 
 import useTestObjects from '../../shared/GenerateBells.js';
-
-
+// import generateObjects from '../../shared/GenerateBells.js';
 
 export default function BellsCancelation({route}) {
     const [modalVisible, setModalVisible] = useState(true);
+    const [objects, setObjects] = useState(useTestObjects());
+    const [gameOver, setGameOver] = useState(false); // Стан гри
+    const [isLoading, setIsLoading] = useState(false); 
+
 
     const imageMap = {
-        0: require("../../assets/pennies/frontCoin.png"),
+        0: require("../../assets/bells/processed_0.png"),
         1: require("../../assets/bells/processed_1.png"),
         2: require("../../assets/bells/processed_2.png"),
         3: require("../../assets/bells/processed_3.png"),
@@ -27,20 +30,33 @@ export default function BellsCancelation({route}) {
         14: require("../../assets/bells/processed_14.png"),
     };
     
-    const objects = useTestObjects();
-    // console.log(objects);
+    // const objects = useTestObjects();
+    // setObjects(useTestObjects());
+
+
+    console.log(objects);
 
      // Стан для відслідковування натиснутого елементу
      const [clickedObjects, setClickedObjects] = useState([]);
 
 
-    const handleImageClick = (id, x, y, type) => {
+
+    const handleImageClick = (clickedImg) => {
         // console.log(`got coords ${x}, ${y}`);
         // Якщо зображення типу 0, зберігаємо його координати та індекс
-        if (type === 0) {
-        console.log(`got coords ${x}, ${y}`);
+        const existingIndex = clickedObjects.findIndex((image)=> {
+            return clickedImg.id === image.id
+        });
+        if (clickedImg.type === 0 && existingIndex === -1) {
+        console.log(`got coords ${clickedImg.x}, ${clickedImg.y}`);
 
-            setClickedObjects((prev) => [...prev, { id, x, y }]);
+            setClickedObjects((prev) => [...prev, { id: clickedImg.id, x: clickedImg.x, y: clickedImg.y, time: Date.now() }]); 
+
+            setObjects((prevObjects) =>
+                prevObjects.map((img) =>
+                    img.id === clickedImg.id ? { ...img, touched: true } : img
+                )
+            );
         }
         // console.log(clickedObjects);
     };
@@ -49,6 +65,13 @@ export default function BellsCancelation({route}) {
         console.log(clickedObjects);
 
     }, [clickedObjects]);
+
+    const endGame = () => {
+        // setGameOver(true);
+        setIsLoading(true);
+
+        
+    };
 
     return (
         <View style={styles.container}>
@@ -62,23 +85,40 @@ export default function BellsCancelation({route}) {
                     <Button title="Почати" onPress={() => setModalVisible(false)} />
                 </View>
             </Modal> */}
-            {/* <View  style={styles.gameContainer}> */}
-            {objects.map((img) => (
-                <TouchableOpacity
-                key={img.id}
-                onPress={() => handleImageClick(img.id, img.x, img.y, img.type)} // Обробка натискання
-                >
+            {!gameOver ? (
+            <>
+                <View  style={styles.gameArea}>
 
-                    <View key={img.id} style={[styles.bellImg, { left: img.x, top: img.y }]}>
-                        <Image 
-                            source={imageMap[img.type] || require("../../assets/bells/processed_0.png")} 
-                            style={[styles.image, img.type === 0 && { opacity: 0.5, textDecorationLine: 'line-through' }]} // Закреслюємо зображення} 
-                        />
-                    </View>
-                </TouchableOpacity>
-            ))}
-            <Text>Touched bells {clickedObjects.x},  {clickedObjects.y}</Text>
-            {/* </View> */}
+                    {objects.map((img) => (
+                        <TouchableOpacity
+                        key={img.id}
+                        onPress={() => handleImageClick(img)} // Обробка натискання
+                        >
+        
+                            <View key={img.id} style={[styles.bellImg, { left: img.x, top: img.y }]}>
+                                <Image 
+                                    source={imageMap[img.type] || require("../../assets/bells/processed_0.png")} 
+                                    style={[styles.image, img.touched && { opacity: 0.1}]} // Закреслюємо зображення} 
+                                />
+                            </View>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+                <Button onPress={endGame} 
+                        title={isLoading ? 'Loading ...' : 'End Game'}
+                        disabled={isLoading}
+                />
+            </>
+
+            ):(
+                <View>
+                <Text>Результати:</Text>
+                {/* <Text>{JSON.stringify(results)}</Text>  */}
+                
+                </View>
+
+            )}
+            
 
         </View>
     );
@@ -87,9 +127,9 @@ export default function BellsCancelation({route}) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        // justifyContent: 'center',
-        // alignItems: 'center',
-        backgroundColor: 'white'
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#eee'
     },
     screenText: {
         fontSize: 24
@@ -108,10 +148,14 @@ const styles = StyleSheet.create({
         textAlign: 'center'
     }, 
 
-    // gameContainer: {
-    //     // flex: 1,
-    //     padding: 10,
-    // },
+    gameArea: {
+        width: "95%", // Обмежуємо розмір ігрового поля
+        height: "80%",
+        backgroundColor: "white", // Фон для поля
+        borderWidth: 2,
+        borderColor: "black",
+        position: "relative",
+    },
 
     bellImg: {
 

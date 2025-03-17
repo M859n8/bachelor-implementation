@@ -3,6 +3,7 @@
 import cv2
 import os
 import numpy as np
+from PIL import Image
 
 # Функція для обробки зображення
 def process_image(image_path, output_path):
@@ -29,6 +30,30 @@ def process_image(image_path, output_path):
     # Зберігаємо результат
     cv2.imwrite(output_path, cleaned)
 
+
+def make_white_background_transparent(image_path, output_path):
+    # Відкриваємо зображення
+    img = Image.open(image_path).convert("RGBA")
+
+    # Отримуємо пікселі зображення
+    data = img.getdata()
+
+    # Створюємо новий список пікселів, де білий фон стає прозорим
+    new_data = []
+    for item in data:
+        # Перевіряємо, чи піксель білий
+        if item[0] in range(200, 256) and item[1] in range(200, 256) and item[2] in range(200, 256):
+            # Робимо піксель прозорим
+            new_data.append((255, 255, 255, 0))
+        else:
+            new_data.append(item)
+
+    # Оновлюємо пікселі в зображенні
+    img.putdata(new_data)
+
+    # Зберігаємо нове зображення
+    img.save(output_path)
+
 # # Шлях до папки з оригінальними зображеннями
 # input_folder = '../hooperVO'
 input_folder = '../bellsCancelation'
@@ -36,7 +61,7 @@ input_folder = '../bellsCancelation'
 
 # # Шлях до папки для збереження оброблених зображень
 # output_folder = '../hooperVO/results'
-output_folder = '../bellsCancelation/results'
+output_folder = '../bellsCancelation/bells'
 
 
 # Перевіряємо, чи існує папка для збереження результатів, якщо ні - створюємо її
@@ -53,6 +78,7 @@ for filename in os.listdir(input_folder):
         
         # Обробляємо зображення
         process_image(input_path, output_path)
+        make_white_background_transparent(input_path, output_path)
         print(f"Processed {filename} and saved to {output_path}")
 
 
