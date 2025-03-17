@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import DopArea from '../../shared/DropArea.js';
 import Penny from '../../shared/Penny.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ScreenOrientation from "expo-screen-orientation";
 
 
 const screenWidth = Dimensions.get("window").width;
@@ -36,6 +37,17 @@ export default function TransferringPennies({route}) {
 	const [activeCoin, setActiveCoin] = useState(null);
 	const [round, setRound] = useState(1); // Стан для відстеження поточного раунду
 	const [gameOver, setGameOver] = useState(false); // Стан для завершення гри
+
+    /////////////////////////перевірити на мобільному пристрої////////////////////////////////
+    const lockOrientation = async () => {
+        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT);
+    };
+
+    useEffect(() => {
+        lockOrientation();
+    }, []);
+    ////////////////////////////////////////////////////////////////////////////////////////
+
 
 	const moveCoin = (id, newStatus) => {
 		setElements((prevElements) => {

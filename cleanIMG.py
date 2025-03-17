@@ -29,11 +29,15 @@ def process_image(image_path, output_path):
     # Зберігаємо результат
     cv2.imwrite(output_path, cleaned)
 
-# Шлях до папки з оригінальними зображеннями
-input_folder = '../hooperVO'
+# # Шлях до папки з оригінальними зображеннями
+# input_folder = '../hooperVO'
+input_folder = '../bellsCancelation'
 
-# Шлях до папки для збереження оброблених зображень
-output_folder = '../hooperVO/results'
+
+# # Шлях до папки для збереження оброблених зображень
+# output_folder = '../hooperVO/results'
+output_folder = '../bellsCancelation/results'
+
 
 # Перевіряємо, чи існує папка для збереження результатів, якщо ні - створюємо її
 if not os.path.exists(output_folder):
