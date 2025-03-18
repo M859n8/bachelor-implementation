@@ -6,7 +6,7 @@ import Login from './Login';
 
 
 
-const tests = [ "Balance","BellsCancelation","BlockDesign",
+const tests = [ "Balance","BellsCancellation","BlockDesign",
     "ComplexFigure", "Drawing", "FacialRecognition", "LineTracking",
     "Steadiness","TransferringPennies", "VisualOrganization"];
 

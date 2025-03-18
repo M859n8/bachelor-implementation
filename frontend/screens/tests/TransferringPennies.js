@@ -113,10 +113,10 @@ export default function TransferringPennies({route}) {
 				body: JSON.stringify({coinData}), //надсилаємо саме об'єкт
 			})
 			if (response.ok) {
-				Alert.alert('Успіх', 'Ваша відповідь успішно надіслана!');
+				Alert.alert('Success', 'Your answers sent!');
 			}
         } catch (error) {
-        Alert.alert('Помилка', 'Не вдалося надіслати відповідь. Перевірте з’єднання!');
+        Alert.alert('Failure', 'Can not send answers');
 
         }
         

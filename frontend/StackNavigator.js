@@ -10,7 +10,7 @@ import Login from './screens/Login';
 // import Second from "./screens/Second";
 
 import Balance from "./screens/tests/Balance";
-import BellsCancelation from "./screens/tests/BellsCancelation";
+import BellsCancellation from "./screens/tests/BellsCancellation";
 import BlockDesign from "./screens/tests/BlockDesign";
 import ComplexFigure from "./screens/tests/ComplexFigure";
 import Drawing from "./screens/tests/Drawing";
@@ -76,7 +76,7 @@ export default function StackNavigator() {
             {props => <Home {...props} setIsAuthenticated={setIsAuthenticated} />} 
           </Stack.Screen>
           <Stack.Screen name="Balance" component={Balance} />
-          <Stack.Screen name="BellsCancelation" component={BellsCancelation} />
+          <Stack.Screen name="BellsCancellation" component={BellsCancellation} />
           <Stack.Screen name="BlockDesign" component={BlockDesign} />
           <Stack.Screen name="ComplexFigure" component={ComplexFigure} />
           <Stack.Screen name="Drawing" component={Drawing} />

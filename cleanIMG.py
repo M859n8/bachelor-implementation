@@ -56,12 +56,12 @@ def make_white_background_transparent(image_path, output_path):
 
 # # Шлях до папки з оригінальними зображеннями
 # input_folder = '../hooperVO'
-input_folder = '../bellsCancelation'
+input_folder = '../bellsCancellation'
 
 
 # # Шлях до папки для збереження оброблених зображень
 # output_folder = '../hooperVO/results'
-output_folder = '../bellsCancelation/bells'
+output_folder = '../bellsCancellation/bells'
 
 
 # Перевіряємо, чи існує папка для збереження результатів, якщо ні - створюємо її

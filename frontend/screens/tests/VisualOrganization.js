@@ -79,7 +79,7 @@ export default function VisualOrganization({route}) {
       const result = await response.json();
 
       if (response.ok) {
-        Alert.alert('Успіх', 'Ваша відповідь успішно надіслана!');
+        Alert.alert('Success', 'Your answers sent!');
         // Оновлюємо індекс для наступного зображення
           // Оновлюємо індекс для наступного зображення
           if (currentImageIndex < Object.keys(images).length) {
@@ -93,7 +93,7 @@ export default function VisualOrganization({route}) {
       }
     } catch (error) {
       console.error('Помилка при відправці:', error);
-      Alert.alert('Помилка', 'Не вдалося надіслати відповідь. Перевірте з’єднання!');
+      Alert.alert('Failure', 'Can not send answers');
     } finally {
       setIsLoading(false);
     }

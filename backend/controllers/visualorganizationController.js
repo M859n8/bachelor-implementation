@@ -31,8 +31,10 @@ const correctAnswers = {
 
 };
 
+
 const visualorganizationController ={
     // Збереження відповіді в локальний масив
+    /*ЗМІНИТИ ЦЕ НА ОДИН ЗАПИТ З МАСИВОМ ВІДПОВІЕЙ, А НЕ ПОЧЕРГОВЕ ВІДСИЛАННЯ ВІДПОВІДЕЦ*/
   saveResponse: (req, res) => {
     console.log('got here');
     const { image_id, text_response } = req.body;

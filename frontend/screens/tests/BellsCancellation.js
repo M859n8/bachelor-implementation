@@ -1,14 +1,16 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Modal, Button, Image, TouchableOpacity  } from 'react-native';
 import { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 import useTestObjects from '../../shared/GenerateBells.js';
 // import generateObjects from '../../shared/GenerateBells.js';
 
-export default function BellsCancelation({route}) {
+export default function BellsCancellation({route}) {
     const [modalVisible, setModalVisible] = useState(true);
-    const [objects, setObjects] = useState(useTestObjects());
-    const [gameOver, setGameOver] = useState(false); // Стан гри
+    const [objects, setObjects] = useState(useTestObjects()); //array with objects 
+    const [gotResults, setGotResults] = useState(false); // Стан гри
     const [isLoading, setIsLoading] = useState(false); 
 
 
@@ -66,11 +68,39 @@ export default function BellsCancelation({route}) {
 
     }, [clickedObjects]);
 
-    const endGame = () => {
+    const endGame = async () => {
         // setGameOver(true);
         setIsLoading(true);
 
-        
+        const correctObjects = objects.filter(obj => obj.type === 0);
+
+        const token = await AsyncStorage.getItem('authToken');
+        // console.log("Coin data being sent: ", coinData);
+        const requestBody = {
+            clickedObjects: clickedObjects,
+            correctObjects: correctObjects, // Додаєш ще один масив
+        };
+
+        //  треба буде десь якось дані про час мвж вибором монеток протягом раунду брати. можна це навіть на бекенді робити
+        try {
+            console.log("phase 1");
+            const response = await fetch('http://localhost:5000/api/result/bells/saveResponse', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+
+                },
+                body: JSON.stringify(requestBody),  //перетворює масив або об'єкт на JSON-рядок
+            })
+            if (response.ok) {
+                Alert.alert('Success', 'Your answers sent!');
+                setGotResults(true);
+            }
+        } catch (error) {
+        Alert.alert('Failure', 'Can not send answers');
+
+        }
     };
 
     return (
@@ -85,7 +115,7 @@ export default function BellsCancelation({route}) {
                     <Button title="Почати" onPress={() => setModalVisible(false)} />
                 </View>
             </Modal> */}
-            {!gameOver ? (
+            {!gotResults ? (
             <>
                 <View  style={styles.gameArea}>
 
@@ -112,7 +142,7 @@ export default function BellsCancelation({route}) {
 
             ):(
                 <View>
-                <Text>Результати:</Text>
+                <Text>Results:</Text>
                 {/* <Text>{JSON.stringify(results)}</Text>  */}
                 
                 </View>
