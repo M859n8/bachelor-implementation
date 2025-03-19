@@ -58,6 +58,7 @@ const generateObjects = () => {
                 y,
                 type: categoryIndex,
                 touched: false,
+                time: 0
             });
             // const newObject = {
             //     id: i,
@@ -83,16 +84,16 @@ const generateObjects = () => {
 const useTestObjects = () => {
     const [objects, setObjects] = useState(generateObjects());
 
-    useEffect(() => {
-        const updateDimensions = () => { //updating objects coords if dimensions changing
-            setObjects(generateObjects());
-        };
+    // useEffect(() => {
+    //     const updateDimensions = () => { //updating objects coords if dimensions changing
+    //         setObjects(generateObjects());
+    //     };
 
-        //Додає обробник події, який викликає updateDimensions, якщо змінюються розміри екрану.
-        const subscription = Dimensions.addEventListener("change", updateDimensions); 
-        return () => subscription?.remove(); //Очищення обробника подій при розмонтуванні компонента
-                                               // Це запобігає витоку пам'яті.
-    }, []);
+    //     //Додає обробник події, який викликає updateDimensions, якщо змінюються розміри екрану.
+    //     const subscription = Dimensions.addEventListener("change", updateDimensions); 
+    //     return () => subscription?.remove(); //Очищення обробника подій при розмонтуванні компонента
+    //                                            // Це запобігає витоку пам'яті.
+    // }, []);
 
     return objects;
 };

@@ -1,8 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Modal, Button, Image, TouchableOpacity  } from 'react-native';
-import { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, Modal, Button, Image, TouchableOpacity, Alert, Dimensions  } from 'react-native';
+import { useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import Orientation from 'react-native-orientation-locker';
 
 import useTestObjects from '../../shared/GenerateBells.js';
 // import generateObjects from '../../shared/GenerateBells.js';
@@ -12,7 +12,13 @@ export default function BellsCancellation({route}) {
     const [objects, setObjects] = useState(useTestObjects()); //array with objects 
     const [gotResults, setGotResults] = useState(false); // Стан гри
     const [isLoading, setIsLoading] = useState(false); 
-
+    // const [additionalData, setAdditionalData] = useState({
+    //     startTime: null,
+    //     endTime: null,
+    //     screenWidth: 0,
+    //     screenHeight: 0,
+    // });
+    const startTime = useRef(0); 
 
     const imageMap = {
         0: require("../../assets/bells/processed_0.png"),
@@ -33,32 +39,57 @@ export default function BellsCancellation({route}) {
     };
     
     // const objects = useTestObjects();
-    // setObjects(useTestObjects());
+    // // setObjects(useTestObjects());
 
 
-    console.log(objects);
+    // console.log(objects);
 
      // Стан для відслідковування натиснутого елементу
      const [clickedObjects, setClickedObjects] = useState([]);
 
+     useEffect(() => {
+        // Заблокуємо орієнтацію екрану в портретному режимі на час тесту
+        Orientation.lockToPortrait();  // Якщо хочемо заблокувати в портретному режимі
+        
+
+        // Очищаємо при розмонтуванні компонента
+        return () => {
+            Orientation.unlockAllOrientations();  // Відкриває доступ до зміни орієнтації після завершення тесту
+        };
+    }, []);
+
+    const handleModalClose = () => {
+        setModalVisible(false);  // Закриваємо модальне вікно
+        // setAdditionalData(prevData => ({
+        //     ...prevData,
+        //     startTime: Date.now(),  // Записуємо час початку
+        // }));
+        startTime.current = Date.now();
+        console.log("start time recorded");
+    };
 
 
     const handleImageClick = (clickedImg) => {
         // console.log(`got coords ${x}, ${y}`);
         // Якщо зображення типу 0, зберігаємо його координати та індекс
-        const existingIndex = clickedObjects.findIndex((image)=> {
-            return clickedImg.id === image.id
-        });
-        if (clickedImg.type === 0 && existingIndex === -1) {
-        console.log(`got coords ${clickedImg.x}, ${clickedImg.y}`);
+        // const existingIndex = clickedObjects.findIndex((image)=> {
+        //     return clickedImg.id === image.id
+        // });
+        const filterdObjects = objects.filter(obj => clickedImg.id === obj.id && obj.type === 0 && obj.touched === false);
+        
+        if (filterdObjects.length ===1) {
+        // console.log(`got coords ${clickedImg.x}, ${clickedImg.y}`);
 
-            setClickedObjects((prev) => [...prev, { id: clickedImg.id, x: clickedImg.x, y: clickedImg.y, time: Date.now() }]); 
+            // setClickedObjects((prev) => [...prev, { id: clickedImg.id, x: clickedImg.x, y: clickedImg.y, time: Date.now() }]); 
 
+            // timeA = Date.now();
             setObjects((prevObjects) =>
                 prevObjects.map((img) =>
-                    img.id === clickedImg.id ? { ...img, touched: true } : img
+                    img.id === clickedImg.id ? { ...img, touched: true, time: Date.now() } : img
                 )
             );
+            // console.log(`time a : ${timeA}`);
+            
         }
         // console.log(clickedObjects);
     };
@@ -68,18 +99,30 @@ export default function BellsCancellation({route}) {
 
     }, [clickedObjects]);
 
+ 
+
     const endGame = async () => {
         // setGameOver(true);
         setIsLoading(true);
 
-        const correctObjects = objects.filter(obj => obj.type === 0);
+        const bellsObjects = objects.filter(obj => obj.type === 0);
+
+        const additionalData = {
+            startTime: startTime.current,
+            endTime: Date.now(),  // Оновлюємо тільки endTime
+            screenWidth: Dimensions.get('window').width,
+            screenHeight:  Dimensions.get('window').height,
+        };
+
+
+        const requestBody ={
+            bellsObjects : bellsObjects,
+            additionalData : additionalData
+        }
 
         const token = await AsyncStorage.getItem('authToken');
         // console.log("Coin data being sent: ", coinData);
-        const requestBody = {
-            clickedObjects: clickedObjects,
-            correctObjects: correctObjects, // Додаєш ще один масив
-        };
+      
 
         //  треба буде десь якось дані про час мвж вибором монеток протягом раунду брати. можна це навіть на бекенді робити
         try {
@@ -105,16 +148,16 @@ export default function BellsCancellation({route}) {
 
     return (
         <View style={styles.container}>
-            {/* <Modal
+            <Modal
                 animationType="slide"
                 transparent={true}
                 visible={modalVisible}
             >
                 <View style={styles.modalContainer}>
                     <Text style={styles.modalText}>Правила тесту: Прочитайте інструкцію перед початком.</Text>
-                    <Button title="Почати" onPress={() => setModalVisible(false)} />
+                    <Button title="Почати" onPress={handleModalClose} />
                 </View>
-            </Modal> */}
+            </Modal>
             {!gotResults ? (
             <>
                 <View  style={styles.gameArea}>
