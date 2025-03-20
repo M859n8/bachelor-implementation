@@ -64,7 +64,7 @@ export default function VisualOrganization({route}) {
     setIsLoading(true);  // Тільки зараз починаємо показувати завантаження
 
     try {
-      const response = await fetch('http://localhost:5000/api/result/saveResponse', {
+      const response = await fetch('http://192.168.0.12:5000/api/result/saveResponse', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -104,7 +104,7 @@ export default function VisualOrganization({route}) {
       try {
         const token = await AsyncStorage.getItem('authToken');
         
-        const response = await fetch('http://localhost:5000/api/result/calculateResults', {
+        const response = await fetch('http://192.168.0.12:5000/api/result/calculateResults', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

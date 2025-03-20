@@ -39,8 +39,8 @@ export default function StackNavigator() {
       }
   
       try {
-        const response = await fetch('http://localhost:5000/api/auth/check', {
-        // const response = await fetch('http://localhost:5000/api/auth/verify', {
+        const response = await fetch('http://192.168.0.12:5000/api/auth/check', {
+        // const response = await fetch('http://192.168.0.12:5000/api/auth/verify', {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}` },
         });

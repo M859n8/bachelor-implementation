@@ -31,6 +31,7 @@ export default function Home({ setIsAuthenticated }) {
     
     return (
         <View style={styles.container}>
+			{/* <LockOrientation/> */}
             <Button title="Logout" onPress={handleLogout} />
             <FlatList
                 data={tests}

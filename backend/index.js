@@ -9,12 +9,12 @@ import authRoutes from './routes/authRoutes.js';
 import testRoutes from './routes/testRoutes.js';
 
 
-// app.use(cors());
-app.use(cors({
-    origin: 'http://localhost:8081', // Дозволяємо тільки запити від React Native Metro Bundler
-    methods: 'GET,POST,PUT,DELETE', //дозволені методи 
-    allowedHeaders: 'Content-Type,Authorization' //дозволені заголовки
-  }));
+app.use(cors());
+// app.use(cors({
+//     origin: 'http://localhost:8081', // Дозволяємо тільки запити від React Native Metro Bundler
+//     methods: 'GET,POST,PUT,DELETE', //дозволені методи 
+//     allowedHeaders: 'Content-Type,Authorization' //дозволені заголовки
+//   }));
 app.use(express.json()); 
 
 app.get('/', (req, res) => {

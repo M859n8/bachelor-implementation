@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Modal, Button, Image, TouchableOpacity, Alert, Dimensions  } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Orientation from 'react-native-orientation-locker';
+// import Orientation from 'react-native-orientation-locker';
 
 import useTestObjects from '../../shared/GenerateBells.js';
 // import generateObjects from '../../shared/GenerateBells.js';
@@ -47,16 +47,16 @@ export default function BellsCancellation({route}) {
      // Стан для відслідковування натиснутого елементу
      const [clickedObjects, setClickedObjects] = useState([]);
 
-     useEffect(() => {
-        // Заблокуємо орієнтацію екрану в портретному режимі на час тесту
-        Orientation.lockToPortrait();  // Якщо хочемо заблокувати в портретному режимі
+    //  useEffect(() => {
+    //     // Заблокуємо орієнтацію екрану в портретному режимі на час тесту
+    //     Orientation.lockToPortrait();  // Якщо хочемо заблокувати в портретному режимі
         
 
-        // Очищаємо при розмонтуванні компонента
-        return () => {
-            Orientation.unlockAllOrientations();  // Відкриває доступ до зміни орієнтації після завершення тесту
-        };
-    }, []);
+    //     // Очищаємо при розмонтуванні компонента
+    //     return () => {
+    //         Orientation.unlockAllOrientations();  // Відкриває доступ до зміни орієнтації після завершення тесту
+    //     };
+    // }, []);
 
     const handleModalClose = () => {
         setModalVisible(false);  // Закриваємо модальне вікно
@@ -127,7 +127,7 @@ export default function BellsCancellation({route}) {
         //  треба буде десь якось дані про час мвж вибором монеток протягом раунду брати. можна це навіть на бекенді робити
         try {
             console.log("phase 1");
-            const response = await fetch('http://localhost:5000/api/result/bells/saveResponse', {
+            const response = await fetch('http://192.168.0.12:5000/api/result/bells/saveResponse', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
