@@ -13,31 +13,49 @@ export default function ComplexFigure({route}) {
 	// const [pathData, setPathData] = useState([]);
 	const [pathData, setPathData] = useState('');
 	const [newLine, setNewLine] = useState(true);
-
+	const [lines, setLines] = useState([]); // Масив для зберігання ліній
 	// const [eraser, setEraser ] = useState(false);
 	const [tool, setTool] = useState('pencil'); // 'pencil' або 'eraser'
 
 
 
-	const gesture = Gesture.Pan()
+	const paintGesture = Gesture.Pan()
 		.onBegin((event) => {
-			// Починаємо нову лінію з M (Move To)
-            const { x, y } = event;
-            setPathData(prevPath => `${prevPath} M${x},${y}`);
-			setNewLine(false);
-
+			const { x , y } = event;
+			setLines((prevLines) => [
+			...prevLines,
+			[{ x: x, y: y }] // Початкова точка для нової лінії
+			]);
 		})
 		.onUpdate((event) => {
-			const { x, y } = event;
-            setPathData(prevPath => `${prevPath} L${x},${y}`);
-			// console.log(`Moved by: ${event.translationX}, ${event.translationY}`);
-		})
-		.onEnd(() => {
-			setNewLine(true);
-			console.log('Gesture ended');
+			const { x , y } = event;
+			setLines((prevLines) => {
+				const updatedLines = [...prevLines];
+				const lastLine = updatedLines[updatedLines.length - 1];
+				lastLine.push({ x: x, y: y }); // Додаємо нову точку до останньої лінії
+				return updatedLines;
+			});
 		});
 	
 		// console.log('Array', pathData);
+	const eraseGesture = Gesture.Pan()
+	.onUpdate((event) => {
+		const { x , y } = event;
+		setLines((prevLines) =>
+			prevLines.filter((line) => {
+			// Перевіряємо кожну точку лінії на відстань до гумки
+			return line.every(
+				//тут повертаютсья всі точки крім видаленої з радіусом 10, 
+				//але нам цей варіант не підходить, бо видаляючи крапку ми 
+				// створюємо пробіл, але не додаємо початок нової лінії, який позначається М
+
+				//на даний момент ця штука працює так, що видаляє цілу лінію і воно в принципі ок
+				//але я не розумію чого воно так. розібратися з цим
+				(point) => Math.sqrt((point.x - x) ** 2 + (point.y - y) ** 2) > 10 //
+			);
+			})
+		);
+	});
 
   	return (  
 		
@@ -55,20 +73,29 @@ export default function ComplexFigure({route}) {
 				style={[styles.button, tool === 'eraser' && styles.activeButton]}
 				onPress={() => setTool('eraser')}
 			>
-				<Icon name="eraser" size={24} color={tool === 'eraser' ? 'white' : 'black'} />
+				<Icon name="plus" size={24} color={tool === 'eraser' ? 'white' : 'black'} />
 			</TouchableOpacity>
 		</View>
-		<GestureDetector gesture={gesture}  >
-		{/* <GestureDetector tool === 'pencil' ? gesture={paintGesture} : gesture={eraseGesture} > */}
+		<GestureDetector gesture={tool === 'pencil' ? paintGesture : eraseGesture}>
+
 
 			<View style={styles.paintContainer}>
 			<Svg style={{ flex: 1 }}>
-				<Path
-				d={pathData}
-				stroke="black"
-				strokeWidth={2}
-				fill="none"
-				/>
+				{lines.map((line, index) => {
+					const path = line
+					.map((point, i) => (i === 0 ? `M${point.x},${point.y}` : `L${point.x},${point.y}`))
+					.join(' ');
+
+					return (
+					<Path
+						key={index}
+						d={path}
+						stroke="black"
+						strokeWidth={2}
+						fill="none"
+					/>
+					);
+				})}
 			</Svg>
 			</View>
 		</GestureDetector>
