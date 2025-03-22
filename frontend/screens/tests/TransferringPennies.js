@@ -103,7 +103,7 @@ export default function TransferringPennies({route}) {
 
         //  треба буде десь якось дані про час мвж вибором монеток протягом раунду брати. можна це навіть на бекенді робити
         try {
-			const response = await fetch('http://192.168.0.12:5000/api/result/pennies/saveResults', {
+			const response = await fetch('http://192.168.0.12:5000/api/result/pennies/saveResponse', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',

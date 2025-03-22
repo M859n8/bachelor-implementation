@@ -19,7 +19,7 @@ def process_image(image_path, output_path):
 
 
     # Морфологічна обробка (видаляємо дрібні точки)
-    kernel = np.ones((2, 2), np.uint8)
+    kernel = np.ones((8, 8), np.uint8)
     # pre_cleaned = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel, iterations=1)
     cleaned = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel, iterations=1)
 
@@ -56,12 +56,15 @@ def make_white_background_transparent(image_path, output_path):
 
 # # Шлях до папки з оригінальними зображеннями
 # input_folder = '../hooperVO'
-input_folder = '../bellsCancellation'
+# input_folder = '../bellsCancellation'
+input_folder = '.'
 
 
 # # Шлях до папки для збереження оброблених зображень
 # output_folder = '../hooperVO/results'
-output_folder = '../bellsCancellation/bells'
+# output_folder = '../bellsCancellation/bells'
+output_folder = './results'
+
 
 
 # Перевіряємо, чи існує папка для збереження результатів, якщо ні - створюємо її
@@ -78,7 +81,7 @@ for filename in os.listdir(input_folder):
         
         # Обробляємо зображення
         process_image(input_path, output_path)
-        make_white_background_transparent(input_path, output_path)
+        # make_white_background_transparent(input_path, output_path)
         print(f"Processed {filename} and saved to {output_path}")
 
 

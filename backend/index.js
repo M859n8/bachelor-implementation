@@ -1,6 +1,9 @@
 import express from 'express';
 import cors from 'cors';// const connection = require('./db-config');
 
+
+
+
 const app = express(); // фреймворк для створення веб-сервера.
 
 const port = process.env.PORT || 5000;

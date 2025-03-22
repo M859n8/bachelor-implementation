@@ -1,10 +1,12 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Modal, Button,  TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Modal, Button,  TouchableOpacity, Image, Alert } from 'react-native';
 import { useState } from 'react';
 import { Gesture, GestureHandlerRootView, GestureDetector } from 'react-native-gesture-handler';
 import Svg, { Path } from 'react-native-svg';
 import { Dimensions } from "react-native";
 import Icon from 'react-native-vector-icons/Feather';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const { width, height } = Dimensions.get('window');
 
@@ -57,15 +59,73 @@ export default function ComplexFigure({route}) {
 		);
 	});
 
+
+	function generateSVGString() {
+		console.log('got to generate string');
+		
+		return `
+			<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">
+				${lines.map(line => {
+					const path = line
+						.map((point, i) => (i === 0 ? `M${point.x},${point.y}` : `L${point.x},${point.y}`))
+						.join(' ');
+					return `<path d="${path}" stroke="black" stroke-width="2" fill="none"/>`;
+				}).join('\n')}
+			</svg>
+		`;
+	}
+
+	async function sendToBackend() {
+		console.log('got to send to backend');
+		const svgString = generateSVGString();
+		console.log('generated string', svgString);
+
+        const token = await AsyncStorage.getItem('authToken');
+		try{
+			const response = await fetch('http://192.168.0.12:5000/api/result/figure/saveResponse', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${token}`
+
+				},
+				body: JSON.stringify({ svg: svgString })
+			});
+
+			
+			console.log('send to the backend');
+			if (response.ok) {
+				Alert.alert('Success', 'Your answers sent!');
+				const data = await response.json();
+				console.log('Server response:', data);
+			}
+		} catch (error) {
+			Alert.alert('Failure', 'Can not send answers');
+			console.log(error);
+		}
+		
+	}
+
   	return (  
 		
 	<GestureHandlerRootView style={styles.container}>
-		<View style={styles.exampleContainer}>
+		{/* <View style={styles.exampleContainer}>
+		<Image
+                source={require("../../assets/complex_figure/figure.svg")}
+                style={{width: 50,
+                    height: 50,
+                    position: "absolute",
+                    resizeMode: "contain"}}
+            />
+		</View> */}
+
+
+		<View style={styles.buttonContainer}>
 			<TouchableOpacity
 				style={[styles.button, tool === 'pencil' && styles.activeButton]}
 				onPress={() => setTool('pencil')}
 			>
-				<Icon name="edit-2" size={24} color={tool === 'pencil' ? 'white' : 'black'} />
+				<Icon name="edit-2" size={24} color={tool === 'pencil' ? 'white' : 'purple'} />
 			</TouchableOpacity>
 
 			{/* Кнопка гумки */}
@@ -73,7 +133,7 @@ export default function ComplexFigure({route}) {
 				style={[styles.button, tool === 'eraser' && styles.activeButton]}
 				onPress={() => setTool('eraser')}
 			>
-				<Icon name="plus" size={24} color={tool === 'eraser' ? 'white' : 'black'} />
+				<Icon name="trash-2" size={24} color={tool === 'eraser' ? 'white' : 'purple'} />
 			</TouchableOpacity>
 		</View>
 		<GestureDetector gesture={tool === 'pencil' ? paintGesture : eraseGesture}>
@@ -99,6 +159,12 @@ export default function ComplexFigure({route}) {
 			</Svg>
 			</View>
 		</GestureDetector>
+		<TouchableOpacity
+			style={{ padding: 10, backgroundColor: 'blue' }}
+			onPress={() => sendToBackend()}
+		>
+			<Text style={{ color: 'white' }}>Finish</Text>
+		</TouchableOpacity>
 
 	</GestureHandlerRootView>
   	);
@@ -110,21 +176,27 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		alignItems: 'center',
 		
+		
+	},
+	buttonContainer: {
+		alignItems: 'space-between',
+		flexDirection: 'row',
 	},
 	button: {
 		backgroundColor: 'lightgray',
 		padding: 12,
-		borderRadius: 8,
+		margin: 12,
+		borderRadius: 25,
 	},
 	activeButton: {
-		backgroundColor: 'blue',
+		backgroundColor: 'purple',
 	},
-	exampleContainer: {
-
-	},
+	
 	paintContainer: {
-		width: '70%',  // Ширина області малювання
-		height: '70%', // Висота області малювання
+		// width: '70%',  // Ширина області малювання
+		// height: '70%', // Висота області малювання
+		width: 500,
+		height: 500,
 		backgroundColor: 'pink', // Колір фону
 		borderRadius: 10, // Закруглені кути
 		borderWidth: 2,

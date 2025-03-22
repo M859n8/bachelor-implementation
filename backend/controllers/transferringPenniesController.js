@@ -4,7 +4,7 @@ const userResponses = {}; // Тимчасове сховище відповід�
 const transferringPenniesController ={
 	
     // Збереження відповіді в локальний масив
-  saveResults: (req, res) => {
+  saveResponse: (req, res) => {
     console.log("got here");
     console.log("Request body: ", req.body);
     
