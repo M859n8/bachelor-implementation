@@ -5,13 +5,13 @@ import DopArea from '../../shared/DropArea.js';
 import Penny from '../../shared/Penny.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ScreenOrientation from "expo-screen-orientation";
+import LockOrientation from '../../shared/LockOrientation.js';
 
-
-const screenWidth = Dimensions.get("window").width;
-const screenHeight = Dimensions.get("window").height;
-const coinSize = screenWidth * 0.05; // Розмір монетки (~15% ширини екрану)
-const dropZoneWidth = screenWidth * 0.1;
-const dropZoneHeight = screenHeight * 0.6;
+// const screenWidth = Dimensions.get("window").width;
+// const screenHeight = Dimensions.get("window").height;
+// const coinSize = screenWidth * 0.05; // Розмір монетки (~15% ширини екрану)
+// const dropZoneWidth = screenWidth * 0.1;
+// const dropZoneHeight = screenHeight * 0.6;
 
 export default function TransferringPennies({route}) {
 
@@ -28,8 +28,8 @@ export default function TransferringPennies({route}) {
    // Масиви монеток для лівої і правої сторін
 	const [elements, setElements] = useState([
 		{ id: 1, status: 'left' },
-		{ id: 2, status: 'left' },
-		{ id: 3, status: 'left' },
+		// { id: 2, status: 'left' },
+		// { id: 3, status: 'left' },
         // { id: 4, status: 'left' },
 		// { id: 5, status: 'left' },
 		// { id: 6, status: 'left' },
@@ -45,12 +45,12 @@ export default function TransferringPennies({route}) {
     const [gotResults, setGotResults] = useState(false);
 
     /////////////////////////перевірити на мобільному пристрої////////////////////////////////
-    const lockOrientation = async () => {
-        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT);
-    };
-    useEffect(() => {
-        lockOrientation();
-    }, []);
+    // const lockOrientation = async () => {
+    //     await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT);
+    // };
+    // useEffect(() => {
+    //     lockOrientation();
+    // }, []);
     ////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -76,7 +76,7 @@ export default function TransferringPennies({route}) {
         if (round === 1) {
             const allInRightZone = elements.every((el) => el.status === 'right');
             if (allInRightZone) {
-                // console.log('R.O.U.N.D 2');
+                console.log('R.O.U.N.D 2');
 
                 setRound(2);
                 // Можна додати повідомлення чи анімацію між раундами
@@ -85,7 +85,7 @@ export default function TransferringPennies({route}) {
         } else if (round === 2) {
             const allInLeftZone = elements.every((el) => el.status === 'left');
             if (allInLeftZone) {
-                // console.log('G.A.M.E O.V.E.R');
+                console.log('G.A.M.E O.V.E.R');
 
                 setGameOver(true); // Гра завершена
                 sendDataToBackend();
@@ -108,63 +108,63 @@ export default function TransferringPennies({route}) {
 				return Math.abs(point.x) > 0.125 * lengthCoordX && Math.abs(point.x) < 0.875 * lengthCoordX;
 			});
 
-            //merge points that are located really close and most likely were created in one hand changing move
-			const mergedPoints = [];
 			// console.log('length before merge', extremePointsDeleted.length);
-			for (let i = 0; i < extremePointsDeleted.length; i++) {
-                //get current point and next one
-				let point1 = extremePointsDeleted[i];
 
-				let point2 = extremePointsDeleted[i++];
-                //if distance is small
-				if (distance(point1, point2) < coinSize) {
-                    //merge two points
-					let mergedPoint = {
-						x: (point1.x + point2.x) / 2,
-						y: (point1.y + point2.y) / 2,
-						time: (point1.time + point2.time) / 2
-					};
-					//push merged point, then we going to scan i+2 point
-					mergedPoints.push(mergedPoint);
-				}else {
-                    i--; //next point will not be merged, we need to scan next point (i+1) 
-                    //add this point to array. we can not merge this point to any
-					mergedPoints.push(point1);
-				}
 
-			}
-			// console.log('length after merge', mergedPoints.length);
+            //merge points that are located really close and most likely were created in one hand changing move
+			let i = 0;
+            while (i < extremePointsDeleted.length - 1) {
+                let point1 = extremePointsDeleted[i];
+                let point2 = extremePointsDeleted[i + 1];
+
+                if (distance(point1, point2) < coinSize) {
+                    // Об'єднуємо дві точки
+                    extremePointsDeleted[i] = {
+                        x: (point1.x + point2.x) / 2,
+                        y: (point1.y + point2.y) / 2,
+                        time: (point1.time + point2.time) / 2
+                    };
+
+                    // Видаляємо `point2`, бо вона вже об'єднана
+                    extremePointsDeleted.splice(i + 1, 1);
+                } else {
+                    // Якщо точки не об'єдналися, рухаємося далі
+                    i++;
+                }
+            }
+			// console.log('length after merge', extremePointsDeleted.length);
+            // console.log('dots after merge', extremePointsDeleted);
 
             //select one (closest to the middle) point
 			let minDistToMiddleIndex = 0;
             //if there are more than one point
-			if (mergedPoints.length > 1) {
+			if (extremePointsDeleted.length > 1) {
                 //calculate middle of the way
 				const middleX = lengthCoordX / 2;
                 //if current point is closer to the center, than point with minDistToMiddleIndex, set the new index 
-				minDistToMiddleIndex = mergedPoints.reduce((closestIndex, point, index) => {
-					return Math.abs(point.x - middleX) < Math.abs(mergedPoints[closestIndex].x - middleX)
+				minDistToMiddleIndex = extremePointsDeleted.reduce((closestIndex, point, index) => {
+					return Math.abs(point.x - middleX) < Math.abs(extremePointsDeleted[closestIndex].x - middleX)
 						? index
 						: closestIndex;
 				}, 0);
                 //set the closest to middle point
-				coin.hand_change_points = mergedPoints[minDistToMiddleIndex];
+				coin.hand_change_points = extremePointsDeleted[minDistToMiddleIndex];
 
 			}else{
                 //if there is one point in arr
-				coin.hand_change_points = mergedPoints;
+				coin.hand_change_points = extremePointsDeleted;
 
 
 			}
 			// console.log('after unifiing', mergedPoints);
 
-			/////// for testing purposes
-			const point = mergedPoints[minDistToMiddleIndex];
-			if (point !== undefined) {
-			handChangePointsTest.current.push(point);
-			forceUpdate((prev) => prev + 1);
-			}
-			// console.log('hand changibg points', handChangePointsTest.current);
+			// /////// for testing purposes
+			// const point = extremePointsDeleted[minDistToMiddleIndex];
+			// if (point !== undefined) {
+			// handChangePointsTest.current.push(point);
+			// forceUpdate((prev) => prev + 1);
+			// }
+			// console.log('	last hand change point', coin.hand_change_points);
 			//////////////
 			return coin;
 		})
@@ -173,9 +173,10 @@ export default function TransferringPennies({route}) {
 
     const sendDataToBackend = async () => {
         const token = await AsyncStorage.getItem('authToken');
-		const normalizedData = normalizeData(coinData);
-        // console.log("Coin data being sent: ", normalizedData);
+		const normalizedData = normalizeData(coinData); //temporaly
 
+        // console.log("Coin data being sent: ", normalizedData);
+		console.log('got to send');
         //  треба буде десь якось дані про час мвж вибором монеток протягом раунду брати. можна це навіть на бекенді робити
         try {
 			const response = await fetch('http://192.168.0.12:5000/api/result/pennies/saveResponse', {
@@ -187,8 +188,13 @@ export default function TransferringPennies({route}) {
 				},
 				body: JSON.stringify(normalizedData), //надсилаємо саме об'єкт
 			})
+			console.log('got to sended');
+
 			if (response.ok) {
 				Alert.alert('Success', 'Ansvers calculated');
+			}else{
+				Alert.alert('Failure', 'Whatt');
+
 			}
         } catch (error) {
         Alert.alert('Failure', 'Can not send answers');
@@ -200,7 +206,9 @@ export default function TransferringPennies({route}) {
 
     return (
         <View style={styles.container}>
-            {/* <Modal
+            <LockOrientation/>
+
+            <Modal
                 animationType="slide"
                 transparent={true}
                 visible={modalVisible}
@@ -209,10 +217,19 @@ export default function TransferringPennies({route}) {
                     <Text style={styles.modalText}>Правила тесту: Прочитайте інструкцію перед початком.</Text>
                     <Button title="Почати" onPress={() => setModalVisible(false)} />
                 </View>
+            </Modal>
+
+			{/* <Modal
+                animationType="slide"
+                transparent={true}
+                visible={gameOver}
+            >
+                <View style={styles.modalContainer}>
+                    <Text style={styles.modalText}>gameOver</Text>
+                    <Button title="Почати" onPress={() => setGameOver(false)} />
+                </View>
             </Modal> */}
 
-
-            <Text style={styles.screenText}>{route.name} Screen</Text>
 
             <View style={styles.gameArea}>
             <View style={styles.dropArea}>
@@ -224,8 +241,6 @@ export default function TransferringPennies({route}) {
                         key={el.id} 
                         index={el.id} 
                         setActiveCoin={setActiveCoin} 
-                        height={coinSize} 
-                        width={coinSize}
                         moveCoin={moveCoin}
                         checkRoundCompletion={checkRoundCompletion}
                         round={round}
@@ -244,8 +259,6 @@ export default function TransferringPennies({route}) {
                     key={el.id} 
                     index={el.id} 
                     setActiveCoin={setActiveCoin} 
-                    height={coinSize} 
-                    width={coinSize}
                     moveCoin={moveCoin}
                     checkRoundCompletion={checkRoundCompletion}
                     round={round}
@@ -291,14 +304,15 @@ const styles = StyleSheet.create({
     gameArea: {
         flexDirection: "row",
         width: "100%",
+		
         justifyContent: "space-between",
         paddingHorizontal: 20,
         position: "relative", // Додаємо відносне позиціонування
         // zIndex: 0,
     },
     dropArea: {
-        width: dropZoneWidth, // Ширина зон ~10% екрану
-        height: dropZoneHeight, // Висота зони ~60% екрану
+        width: '10%', // Ширина зон ~10% екрану
+        height: '100%', // Висота зони ~60% of the parent zone
         backgroundColor: "#d3d3d3",
         alignItems: "center",
         justifyContent: "center",
@@ -308,13 +322,13 @@ const styles = StyleSheet.create({
         zIndex: 2,
     },
     dropAreaR: {
-      width: dropZoneWidth, // Ширина зон ~10% екрану
-      height: dropZoneHeight, // Висота зони ~60% екрану
-      backgroundColor: "#d3d3d3",
-      alignItems: "center",
-      justifyContent: "center",
-      borderRadius: 10,
-      position: 'relative',
+    	width: '10%', // Ширина зон ~10% екрану
+        height: '100%', // Висота зони ~60% parent zone
+		backgroundColor: "#d3d3d3",
+		alignItems: "center",
+		justifyContent: "center",
+		borderRadius: 10,
+		position: 'relative',
       //pointerEvents: "none",
       // zIndex: round,
   },

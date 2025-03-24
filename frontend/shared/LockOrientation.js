@@ -8,7 +8,7 @@ const LockOrientation = () => {
     // Локалізуємо екран в вертикальній орієнтації
     const lockOrientation = async () => {
 		try {
-			const supportsPortraitUp = await ScreenOrientation.supportsOrientationLockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+			const supportsPortraitUp = await ScreenOrientation.supportsOrientationLockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_LEFT);
 			
 			if (supportsPortraitUp) {
 			  await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_LEFT);

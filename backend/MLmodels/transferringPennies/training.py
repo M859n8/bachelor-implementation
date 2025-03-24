@@ -3,8 +3,9 @@ from sklearn.ensemble import RandomForestRegressor
 
 # Приклад даних для тренування (наприклад, час, відстань, кількість помилок, час помилки)
 X_train = np.array([
-    [10.5, 5.2, 1, 2.3],  # Дані для правої руки
-    [11.2, 5.1, 2, 3.4],  # Дані для лівої руки
+#    Vl, Vr, ErrL,ErrR,%l, %r
+    [10.5, 5.2, 1, 2, 40, 60],  # Дані для правої руки
+    [11.2, 5.1, 2, 3, 50, 50],  # Дані для лівої руки
     # додайте більше прикладів
 ])
 
@@ -18,7 +19,7 @@ model = RandomForestRegressor(n_estimators=100)
 model.fit(X_train, y_train)
 
 # Тестування моделі на нових даних
-X_test = np.array([[9.8, 5.5, 0, 1.5]])  # Нові дані для тесту (права рука)
+X_test = np.array([[9.8, 5.5, 0, 1.5, 30, 70]])  # Нові дані для тесту (права рука)
 predictions = model.predict(X_test)
 
 print("Calculated percent:", predictions)

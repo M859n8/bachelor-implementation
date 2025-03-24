@@ -5,14 +5,16 @@ import { Image, Dimensions, StyleSheet, View, Animated, PanResponder } from "rea
 // import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 
 
-const screenWidth = Dimensions.get("window").width;
 // const coinSize = screenWidth * 0.05; // 15% ширини екрана
 
-export default function Penny({ index, setActiveCoin, height, width, moveCoin, round, setCoinData, handChangePointsTest}) {
+export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinData, handChangePointsTest}) {
 
     const position = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
     const startCoords = { x: position.x.__getValue(), y: position.y.__getValue() };
     // const [data, setData] = useState({ coins: [] }); // Структура з coins
+
+	const screenWidth = Dimensions.get("window").width;
+	const coinSize = screenWidth * 0.05; // Розмір монетки (~15% ширини екрану)
 
 
     const lastSpeed = useRef(0);
@@ -90,7 +92,7 @@ export default function Penny({ index, setActiveCoin, height, width, moveCoin, r
     
 		// handChangePoints.current.length = 0;
         // droppedCoinPoints.current.length = 0;
-		console.log('check if array is empty', droppedCoinPoints.current );
+		// console.log('check if array is empty', droppedCoinPoints.current );
         // setCoinData((prevData) => [...prevData, coinData]); 
         updateOrAddCoin(coinData)
 
@@ -116,7 +118,7 @@ export default function Penny({ index, setActiveCoin, height, width, moveCoin, r
                 console.log("Round is", newCoinData.round);
                 // handChangePoints.current.length = 0;
                 // droppedCoinPoints.current.length = 0;
-                console.log('check if array is empty', handChangePoints.current );
+                // console.log('check if array is empty', handChangePoints.current );
 
                 return [...prevCoinData, newCoinData];
             }
@@ -152,8 +154,8 @@ export default function Penny({ index, setActiveCoin, height, width, moveCoin, r
 
             // handChangePoints.current.length = 0;
             // droppedCoinPoints.current.length = 0;
-            console.log("Updated coin error time", updatedCoin.errors);
-            console.log('check if array is empty', handChangePoints.current );
+            // console.log("Updated coin error time", updatedCoin.errors);
+            // console.log('check if array is empty', handChangePoints.current );
 
           
           // Повертаємо новий масив з оновленим записом
@@ -177,7 +179,7 @@ export default function Penny({ index, setActiveCoin, height, width, moveCoin, r
             onPanResponderGrant: () => {
                 setActiveCoin(index); // Записуємо, яку монету взяли
                 startTime.current = Date.now(); // Оновлюється без виклику ререндеру
-				console.log('start time is ', startTime.current);
+				// console.log('start time is ', startTime.current);
 
                 if(droppedCoin.current){
                     // console.log("#########Помилка!");
@@ -280,7 +282,7 @@ export default function Penny({ index, setActiveCoin, height, width, moveCoin, r
             angleHistory.current[0]
         );
 
-        if (lastSpeed.current < 0.2 && speed > 0.2 && avgAngleChange > 0.1) {
+        if (lastSpeed.current < 0.2 && speed > 0.2 && avgAngleChange > 0.05) {
             // console.log(`angle history ${avgAngleChange}`);
             // console.log(`🔄 Можлива зміна руки! Speed ${speed}, coordinates(x) ${ position.x._value}`);
             // Реєструємо місце зміни руки
@@ -322,8 +324,8 @@ export default function Penny({ index, setActiveCoin, height, width, moveCoin, r
             >
             <Image
                 source={require("../assets/pennies/frontCoin.png")}
-                style={{width: width,
-                    height: height,
+                style={{width: coinSize,
+                    height: coinSize,
                     position: "absolute",
 
                     zIndex: 2,
