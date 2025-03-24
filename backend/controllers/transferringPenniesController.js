@@ -1,103 +1,74 @@
+import {spawn} from 'child_process';
 
-const userResponses = {}; // Тимчасове сховище відповідей користувачі
 
 const transferringPenniesController ={
 	
-    // Збереження відповіді в локальний масив
-  saveResponse: (req, res) => {
-    console.log("got here");
-    console.log("Request body: ", req.body);
-    
-    const  coinData  = req.body;
-    const user_id = req.user.id;
+		// Збереження відповіді в локальний масив
+	saveResponse: (req, res) => {
+		console.log("got here");
+		console.log("Request body: ", req.body);
+		
+		const  coinData  = req.body;
+		const user_id = req.user.id;
+		
+		if (!user_id ) {
+		console.log("Missing token");
+
+		return res.status(400).json({ error: "Missing required fields" });
+		}
+		if (!coinData) {
+		console.log("Missing coin data");
+
+		return res.status(400).json({ error: "Missing required fields" });
+		}
+
+
+		// console.log("Data : ", coinData);
+		console.log("Received Data: ", JSON.stringify(coinData, null, 2));
+
+		// console.trace("Trace: Execution reached 'end'");
+		// res.json({ message: "Response saved locally" });
+		transferringPenniesController.callModel(coinData, res); 
+		// return;
+		// res.json({ message: "Response saved locally" });
+	},
+
+	normalizeData : (userRequest) => {
+
+	},
+
+	callModel : (coinData, res)=> {
+		// const inputData = JSON.stringify(req.body); 
+		// Викликаємо Python скрипт, передаючи шлях до SVG файлу
+		const child = spawn('python3', ['../backend/MLmodels/transferringPennies/training.py', coinData]);
+
+		// Обробляємо вивід з Python скрипта
+		child.stdout.on('data', (data) => {
+		console.log(`stdout: ${data.toString()}`);
+		});
 	
-    if (!user_id ) {
-      console.log("Missing token");
+		// Обробляємо помилки
+		child.stderr.on('data', (data) => {
+		console.error(`stderr: ${data.toString()}`);
+		});
+	
+		// Перевірка завершення процесу
+		child.on('close', (code) => {
+		if (code === 0) {
+			console.log('good');
 
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-    if (!coinData) {
-      console.log("Missing coin data");
+			// Якщо Python скрипт успішно завершився, надсилаємо відповідь користувачу
+			res.json({ message: 'Results calculated' });
+		} else {
+			console.log('bad');
 
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-     // Перевірка координат
-    //  coinData.forEach(coin => {
-    //   if (!coin.start_coordinates || !coin.start_coordinates.x || !coin.start_coordinates.y) {
-    //       return res.status(400).json({ error: "Invalid start coordinates" });
-    //   }else{
-    //     console.log('valid1');
-    //   }
-    //   if (!coin.end_coordinates || !coin.end_coordinates.x || !coin.end_coordinates.y) {
-    //       return res.status(400).json({ error: "Invalid end coordinates" });
-    //   }else{
-    //     console.log('valid2');
+			// Якщо процес завершився з помилкою
+			res.status(500).json({ error: 'Error calculating results' });
+		}
+		});
+	},
 
-    //   }
-  // });
+		
+	};
 
-    // Якщо ще немає запису для користувача – створюємо
-    if (!userResponses[user_id]) {
-      userResponses[user_id] = [];
-    }
-
-    // Зберігаємо відповідь у тимчасовий масив
-    userResponses[user_id].push({coinData });
-    // console.log("Data : ", coinData);
-    // console.log("Received Data: ", JSON.stringify(coinData, null, 2));
-
-	// Видаляємо дані користувача після збереження
-	console.log("Before delete:", JSON.stringify(userResponses, null, 2));
-	delete userResponses[user_id];
-	console.log("After delete:", JSON.stringify(userResponses, null, 2));
-	console.trace("Trace: Execution reached 'end'");
-	res.json({ message: "Response saved locally" });
-	return;
-    // res.json({ message: "Response saved locally" });
-  },
-
-    // Обчислення загального % правильності і збереження в БД
-  calculateResults: async (req, res) => {
-    // const { user_id } = req.body;
-    const user_id = req.user.id;
-
-
-    if (!user_id || !userResponses[user_id]) {
-      return res.status(400).json({ error: "No responses found for this user" });
-    }
-
-    let totalSimilarity = 0;
-    let totalQuestions = userResponses[user_id].length;
-
-    // Обчислюємо схожість для кожної відповіді
-    userResponses[user_id].forEach(({ image_id, text_response }) => {
-      const possibleAnswers = correctAnswers[image_id] || [];
-      const similarities = possibleAnswers.map((answer) =>
-        stringSimilarity.compareTwoStrings(text_response.toLowerCase(), answer.toLowerCase())
-      );
-      const maxSimilarity = Math.max(...similarities);
-      totalSimilarity += maxSimilarity;
-    });
-
-    // Підраховуємо загальний % правильності
-    const finalScore = ((totalSimilarity / totalQuestions) * 100).toFixed(2);
-
-    try {
-      // (Тут можна зберігати фінальний результат у базу)
-      console.log(`User ${user_id} final score: ${finalScore}%`);
-
-      // Очищаємо тимчасові відповіді користувача
-      delete userResponses[user_id];
-
-      res.json({
-        message: "Final score calculated",
-        finalScore: `${finalScore}%`,
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Database error" });
-    }
-  },
-};
-
-export default transferringPenniesController;
+	export default transferringPenniesController;

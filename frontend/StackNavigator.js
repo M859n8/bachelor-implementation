@@ -83,7 +83,7 @@ export default function StackNavigator() {
           <Stack.Screen name="FacialRecognition" component={FacialRecognition} />
           <Stack.Screen name="LineTracking" component={LineTracking} />
           <Stack.Screen name="Steadiness" component={Steadiness} />
-          <Stack.Screen name="TransferringPennies" component={TransferringPennies} />
+          <Stack.Screen name="TransferringPennies" component={TransferringPennies}  options={{ gestureEnabled: false }}/>
           <Stack.Screen name="VisualOrganization" component={VisualOrganization} />
         </Stack.Group>
         ) : ( 

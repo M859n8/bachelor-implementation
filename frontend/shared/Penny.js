@@ -8,7 +8,7 @@ import { Image, Dimensions, StyleSheet, View, Animated, PanResponder } from "rea
 const screenWidth = Dimensions.get("window").width;
 // const coinSize = screenWidth * 0.05; // 15% ширини екрана
 
-export default function Penny({ index, setActiveCoin, height, width, moveCoin, round, setCoinData}) {
+export default function Penny({ index, setActiveCoin, height, width, moveCoin, round, setCoinData, handChangePointsTest}) {
 
     const position = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
     const startCoords = { x: position.x.__getValue(), y: position.y.__getValue() };
@@ -77,8 +77,8 @@ export default function Penny({ index, setActiveCoin, height, width, moveCoin, r
       
         const coinData = {
             id: coinId,
-            start_coordinates: {x : startCoords.x, y: startCoords.y},
-            end_coordinates: { x: endCoords.x , y: endCoords.y},
+            start_coordinates: {x: startCoords.x, y: startCoords.y},
+            end_coordinates: {x: endCoords.x , y: endCoords.y},
             // time: timeTaken,
             time_start: startTime.current,
             time_end: endTime,
@@ -280,7 +280,7 @@ export default function Penny({ index, setActiveCoin, height, width, moveCoin, r
             angleHistory.current[0]
         );
 
-        if (lastSpeed.current < 0.2 && speed > 0.3 && avgAngleChange > 0.1) {
+        if (lastSpeed.current < 0.2 && speed > 0.2 && avgAngleChange > 0.1) {
             // console.log(`angle history ${avgAngleChange}`);
             // console.log(`🔄 Можлива зміна руки! Speed ${speed}, coordinates(x) ${ position.x._value}`);
             // Реєструємо місце зміни руки
@@ -347,6 +347,25 @@ export default function Penny({ index, setActiveCoin, height, width, moveCoin, r
                     }}
                 />
             ))}
+
+			<View style={{ position: "absolute", top: 0, left: 0 }}>
+
+			{handChangePointsTest.current.map((point, index) => (
+
+				<View
+					key={index}
+					style={{
+						position: "absolute",
+						width: 10,
+						height: 10,
+						borderRadius: 5,
+						backgroundColor: "green",
+						left: point.x,
+						top: point.y,
+					}}
+				/>
+			))}
+			</View>
         </View>
         </>
     );
