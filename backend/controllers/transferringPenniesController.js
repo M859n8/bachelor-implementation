@@ -90,7 +90,7 @@ const transferringPenniesController ={
 			
 			// Додаємо результат
 			results.push({
-				id: entry.id,
+				// id: entry.id,
 				round: entry.round,
 				speedLeft, speedRight,
 				partLeft, partRight,
@@ -131,16 +131,16 @@ const transferringPenniesController ={
 	callModel : (coinData, res)=> {
 		// const inputData = JSON.stringify(req.body); 
 		// Викликаємо Python скрипт, передаючи шлях до SVG файлу
-		const child = spawn('python3', ['../backend/MLmodels/transferringPennies/training.py', coinData]);
+		const coin_data = JSON.stringify(coinData);
+		const child = spawn('python3', ['../backend/MLmodels/transferringPennies/training.py', coin_data]);
 
-		// Обробляємо вивід з Python скрипта
 		child.stdout.on('data', (data) => {
-		console.log(`stdout: ${data.toString()}`);
+			const clusters = JSON.parse(data.toString());
+			console.log('Clustered Data:', clusters);
 		});
-	
-		// Обробляємо помилки
-		child.stderr.on('data', (data) => {
-		console.error(`stderr: ${data.toString()}`);
+		
+		child.stderr.on('data', (error) => {
+			console.error('Error:', error.toString());
 		});
 	
 		// Перевірка завершення процесу

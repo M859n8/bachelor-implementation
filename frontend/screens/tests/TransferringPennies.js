@@ -28,14 +28,14 @@ export default function TransferringPennies({route}) {
    // Масиви монеток для лівої і правої сторін
 	const [elements, setElements] = useState([
 		{ id: 1, status: 'left' },
-		// { id: 2, status: 'left' },
-		// { id: 3, status: 'left' },
-        // { id: 4, status: 'left' },
-		// { id: 5, status: 'left' },
-		// { id: 6, status: 'left' },
-        // { id: 7, status: 'left' },
-		// { id: 8, status: 'left' },
-		// { id: 9, status: 'left' },
+		{ id: 2, status: 'left' },
+		{ id: 3, status: 'left' },
+        { id: 4, status: 'left' },
+		{ id: 5, status: 'left' },
+		{ id: 6, status: 'left' },
+        { id: 7, status: 'left' },
+		{ id: 8, status: 'left' },
+		{ id: 9, status: 'left' },
 	 
   ]);
 
@@ -100,6 +100,7 @@ export default function TransferringPennies({route}) {
 	
     // function to normalize hand_change_points before sending to the backend
 	const normalizeData = (coinData) => {
+		console.log('got to normalized');
 		return coinData.map((coin) => {
             //get horizontal middle of the movement
 			const lengthCoordX = Math.abs(coin.end_coordinates.x - coin.start_coordinates.x)
@@ -114,6 +115,7 @@ export default function TransferringPennies({route}) {
             //merge points that are located really close and most likely were created in one hand changing move
 			let i = 0;
             while (i < extremePointsDeleted.length - 1) {
+				console.log('got to cyckle');
                 let point1 = extremePointsDeleted[i];
                 let point2 = extremePointsDeleted[i + 1];
 
@@ -152,6 +154,7 @@ export default function TransferringPennies({route}) {
 
 			}else{
                 //if there is one point in arr
+				console.log('got to else');
 				coin.hand_change_points = extremePointsDeleted;
 
 

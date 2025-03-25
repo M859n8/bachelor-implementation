@@ -79,13 +79,13 @@ export default function VisualOrganization({route}) {
       const result = await response.json();
 
       if (response.ok) {
-        Alert.alert('Success', 'Your answers sent!');
+        // Alert.alert('Success', 'Your answers sent!');
         // Оновлюємо індекс для наступного зображення
           // Оновлюємо індекс для наступного зображення
           if (currentImageIndex < Object.keys(images).length) {
             setCurrentImageIndex(currentImageIndex + 1); // Перехід до наступного зображення
           } else {
-            Alert.alert('Успіх', 'Це була остання картинка!');
+            // Alert.alert('Успіх', 'Це була остання картинка!');
             fetchResults(); // Викликаємо функцію для отримання результатів
           }
       } else {
@@ -139,15 +139,15 @@ export default function VisualOrganization({route}) {
               </View>
           </Modal> */}
         {showResults ? (
-        <View>
-          <Text>Результати:</Text>
-          <Text>{JSON.stringify(results)}</Text> 
+        <View style={styles.card} >
+          <Text>Results:</Text>
+          <Text style={styles.screenText}>{results.finalScore}</Text> 
         </View>
         ) : (
           <>
-            <Card>
-              <Image source={images[currentImageIndex]} />
-            </Card >
+            <View style={styles.card}>
+              <Image source={images[currentImageIndex]} style={styles.image} resizeMode="contain"/>
+            </View >
             <TextInput
               value={textResponse}
               onChangeText={setTextResponse}
@@ -186,5 +186,23 @@ const styles = StyleSheet.create({
       padding: 20,
       borderRadius: 10,
       textAlign: 'center'
+  }, 
+  card: {
+	width: '60%', // конкретний розмір картки
+	height: '60%', // конкретний розмір картки
+	borderRadius: 6,
+	elevation: 3,
+	backgroundColor: '#fff',
+	shadowOffset: { width: 1, height: 1 },
+	shadowColor: '#333',
+	shadowOpacity: 0.3,
+	shadowRadius: 2,
+	marginHorizontal: 4,
+	marginVertical: 6,
+	alignItems:'center'
+  },
+  image: {
+	width: '100%', // картинка займатиме всю ширину картки
+	height: '100%', // картинка займатиме всю висоту картки
   }
 });

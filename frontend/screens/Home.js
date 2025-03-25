@@ -7,8 +7,7 @@ import Login from './Login';
 
 
 const tests = [ "Balance","BellsCancellation","BlockDesign",
-    "ComplexFigure", "Drawing", "FacialRecognition", "LineTracking",
-    "Steadiness","TransferringPennies", "VisualOrganization"];
+    "ComplexFigure","TransferringPennies", "VisualOrganization"];
 
 export default function Home({ setIsAuthenticated }) {
 
@@ -55,9 +54,9 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     testCircle: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
+        width: 200,
+        height: 200,
+        borderRadius: 100,
         backgroundColor: '#ddd',
         justifyContent: 'center',
         alignItems: 'center',

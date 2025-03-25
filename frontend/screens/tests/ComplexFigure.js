@@ -19,7 +19,7 @@ export default function ComplexFigure({route}) {
 	// const [eraser, setEraser ] = useState(false);
 	const [tool, setTool] = useState('pencil'); // 'pencil' або 'eraser'
 
-
+	const [backgroundZoomed, setBackgroundZoomed] = useState(false); // Стан для контролю масштабу
 
 	const paintGesture = Gesture.Pan()
 		.onBegin((event) => {
@@ -106,6 +106,10 @@ export default function ComplexFigure({route}) {
 		
 	}
 
+	const handleImagePress = () => {
+		setBackgroundZoomed(!backgroundZoomed); // Перемикання стану для збільшення
+	  };
+
   	return (  
 		
 	<GestureHandlerRootView style={styles.container}>
@@ -125,7 +129,7 @@ export default function ComplexFigure({route}) {
 				style={[styles.button, tool === 'pencil' && styles.activeButton]}
 				onPress={() => setTool('pencil')}
 			>
-				<Icon name="edit-2" size={24} color={tool === 'pencil' ? 'white' : 'purple'} />
+				<Icon name="edit-2" size={24} color={tool === 'pencil' ? 'white' : '#550080'} />
 			</TouchableOpacity>
 
 			{/* Кнопка гумки */}
@@ -133,10 +137,23 @@ export default function ComplexFigure({route}) {
 				style={[styles.button, tool === 'eraser' && styles.activeButton]}
 				onPress={() => setTool('eraser')}
 			>
-				<Icon name="trash-2" size={24} color={tool === 'eraser' ? 'white' : 'purple'} />
+				<Icon name="trash-2" size={24} color={tool === 'eraser' ? 'white' : '#550080'} />
 			</TouchableOpacity>
 		</View>
-		<GestureDetector gesture={tool === 'pencil' ? paintGesture : eraseGesture}>
+		{/* Зображення у правому верхньому куті */}
+		<TouchableOpacity 
+			style={[styles.imageContainer, { position: 'absolute', top: 10, right: 10 }]} 
+			onPress={handleImagePress}
+		>
+			<Image 
+			source={require("../../assets/complex_figure/complexFigure.png")} // Ваша URL картинки
+			style={[styles.image, backgroundZoomed ? styles.zoomedImage : {}]} 
+ 			resizeMode="contain"
+			/>
+
+		</TouchableOpacity>
+		
+			<GestureDetector gesture={tool === 'pencil' ? paintGesture : eraseGesture}>
 
 
 			<View style={styles.paintContainer}>
@@ -160,10 +177,10 @@ export default function ComplexFigure({route}) {
 			</View>
 		</GestureDetector>
 		<TouchableOpacity
-			style={{ padding: 10, backgroundColor: 'blue' }}
+			style={styles.button}
 			onPress={() => sendToBackend()}
 		>
-			<Text style={{ color: 'white' }}>Finish</Text>
+			<Text style={{ color: '#550080', fontSize: '24' }}>Finish</Text>
 		</TouchableOpacity>
 
 	</GestureHandlerRootView>
@@ -189,7 +206,7 @@ const styles = StyleSheet.create({
 		borderRadius: 25,
 	},
 	activeButton: {
-		backgroundColor: 'purple',
+		backgroundColor: '#550080',
 	},
 	
 	paintContainer: {
@@ -197,7 +214,7 @@ const styles = StyleSheet.create({
 		// height: '70%', // Висота області малювання
 		width: 500,
 		height: 500,
-		backgroundColor: 'pink', // Колір фону
+		backgroundColor: '#EABFFF', // Колір фону
 		borderRadius: 10, // Закруглені кути
 		borderWidth: 2,
 		borderColor: '#000',
@@ -218,5 +235,27 @@ const styles = StyleSheet.create({
 		padding: 20,
 		borderRadius: 10,
 		textAlign: 'center'
-	}
+	},
+	imageContainer: {
+		// padding: 5,
+		backgroundColor: 'white',
+		zIndex: 10, 
+	  },
+	  image: {
+		width: 100,
+		height: 100,
+		// borderRadius: 5,
+		borderRadius: 5,
+		borderColor: 'black',
+		borderWidth: 2,
+	  },
+	  zoomedImage: {
+		width: 500, // Збільшений розмір
+		height: 500,
+		
+		borderRadius: 5,
+		borderColor: 'black',
+		borderWidth: 2,
+		zIndex: 1,
+	  },
 });
