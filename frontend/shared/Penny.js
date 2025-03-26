@@ -64,7 +64,7 @@ export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinDa
 
         }
         
-        // console.log("Error points:", droppedCoinPoints.current);
+        console.log("Error points:", droppedCoinPoints.current);
 
     };
 
@@ -183,10 +183,11 @@ export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinDa
 
                 if(droppedCoin.current){
                     // console.log("#########Помилка!");
+					//coin is picked
                     registerDroppedCoin(position.x._value, position.y._value, Date.now());
                     // console.log(`error points detail ${position.x._value}`);
                 }
-                droppedCoin.current = true;
+                droppedCoin.current = false;
 
 
                 // console.log(`active index is : ${index}`);
@@ -257,8 +258,9 @@ export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinDa
 
 
                 }else{
+					//coin is dropped
                     registerDroppedCoin(position.x._value, position.y._value, Date.now());
-
+					droppedCoin.current = true;
 
                 }
             },

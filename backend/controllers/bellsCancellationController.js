@@ -22,19 +22,19 @@ const bellsCancellationController = {
         // userResponses[user_id].push({ image_id, text_response });
 
         console.log("clicked obj", bellsObjects);
-        console.log("additional fata", additionalData);
-        try {
-            const result = await calculateResults(bellsObjects, additionalData);  // Виконання обчислень асинхронно
+        console.log("additional data", additionalData);
+        // try {
+        //     const result = await calculateResults(bellsObjects, additionalData);  // Виконання обчислень асинхронно
             
-            // Зберігаємо результат в базу даних
-            // const response = await saveToDatabase(user_id, bellsObjects, additionalData, result);
+        //     // Зберігаємо результат в базу даних
+        //     // const response = await saveToDatabase(user_id, bellsObjects, additionalData, result);
             
-            res.json({ message: "Response saved successfully", result });
-        } catch (error) {
-            res.status(500).json({ error: "Failed to process the request" });
-        }
+        //     res.json({ message: "Response saved successfully", result });
+        // } catch (error) {
+        //     res.status(500).json({ error: "Failed to process the request" });
+        // }
 
-        // res.json({ message: "Response saved locally" });
+        res.json({ message: "Response saved locally" });
 
     },
 

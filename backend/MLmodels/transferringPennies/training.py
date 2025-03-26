@@ -68,4 +68,4 @@ for i, entry in enumerate(coin_data):
     entry["cluster"] = int(labels[i])  # Перетворюємо в int для JSON
 
 # Виводимо результат у JSON-форматі для Node.js
-print(json.dumps(coin_data))
+# print(json.dumps(coin_data))

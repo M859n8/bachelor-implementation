@@ -3,7 +3,10 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Modal, Button, Image, TextInput, Alert } from 'react-native';
 import { useState, useEffect  } from 'react';
 
-import Card from '../../shared/Card.js';
+import ResultsModal from '../../shared/resultsModal.js';
+import RulesModal from '../../shared/RulesModal.js';
+
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Масив зображень, що відповідають файлам
@@ -45,18 +48,22 @@ export default function VisualOrganization({route}) {
   // const images = [1, 2, 3, 4, 5]; // Масив зображень
   const [currentImageIndex, setCurrentImageIndex] = useState(1); // Поточний індекс зображення
 
-  const [showResults, setShowResults] = useState(false); // Показувати результати
-  const [results, setResults] = useState(null); // Збереження результатів
+  const [resultsModal, setResultsModal] = useState(false);
+  const [results, setResults] = useState({ finalScore: 100 });
+
+  const [rulesModal, setRulesModal] = useState(true);
+
+
 
   // const image_id = 1; // Ідентифікатор картинки
 
-  useEffect(() => {
-    console.log(' isLoading changed:', isLoading);
-  }, [isLoading]); // Після зміни isLoading, логувати його значення
+	useEffect(() => {
+		// console.log(' isLoading changed:', isLoading);
+	}, [isLoading]); // Після зміни isLoading, логувати його значення
 
   const handleSubmit = async () => {
     if (!textResponse) {
-      Alert.alert('Помилка', 'Будь ласка, введіть відповідь!');
+      Alert.alert('Error', 'Please provide an answer');
       return;
     }
 
@@ -88,11 +95,9 @@ export default function VisualOrganization({route}) {
             // Alert.alert('Успіх', 'Це була остання картинка!');
             fetchResults(); // Викликаємо функцію для отримання результатів
           }
-      } else {
-        Alert.alert('Помилка', 'Щось пішло не так. Спробуйте знову.');
-      }
+      } 
     } catch (error) {
-      console.error('Помилка при відправці:', error);
+    //   console.error('Помилка при відправці:', error);
       Alert.alert('Failure', 'Can not send answers');
     } finally {
       setIsLoading(false);
@@ -116,13 +121,11 @@ export default function VisualOrganization({route}) {
   
         if (response.ok) {
           setResults(result); // Зберігаємо результати
-          setShowResults(true); // Показуємо картку з результатами
-        } else {
-          Alert.alert('Помилка', 'Не вдалося отримати результати. Спробуйте знову.');
+          setResultsModal(true); // Показуємо картку з результатами
         }
       } catch (error) {
-        console.error('Помилка при отриманні результатів:', error);
-        Alert.alert('Помилка', 'Не вдалося отримати результати. Перевірте з’єднання!');
+        // console.error('Помилка при отриманні результатів:', error);
+        Alert.alert('Error', 'Sending results to backend');
       }
     };
 
@@ -138,12 +141,25 @@ export default function VisualOrganization({route}) {
                   <Button title="Почати" onPress={() => setModalVisible(false)} />
               </View>
           </Modal> */}
-        {showResults ? (
+        {/* {resultsModal ? (
         <View style={styles.card} >
           <Text>Results:</Text>
           <Text style={styles.screenText}>{results.finalScore}</Text> 
-        </View>
-        ) : (
+        </View> */}
+
+		 {/* Модальне вікно */}
+		<RulesModal 
+			visible={rulesModal} 
+			rules='The pictures shows an object divided into parts. Enter the name of the object in the test field' 
+			onClose={() => setRulesModal(false)} 
+		/>
+		<ResultsModal 
+			visible={resultsModal} 
+			results={results} 
+			onClose={() => setResultsModal(false)} 
+		/>
+		
+        {/* ) : ( */}
           <>
             <View style={styles.card}>
               <Image source={images[currentImageIndex]} style={styles.image} resizeMode="contain"/>
@@ -151,15 +167,16 @@ export default function VisualOrganization({route}) {
             <TextInput
               value={textResponse}
               onChangeText={setTextResponse}
-              placeholder="Введіть вашу відповідь"
+              placeholder="Enter your answer"
+			  style = {styles.textInput}
             />
             <Button
-              title={isLoading ? 'Завантаження...' : 'Відправити'}
+              title={isLoading ? 'Loading...' : 'Send'}
               onPress={handleSubmit}
               disabled={isLoading}
             />
           </>
-      )}
+      {/* )} */}
       </View>
   );
 };
@@ -204,5 +221,9 @@ const styles = StyleSheet.create({
   image: {
 	width: '100%', // картинка займатиме всю ширину картки
 	height: '100%', // картинка займатиме всю висоту картки
+  },
+  textInput: {
+	padding: 5,
+	fontSize: 22,
   }
 });

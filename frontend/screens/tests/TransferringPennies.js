@@ -1,11 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Modal, Button, Image, Dimensions, Animated, Alert } from 'react-native';
 import { useState, useEffect , useRef} from 'react';
-import DopArea from '../../shared/DropArea.js';
 import Penny from '../../shared/Penny.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ScreenOrientation from "expo-screen-orientation";
 import LockOrientation from '../../shared/LockOrientation.js';
+import ResultsModal from '../../shared/resultsModal.js';
 
 // const screenWidth = Dimensions.get("window").width;
 // const screenHeight = Dimensions.get("window").height;
@@ -16,6 +16,8 @@ import LockOrientation from '../../shared/LockOrientation.js';
 export default function TransferringPennies({route}) {
 
 	const [modalVisible, setModalVisible] = useState(true);
+	const [resultsModal, setResultsModal] = useState(false);
+	const [results, setResults] = useState({ finalScore: 100 });
 
 	const [coinData, setCoinData] = useState([]); // Структура з coins
 
@@ -23,26 +25,26 @@ export default function TransferringPennies({route}) {
 	const handChangePointsTest = useRef([]);
 	const [, forceUpdate] = useState(0);
 	/////////
-
+	const screenWidth = Dimensions.get("window").width;
+	const coinSize = screenWidth * 0.05;
 
    // Масиви монеток для лівої і правої сторін
 	const [elements, setElements] = useState([
 		{ id: 1, status: 'left' },
 		{ id: 2, status: 'left' },
 		{ id: 3, status: 'left' },
-        { id: 4, status: 'left' },
-		{ id: 5, status: 'left' },
-		{ id: 6, status: 'left' },
-        { id: 7, status: 'left' },
-		{ id: 8, status: 'left' },
-		{ id: 9, status: 'left' },
+        // { id: 4, status: 'left' },
+		// { id: 5, status: 'left' },
+		// { id: 6, status: 'left' },
+        // { id: 7, status: 'left' },
+		// { id: 8, status: 'left' },
+		// { id: 9, status: 'left' },
 	 
   ]);
 
 	const [activeCoin, setActiveCoin] = useState(null);
 	const [round, setRound] = useState(1); // Стан для відстеження поточного раунду
-	const [gameOver, setGameOver] = useState(false); // Стан для завершення гри
-    const [gotResults, setGotResults] = useState(false);
+
 
     /////////////////////////перевірити на мобільному пристрої////////////////////////////////
     // const lockOrientation = async () => {
@@ -87,7 +89,7 @@ export default function TransferringPennies({route}) {
             if (allInLeftZone) {
                 console.log('G.A.M.E O.V.E.R');
 
-                setGameOver(true); // Гра завершена
+                // setGameOver(true); // Гра завершена
                 sendDataToBackend();
             }
         }
@@ -154,7 +156,7 @@ export default function TransferringPennies({route}) {
 
 			}else{
                 //if there is one point in arr
-				console.log('got to else');
+				// console.log('got to else');
 				coin.hand_change_points = extremePointsDeleted;
 
 
@@ -194,10 +196,10 @@ export default function TransferringPennies({route}) {
 			console.log('got to sended');
 
 			if (response.ok) {
-				Alert.alert('Success', 'Ansvers calculated');
-			}else{
-				Alert.alert('Failure', 'Whatt');
-
+				// Alert.alert('Success', 'Ansvers calculated');
+				
+				setResults(response); 
+				setResultsModal(true);
 			}
         } catch (error) {
         Alert.alert('Failure', 'Can not send answers');
@@ -209,7 +211,7 @@ export default function TransferringPennies({route}) {
 
     return (
         <View style={styles.container}>
-            <LockOrientation/>
+            {/* <LockOrientation/> */}
 
             <Modal
                 animationType="slide"
@@ -217,10 +219,16 @@ export default function TransferringPennies({route}) {
                 visible={modalVisible}
             >
                 <View style={styles.modalContainer}>
-                    <Text style={styles.modalText}>Правила тесту: Прочитайте інструкцію перед початком.</Text>
-                    <Button title="Почати" onPress={() => setModalVisible(false)} />
+                    <Text style={styles.modalText}>Rules: transfer pennies from one zone to another.</Text>
+                    <Button title="Start" onPress={() => setModalVisible(false)} />
                 </View>
             </Modal>
+
+			<ResultsModal 
+				visible={resultsModal} 
+				results={results} 
+				onClose={() => setResultsModal(false)} 
+			/>
 
 			{/* <Modal
                 animationType="slide"
@@ -307,7 +315,7 @@ const styles = StyleSheet.create({
     gameArea: {
         flexDirection: "row",
         width: "100%",
-		
+		height: '60%',
         justifyContent: "space-between",
         paddingHorizontal: 20,
         position: "relative", // Додаємо відносне позиціонування

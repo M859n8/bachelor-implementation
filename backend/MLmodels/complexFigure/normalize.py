@@ -2,6 +2,7 @@ import numpy as np
 import sys
 
 import svgpathtools
+from svgwrite import Drawing
 from sklearn.metrics.pairwise import cosine_similarity
 
 
@@ -80,7 +81,7 @@ def clean_small_lines(features, min_length):
             
             # Якщо довжина сегмента більша за мінімальний поріг, додаємо його
             if length >= min_length:
-                print("saving")
+                # print("saving")
                 path_segments.append(segment)
             else :
                 print("cleaning")
@@ -89,6 +90,22 @@ def clean_small_lines(features, min_length):
         cleaned_lines.append(path_segments)
     
     return cleaned_lines
+
+# def save_lines_to_svg(lines, output_path, width=500, height=500):
+#     # Створюємо новий SVG-документ
+#     dwg = Drawing(output_path, size=(f"{width}px", f"{height}px"))
+
+#     # Додаємо білий фон
+#     dwg.add(dwg.rect(insert=(0, 0), size=(width, height), fill='white'))
+
+#     # Додаємо лінії
+#     for line in lines:
+#         for segment in line:
+#             x1, y1, x2, y2, _, _ = segment
+#             dwg.add(dwg.line(start=(x1, y1), end=(x2, y2), stroke="black", stroke_width=2))
+
+#     # Зберігаємо файл
+#     dwg.save()
 
 def save_lines_to_svg(lines, output_path):
     # Створюємо список шляхи (paths) для збереження
@@ -132,4 +149,4 @@ if __name__ == "__main__":
     user_path = sys.argv[1]
     
     similarity = normalize_drawings(template_path, user_path)
-    print(similarity)
+    # print(similarity)

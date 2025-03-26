@@ -361,5 +361,159 @@
         "errNumRight": 0,
         "errTimeLeft": 0,
         "errTimeRight": 0
+    },
+    {
+        "round": 1,
+        "speedLeft": 1.036618199287145,
+        "speedRight": 1.144127498080566,
+        "partLeft": 0.46128519750683944,
+        "partRight": 0.5476255438042116,
+        "errNumLeft": 0,
+        "errNumRight": 0,
+        "errTimeLeft": 0,
+        "errTimeRight": 0
+    },
+    {
+        "round": 1,
+        "speedLeft": 1.9630944822332286,
+        "speedRight": 1.005792771084358,
+        "partLeft": 0.7176137655212449,
+        "partRight": 0.29615449402429467,
+        "errNumLeft": 0,
+        "errNumRight": 0,
+        "errTimeLeft": 0,
+        "errTimeRight": 0
+    },
+    {
+        "round": 2,
+        "speedLeft": 0.7013016382020906,
+        "speedRight": 1.6619079827192014,
+        "partLeft": 0.3795473995179788,
+        "partRight": 0.6502932679871647,
+        "errNumLeft": 0,
+        "errNumRight": 0,
+        "errTimeLeft": 0,
+        "errTimeRight": 0
+    },
+    {
+        "round": 2,
+        "speedLeft": 0.44160289854121204,
+        "speedRight": 0.5792430097453021,
+        "partLeft": 0.1734541914632814,
+        "partRight": 0.8569196982931326,
+        "errNumLeft": 0,
+        "errNumRight": 0,
+        "errTimeLeft": 0,
+        "errTimeRight": 0
+    },
+    {
+        "round": 2,
+        "speedLeft": 0.5261696897113753,
+        "speedRight": 1.7075958007841103,
+        "partLeft": 0.22060216020202225,
+        "partRight": 0.7848287346344516,
+        "errNumLeft": 0,
+        "errNumRight": 0,
+        "errTimeLeft": 0,
+        "errTimeRight": 0
+    },
+    {
+        "round": 1,
+        "speedLeft": 0.28975050996450613,
+        "speedRight": 0.7905270588822753,
+        "partLeft": 0.35564195081095673,
+        "partRight": 0.7089650233342732,
+        "errNumLeft": 0,
+        "errNumRight": 0,
+        "errTimeLeft": 0,
+        "errTimeRight": 0
+    },
+    {
+        "round": 1,
+        "speedLeft": 0.5233935892758114,
+        "speedRight": 0.9648848010178342,
+        "partLeft": 0.7231717476415082,
+        "partRight": 0.27787575082269356,
+        "errNumLeft": 1,
+        "errNumRight": 0,
+        "errTimeLeft": 4383,
+        "errTimeRight": 0
+    },
+    {
+        "round": 2,
+        "speedLeft": 0.9892786209022859,
+        "speedRight": 0.4846727655073366,
+        "partLeft": 0.8211237834862225,
+        "partRight": 0.19096365673066634,
+        "errNumLeft": 1,
+        "errNumRight": 0,
+        "errTimeLeft": 669,
+        "errTimeRight": 0
+    },
+    {
+        "round": 1,
+        "speedLeft": 0.465417392701544,
+        "speedRight": 1.206591210325735,
+        "partLeft": 0.3455243966969598,
+        "partRight": 0.7051802359801398,
+        "errNumLeft": 0,
+        "errNumRight": 0,
+        "errTimeLeft": 0,
+        "errTimeRight": 0
+    },
+    {
+        "round": 1,
+        "speedLeft": 0.5996205985164281,
+        "speedRight": 1.2027083669704786,
+        "partLeft": 0.5101255981909442,
+        "partRight": 0.5645246244437864,
+        "errNumLeft": 0,
+        "errNumRight": 0,
+        "errTimeLeft": 0,
+        "errTimeRight": 0
+    },
+    {
+        "round": 1,
+        "speedLeft": 0.5768909997505868,
+        "speedRight": 1.4195561042376805,
+        "partLeft": 0.38484648085043643,
+        "partRight": 0.6990802852630749,
+        "errNumLeft": 0,
+        "errNumRight": 0,
+        "errTimeLeft": 0,
+        "errTimeRight": 0
+    },
+    {
+        "round": 2,
+        "speedLeft": 0.7285041211580628,
+        "speedRight": 0.8847627749671203,
+        "partLeft": 0.4033274425615751,
+        "partRight": 0.6718061305325972,
+        "errNumLeft": 0,
+        "errNumRight": 0,
+        "errTimeLeft": 0,
+        "errTimeRight": 0
+    },
+    {
+        "round": 2,
+        "speedLeft": 0.9365452011404203,
+        "speedRight": 0.7556988485378108,
+        "partLeft": 0.3796673964815714,
+        "partRight": 0.7103736073113742,
+        "errNumLeft": 0,
+        "errNumRight": 0,
+        "errTimeLeft": 0,
+        "errTimeRight": 0
+    },
+    {
+        "round": 2,
+        "speedLeft": 0.7461634833429293,
+        "speedRight": 0.811250439224545,
+        "partLeft": 0.2639427424211912,
+        "partRight": 0.7368783913696413,
+        "errNumLeft": 0,
+        "errNumRight": 0,
+        "errTimeLeft": 0,
+        "errTimeRight": 0
     }
 ]

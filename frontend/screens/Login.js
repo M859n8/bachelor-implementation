@@ -77,8 +77,8 @@ export default function Login({ setIsAuthenticated }) {
 			style={styles.input}
 			/>
 			<View style={styles.buttonContainer}>
-				<Button title="Register" onPress={handleRegister} color='purple' />
-				<Button title="Login" onPress={handleLogin} color='purple' />
+				<Button title="Register" onPress={handleRegister} color='blue' />
+				<Button title="Login" onPress={handleLogin} color='blue' />
 			</View>
 
 		</View>
@@ -92,7 +92,7 @@ export default function Login({ setIsAuthenticated }) {
 			justifyContent: 'center',
 			alignItems: 'center',
 			padding: '10%',
-			backgroundColor: 'grey',
+			backgroundColor: '#ccc',
 		},
 		input: {
 			width: '100%',

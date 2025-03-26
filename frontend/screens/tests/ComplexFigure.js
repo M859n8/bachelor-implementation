@@ -6,12 +6,16 @@ import Svg, { Path } from 'react-native-svg';
 import { Dimensions } from "react-native";
 import Icon from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ResultsModal from '../../shared/resultsModal.js';
 
 
 const { width, height } = Dimensions.get('window');
 
 export default function ComplexFigure({route}) {
   	const [modalVisible, setModalVisible] = useState(true);
+	const [resultsModal, setResultsModal] = useState(false);
+	const [results, setResults] = useState({ finalScore: 100 });
+
 	// const [pathData, setPathData] = useState([]);
 	const [pathData, setPathData] = useState('');
 	const [newLine, setNewLine] = useState(true);
@@ -64,7 +68,7 @@ export default function ComplexFigure({route}) {
 		console.log('got to generate string');
 		
 		return `
-			<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">
+			<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" >
 				${lines.map(line => {
 					const path = line
 						.map((point, i) => (i === 0 ? `M${point.x},${point.y}` : `L${point.x},${point.y}`))
@@ -95,9 +99,11 @@ export default function ComplexFigure({route}) {
 			
 			console.log('send to the backend');
 			if (response.ok) {
-				Alert.alert('Success', 'Your answers sent!');
+				// Alert.alert('Success', 'Your answers sent!');
 				const data = await response.json();
 				console.log('Server response:', data);
+				setResults(response); 
+				setResultsModal(true);
 			}
 		} catch (error) {
 			Alert.alert('Failure', 'Can not send answers');
@@ -122,7 +128,11 @@ export default function ComplexFigure({route}) {
                     resizeMode: "contain"}}
             />
 		</View> */}
-
+		<ResultsModal 
+			visible={resultsModal} 
+			results={results} 
+			onClose={() => setResultsModal(false)} 
+		/>
 
 		<View style={styles.buttonContainer}>
 			<TouchableOpacity

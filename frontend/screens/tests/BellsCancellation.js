@@ -154,8 +154,8 @@ export default function BellsCancellation({route}) {
                 visible={modalVisible}
             >
                 <View style={styles.modalContainer}>
-                    <Text style={styles.modalText}>Правила тесту: Прочитайте інструкцію перед початком.</Text>
-                    <Button title="Почати" onPress={handleModalClose} />
+                    <Text style={styles.modalText}>Among the objects in the picture, click on all the bells as quickly as possible. When you find all the bells, end the game.</Text>
+                    <Button title="Start" onPress={handleModalClose} />
                 </View>
             </Modal>
             {!gotResults ? (

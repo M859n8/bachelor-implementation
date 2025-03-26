@@ -7,7 +7,7 @@ import Login from './Login';
 
 
 const tests = [ "Balance","BellsCancellation","BlockDesign",
-    "ComplexFigure","TransferringPennies", "VisualOrganization"];
+    "ComplexFigure","TransferringPennies", "VisualOrganization", "LineTracking"];
 
 export default function Home({ setIsAuthenticated }) {
 
