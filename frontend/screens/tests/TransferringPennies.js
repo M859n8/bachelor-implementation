@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ScreenOrientation from "expo-screen-orientation";
 import LockOrientation from '../../shared/LockOrientation.js';
 import ResultsModal from '../../shared/resultsModal.js';
+import RulesModal from '../../shared/RulesModal.js';
 
 // const screenWidth = Dimensions.get("window").width;
 // const screenHeight = Dimensions.get("window").height;
@@ -15,7 +16,8 @@ import ResultsModal from '../../shared/resultsModal.js';
 
 export default function TransferringPennies({route}) {
 
-	const [modalVisible, setModalVisible] = useState(true);
+	const [rulesModal, setRulesModal] = useState(true);
+	const [round2Modal, setRound2Modal] = useState(false);
 	const [resultsModal, setResultsModal] = useState(false);
 	const [results, setResults] = useState({ finalScore: 100 });
 
@@ -27,6 +29,15 @@ export default function TransferringPennies({route}) {
 	/////////
 	const screenWidth = Dimensions.get("window").width;
 	const coinSize = screenWidth * 0.05;
+
+	const additionalData = useRef({
+		timeStartRound1:0,
+		timeEndRound1:0,
+		timeStartRound2:0,
+		timeEndRound2:0,
+
+	});
+
 
    // Масиви монеток для лівої і правої сторін
 	const [elements, setElements] = useState([
@@ -79,15 +90,17 @@ export default function TransferringPennies({route}) {
             const allInRightZone = elements.every((el) => el.status === 'right');
             if (allInRightZone) {
                 console.log('R.O.U.N.D 2');
-
                 setRound(2);
+				additionalData.current.timeEndRound1 = Date.now();
+
                 // Можна додати повідомлення чи анімацію між раундами
+				setRound2Modal(true);
             }
             
         } else if (round === 2) {
             const allInLeftZone = elements.every((el) => el.status === 'left');
             if (allInLeftZone) {
-                console.log('G.A.M.E O.V.E.R');
+				additionalData.current.timeEndRound2 = Date.now();
 
                 // setGameOver(true); // Гра завершена
                 sendDataToBackend();
@@ -180,6 +193,11 @@ export default function TransferringPennies({route}) {
         const token = await AsyncStorage.getItem('authToken');
 		const normalizedData = normalizeData(coinData); //temporaly
 
+		requestBody = {
+			coinData : normalizedData,
+            additionalData : additionalData.current
+		}
+
         // console.log("Coin data being sent: ", normalizedData);
 		console.log('got to send');
         //  треба буде десь якось дані про час мвж вибором монеток протягом раунду брати. можна це навіть на бекенді робити
@@ -191,14 +209,15 @@ export default function TransferringPennies({route}) {
 					'Authorization': `Bearer ${token}`
 
 				},
-				body: JSON.stringify(normalizedData), //надсилаємо саме об'єкт
+				body: JSON.stringify(requestBody), //надсилаємо саме об'єкт
 			})
 			console.log('got to sended');
+			const result = await response.json();
 
 			if (response.ok) {
 				// Alert.alert('Success', 'Ansvers calculated');
 				
-				setResults(response); 
+				setResults(result); 
 				setResultsModal(true);
 			}
         } catch (error) {
@@ -213,34 +232,32 @@ export default function TransferringPennies({route}) {
         <View style={styles.container}>
             {/* <LockOrientation/> */}
 
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-            >
-                <View style={styles.modalContainer}>
-                    <Text style={styles.modalText}>Rules: transfer pennies from one zone to another.</Text>
-                    <Button title="Start" onPress={() => setModalVisible(false)} />
-                </View>
-            </Modal>
+          
+			<RulesModal 
+				visible={rulesModal} 
+				rules='The pictures shows an object divided into parts. Enter the name of the object in the test field' 
+				onClose={() => {
+					setRulesModal(false);
+					additionalData.current.timeStartRound1 = Date.now();
+
+				}} 
+			/>
+
+			<RulesModal 
+				visible={round2Modal} 
+				rules='Round 2 rules: lorem ipsum' 
+				onClose={() => {
+					setRound2Modal(false);
+					additionalData.current.timeStartRound2 = Date.now();
+
+				}} 
+			/>
 
 			<ResultsModal 
 				visible={resultsModal} 
 				results={results} 
 				onClose={() => setResultsModal(false)} 
 			/>
-
-			{/* <Modal
-                animationType="slide"
-                transparent={true}
-                visible={gameOver}
-            >
-                <View style={styles.modalContainer}>
-                    <Text style={styles.modalText}>gameOver</Text>
-                    <Button title="Почати" onPress={() => setGameOver(false)} />
-                </View>
-            </Modal> */}
-
 
             <View style={styles.gameArea}>
             <View style={styles.dropArea}>
@@ -256,7 +273,7 @@ export default function TransferringPennies({route}) {
                         checkRoundCompletion={checkRoundCompletion}
                         round={round}
                         setCoinData={setCoinData}
-					handChangePointsTest={handChangePointsTest} //tet purposes
+					handChangePointsTest={handChangePointsTest} //test purposes
                         
                         />
                 ))}
