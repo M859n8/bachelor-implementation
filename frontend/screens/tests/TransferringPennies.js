@@ -7,6 +7,7 @@ import * as ScreenOrientation from "expo-screen-orientation";
 import LockOrientation from '../../shared/LockOrientation.js';
 import ResultsModal from '../../shared/resultsModal.js';
 import RulesModal from '../../shared/RulesModal.js';
+// import DeviceInfo from 'react-native-device-info';
 
 // const screenWidth = Dimensions.get("window").width;
 // const screenHeight = Dimensions.get("window").height;
@@ -29,13 +30,25 @@ export default function TransferringPennies({route}) {
 	/////////
 	const screenWidth = Dimensions.get("window").width;
 	const coinSize = screenWidth * 0.05;
+	// const screenSizeInches = DeviceInfo.getScreenSize();S 
+	const widthInInches = (screenWidth * 0.8 - 20 - 20)/ 160;
+	//можливо для переводу в дюцми працюватиме ось це ділення на 160
+
+	// const screenHeight = Dimensions.get("window").height;
+	// const heightInInches = (screenHeight* 0.8 - 20 - 20)/ 160;
+
+	// console.log(`size of the screen ${screenWidth} and geight ${screenHeight}` );
+	// console.log('width of the screen in cm', widthInInches*2.54, 'height in cm', heightInInches*2.54);
+
+
+
 
 	const additionalData = useRef({
 		timeStartRound1:0,
 		timeEndRound1:0,
 		timeStartRound2:0,
 		timeEndRound2:0,
-
+		width: widthInInches,
 	});
 
 
@@ -44,8 +57,8 @@ export default function TransferringPennies({route}) {
 		{ id: 1, status: 'left' },
 		{ id: 2, status: 'left' },
 		{ id: 3, status: 'left' },
-        // { id: 4, status: 'left' },
-		// { id: 5, status: 'left' },
+        { id: 4, status: 'left' },
+		{ id: 5, status: 'left' },
 		// { id: 6, status: 'left' },
         // { id: 7, status: 'left' },
 		// { id: 8, status: 'left' },
@@ -235,7 +248,7 @@ export default function TransferringPennies({route}) {
           
 			<RulesModal 
 				visible={rulesModal} 
-				rules='The pictures shows an object divided into parts. Enter the name of the object in the test field' 
+				rules='The pictures shows an object divided into parts. Enter the name of the object in the test field. ONLY ONE HAND at a time' 
 				onClose={() => {
 					setRulesModal(false);
 					additionalData.current.timeStartRound1 = Date.now();

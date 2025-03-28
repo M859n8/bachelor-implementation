@@ -128,11 +128,11 @@ export default function ComplexFigure({route}) {
                     resizeMode: "contain"}}
             />
 		</View> */}
-		<ResultsModal 
+		{/* <ResultsModal 
 			visible={resultsModal} 
 			results={results} 
 			onClose={() => setResultsModal(false)} 
-		/>
+		/> */}
 
 		<View style={styles.buttonContainer}>
 			<TouchableOpacity
@@ -190,7 +190,7 @@ export default function ComplexFigure({route}) {
 			style={styles.button}
 			onPress={() => sendToBackend()}
 		>
-			<Text style={{ color: '#550080', fontSize: '24' }}>Finish</Text>
+			<Text style={{ color: '#550080', fontSize: 24 }}>Finish</Text>
 		</TouchableOpacity>
 
 	</GestureHandlerRootView>

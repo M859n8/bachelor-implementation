@@ -1,7 +1,9 @@
 import {spawn} from 'child_process';
 
-const COINS_PER_ROUND = 3; //will be 10 in final variant
-const REFERENCE_SPEED = 0.75;
+const COINS_PER_ROUND = 5; //will be 10 in final variant
+const REFERENCE_SPEED = 4; //18*10/30 (замінила 15 секунд на 45 а монетки на 10) 
+const REFERENCE_WIDTH = 18; //inches
+
 
 const transferringPenniesController ={
 	
@@ -19,13 +21,14 @@ const transferringPenniesController ={
 		const features = transferringPenniesController.extractFeatures(coinData);
 		const {resultLeft, resultRight} = transferringPenniesController.assessCoordination(features);
 		console.log(`left percentage is ${resultLeft}, and right is ${resultRight}`);
-		const overallResult = transferringPenniesController.assessOverall(additionalData);
+		const {round1, round2} = transferringPenniesController.assessOverall(additionalData);
 		// console.trace("Trace: Execution reached 'end'");
 		// transferringPenniesController.callModel(features, res);  //викликатимемо модель для кожного раунду окремо
 		// return;
 		res.json({ 
 			message: "Response saved locally",
-			finalScore: `Left to right hand \n ${resultLeft}% : ${resultRight}% \n Overallresult \n ${overallResult}`, 
+			finalScore: `Left to right hand \n ${resultLeft}% : ${resultRight}% \n Overallresult 
+			\n ${round1}% \n and round 2 ${round2}%`, 
 		});
 	},
 
@@ -188,9 +191,26 @@ const transferringPenniesController ={
 		// const resultRound1 = numberCoinsRound1 * 100 / COINS_PER_ROUND;
 		// const resultRound2 = numberCoinsRound2 * 100 / COINS_PER_ROUND;
 		// return (resultRound1+resultRound2)/ 2
-		const round1Duration = data.timeStartRound1 - data.timeEndRound1;
-		const round2Duration = data.timeStartRound2 - data.timeEndRound2;
-		// round1Duration+round2Duration
+		const round1Duration = (data.timeEndRound1 - data.timeStartRound1)/1000;
+		const round2Duration = (data.timeEndRound2 - data.timeStartRound2)/1000;
+
+		console.log('round 1 duration', round1Duration, 'round 2 duration', round2Duration);
+
+		//reference speed = pathWidth * coinsAmount / 15 sec
+		const speedRound1 = COINS_PER_ROUND * data.width / round1Duration;
+		const speedRound2 = COINS_PER_ROUND * data.width / round2Duration;
+		console.log('data width ', data.width, 'in cm ', data.width*2.45)
+		console.log('round 1 speed', speedRound1, 'round 2 speed', speedRound2);
+		
+		
+		const resultRound1 = (speedRound1 * 100) / REFERENCE_SPEED
+		const resultRound2 = (speedRound2 * 100) / REFERENCE_SPEED
+
+		console.log('results round 1 ', resultRound1, 'results round 2 ', resultRound2)
+		
+		return ({round1: resultRound1.toFixed(2), round2 : resultRound2.toFixed(2)})
+
+		
 
 		//for each round get time start and end, divide by COINS_PER_ROUND and compare this speed to reference
 

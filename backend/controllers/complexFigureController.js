@@ -52,7 +52,7 @@ const complexFigureController = {
 
     },
 
-    calculateResults: async (bellsObjects, additionalData) => {
+    calculateResults: async () => {
 
     }
 

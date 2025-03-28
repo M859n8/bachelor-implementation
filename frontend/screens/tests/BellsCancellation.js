@@ -70,12 +70,11 @@ export default function BellsCancellation({route}) {
 
 
     const handleImageClick = (clickedImg) => {
-        // console.log(`got coords ${x}, ${y}`);
-        // Якщо зображення типу 0, зберігаємо його координати та індекс
-        // const existingIndex = clickedObjects.findIndex((image)=> {
-        //     return clickedImg.id === image.id
-        // });
-        const filterdObjects = objects.filter(obj => clickedImg.id === obj.id && obj.type === 0 && obj.touched === false);
+		console.log('entered');
+      
+        // const filterdObjects = objects.filter(obj => clickedImg.id === obj.id && obj.type === 0 && obj.touched === false);
+        const filterdObjects = objects.filter(obj => clickedImg.id === obj.id && obj.touched === false);
+
         
         if (filterdObjects.length ===1) {
         // console.log(`got coords ${clickedImg.x}, ${clickedImg.y}`);
@@ -88,16 +87,16 @@ export default function BellsCancellation({route}) {
                     img.id === clickedImg.id ? { ...img, touched: true, time: Date.now() } : img
                 )
             );
-            // console.log(`time a : ${timeA}`);
+            console.log(`time a : ${Date.now()}`);
             
         }
         // console.log(clickedObjects);
     };
     
-    useEffect(()=>{
-        console.log(clickedObjects);
+    // useEffect(()=>{
+    //     console.log(clickedObjects);
 
-    }, [clickedObjects]);
+    // }, [clickedObjects]);
 
  
 
@@ -106,6 +105,11 @@ export default function BellsCancellation({route}) {
         setIsLoading(true);
 
         const bellsObjects = objects.filter(obj => obj.type === 0);
+		console.log('bells', bellsObjects);
+        const otherObjects = objects.filter(obj => obj.type !== 0 && obj.touched === true);
+		console.log('other', otherObjects)
+
+
 
         const additionalData = {
             startTime: startTime.current,
@@ -117,7 +121,8 @@ export default function BellsCancellation({route}) {
 
         const requestBody ={
             bellsObjects : bellsObjects,
-            additionalData : additionalData
+            additionalData : additionalData,
+			otherObjects : otherObjects,
         }
 
         const token = await AsyncStorage.getItem('authToken');
@@ -171,7 +176,9 @@ export default function BellsCancellation({route}) {
                             <View key={img.id} style={[styles.bellImg, { left: img.x, top: img.y }]}>
                                 <Image 
                                     source={imageMap[img.type] || require("../../assets/bells/processed_0.png")} 
-                                    style={[styles.image, img.touched && { opacity: 0.1}]} // Закреслюємо зображення} 
+                                    style={[styles.image, (img.touched && img.type === 0) ? { opacity: 0.1 } : {}]}
+
+									// Закреслюємо зображення} 
                                 />
                             </View>
                         </TouchableOpacity>

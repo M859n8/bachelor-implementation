@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<svg baseProfile="full" height="500px" version="1.1" width="500px" xmlns="http://www.w3.org/2000/svg" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xlink="http://www.w3.org/1999/xlink"><defs />
-<rect fill="white" height="500" width="500" x="0" y="0" />
-<line stroke="black" stroke-width="2" x1="113.20489501953125" x2="114.1649169921875" y1="103.719970703125" y2="121.95999145507812" />
-<line stroke="black" stroke-width="2" x1="114.1649169921875" x2="122.804931640625" y1="121.95999145507812" y2="369.63995361328125" />
-<line stroke="black" stroke-width="2" x1="122.804931640625" x2="333.04498291015625" y1="369.63995361328125" y2="351.39990234375" />
-<line stroke="black" stroke-width="2" x1="330.16497802734375" x2="336.88494873046875" y1="352.35992431640625" y2="349.47991943359375" />
-<line stroke="black" stroke-width="2" x1="336.88494873046875" x2="342.64495849609375" y1="349.47991943359375" y2="349.47991943359375" />
-<line stroke="black" stroke-width="2" x1="114.1649169921875" x2="325.364990234375" y1="94.1199951171875" y2="99.87997436523438" />
-<line stroke="black" stroke-width="2" x1="325.364990234375" x2="331.12493896484375" y1="99.87997436523438" y2="104.67999267578125" />
-<line stroke="black" stroke-width="2" x1="331.12493896484375" x2="325.364990234375" y1="104.67999267578125" y2="146.91998291015625" /><line stroke="black" stroke-width="2" x1="325.364990234375" x2="351.28485107421875" y1="135.39993286132812" y2="389.79986572265625" /></svg>
+<?xml version="1.0" ?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xlink="http://www.w3.org/1999/xlink"  style="background-color: white;" baseProfile="full" height="537px" version="1.1" viewBox="32.405499999999996 66.5555 467.189 417.389" width="600px">
+	<defs/>
+	<path d="M 410.5,101.5 L 360.0,154.5" fill="none" stroke="#000000" stroke-width="0.389"/>
+	<path d="M 360.0,154.5 L 71.5,449.0" fill="none" stroke="#000000" stroke-width="0.389"/>
+	<path d="M 454.5,402.0 L 401.5,363.0" fill="none" stroke="#000000" stroke-width="0.389"/>
+	<path d="M 401.5,363.0 L 104.0,149.5" fill="none" stroke="#000000" stroke-width="0.389"/>
+	<path d="M 460.5,290.0 L 435.0,258.5" fill="none" stroke="#000000" stroke-width="0.389"/>
+	<path d="M 435.0,258.5 L 250.0,106.5" fill="none" stroke="#000000" stroke-width="0.389"/>
+	<path d="M 244.5,107.5 L 86.5,314.0" fill="none" stroke="#000000" stroke-width="0.389"/>
+</svg>
