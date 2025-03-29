@@ -74,11 +74,15 @@ def extract_lines(svg_path):
 def distance(x1, y1, x2, y2):
     return np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
-def merge_segments(path, angle_threshold=np.deg2rad(20), distance_threshold=5):
+def merge_lines(path, angle_threshold=np.deg2rad(30), distance_threshold=5):
     merged_path = []
     i = 0  
 
-    while i < len(path) - 1:
+    while i < len(path):
+        if i == len(path) - 1:  # Останній елемент, просто додаємо
+            merged_path.append(path[i])
+            break
+
         x1, y1, x2, y2, length1, angle1 = path[i]
         x3, y3, x4, y4, length2, angle2 = path[i + 1]
 
@@ -88,7 +92,7 @@ def merge_segments(path, angle_threshold=np.deg2rad(20), distance_threshold=5):
             while i < len(path) - 2:
                 x5, y5, x6, y6, length3, angle3 = path[i + 2]
 
-                if abs(angle2 - angle3) < angle_threshold and distance(new_line[2], new_line[3], x5, y5) < distance_threshold:
+                if abs(new_line[5] - angle3) < angle_threshold and distance(new_line[2], new_line[3], x5, y5) < distance_threshold:
                     new_line[2] = x6  
                     new_line[3] = y6
                     new_line[4] += length3  
@@ -96,25 +100,21 @@ def merge_segments(path, angle_threshold=np.deg2rad(20), distance_threshold=5):
                     i += 1  
                 else:
                     break
-            print('sequence upd')
+
             merged_path.append(new_line)
-            i += 1  
+
         else:
             merged_path.append(path[i])
-            i += 1 
-            if(i == len(path)-1): 
-                print('last path')
 
-                merged_path.append(path[i])
-
+        i += 1  
 
     return merged_path
 
-def merge_lines(features, angle_threshold=np.deg2rad(20), distance_threshold=5):
+def merge_segments(features, angle_threshold=np.deg2rad(30), distance_threshold=5):
     merged_features = []
 
     for path in features:
-        merged_features.extend(merge_segments(path, angle_threshold))
+        merged_features.extend(merge_lines(path, angle_threshold, distance_threshold))
 
     return merged_features
 
@@ -185,13 +185,13 @@ def save_lines_to_svg(lines, output_path):
 def normalize_drawings(svg_template, svg_user):
     template_features = extract_lines(svg_template)
     user_features = extract_lines(svg_user)
-    merged_features0 = merge_lines(user_features)
-    print('length first', len(merged_features0))
-    merged_features = merge_segments(merged_features0)
-    print('length second', len(merged_features))
+    merged_segments = merge_segments(user_features)
+    # print('length first', len(merged_segments))
+    # merged_segments1 = merge_lines(merged_segments)
+    # print('length second', len(merged_features1))
 
-    # merged_features = merge_segments(merged_features1)
-    # print('length third', len(merged_features))
+    merged_features = merge_lines(merged_segments)
+    # print('length second', len(merged_features))
 
     # print(merged_features)
 
