@@ -5,6 +5,7 @@ import svgpathtools
 from svgwrite import Drawing
 from sklearn.metrics.pairwise import cosine_similarity
 
+import convert_to_graph
 
 def extract_lines(svg_path):
     # Зчитуємо всі шляхи з SVG
@@ -28,6 +29,26 @@ def extract_lines(svg_path):
         extracted_lines.append(path_points)
     
     return extracted_lines  # Повертаємо масив координат
+
+def extract_example_lines(svg_path):
+    # Зчитуємо всі шляхи з SVG
+    paths, _ = svgpathtools.svg2paths(svg_path)
+    
+    extracted_lines = []
+
+    for path in paths:
+        # Для кожного шляху створюємо окремий масив точок
+        path_points = []
+        start_x, start_y = path.start.real, path.start.imag
+        end_x, end_y = path.end.real, path.end.imag
+
+        length = abs(path.length())  # Довжина відрізка
+        angle = np.arctan2(end_y - start_y, end_x - start_x)  # Кут нахилу
+
+		# Додаємо масив точок цього шляху до загального списку
+        extracted_lines.append([start_x, start_y, end_x, end_y, length, angle])
+    
+    return extracted_lines
 
 # def merge_lines(features, angle_threshold=np.deg2rad(20)):
 #     merged_features = []
@@ -196,9 +217,12 @@ def save_lines_to_svg(lines, output_path):
 
 def normalize_drawings(svg_template, svg_user):
 	# extract template features
-    template_features = extract_lines(svg_template)
+    template_features = extract_example_lines(svg_template)
+    print('template features ', template_features)
 	# extract user features
     user_features = extract_lines(svg_user)
+    # print('user features ', user_features)
+
 	# clean zero lines . they could mess up next step
     maximaze_features = clean_zero_lines(user_features)
 	# merge segments in one curve
@@ -207,6 +231,9 @@ def normalize_drawings(svg_template, svg_user):
     merged_lines = merge_lines(merged_features)
 	# clean small lines 
     result_features = clean_small_lines(merged_lines, 5.0)
+	
+    convert_to_graph.build_graph(result_features)
+    convert_to_graph.build_graph(template_features)
 
     save_lines_to_svg(result_features, './assets/normalizedOutput.svg')
     # print(merged_features)
