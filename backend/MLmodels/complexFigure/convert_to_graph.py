@@ -1,10 +1,11 @@
 import networkx as nx
+import json
 import numpy as np
 from scipy.spatial import KDTree
 # from scipy.spatial import KDTree
 import matplotlib.pyplot as plt  #for drawing
 
-import model
+# import model
 
 def visualize_graph(G):
     plt.figure(figsize=(8, 8))
@@ -30,7 +31,8 @@ def build_graph(lines, threshold=30):
 	# Використовуємо KDTree для кластеризації близьких точок
 	tree = KDTree(points)
 	clusters = {}
-	merged_points = []
+	# Оновлений merged_points, де координати є ключами, а індексами — значеннями
+	merged_points = {}
 
 	for i, pt in enumerate(points):
 		if i in clusters:
@@ -41,26 +43,43 @@ def build_graph(lines, threshold=30):
 		cluster_pts = [points[idx] for idx in indices]
 
 		# Обчислюємо середнє положення кластеру
-		avg_pt = tuple(np.mean(cluster_pts, axis=0).astype(int))
-		merged_points.append(avg_pt)
+		avg_pt = tuple(np.mean(cluster_pts, axis=0))
+		merged_points[avg_pt] = len(merged_points)  # Використовуємо довжину merged_points як індекс
 
 		# Позначаємо всі ці точки як частину кластеру
 		for idx in indices:
 			clusters[idx] = avg_pt
 
+	G.add_nodes_from(set(clusters.values()))  # Додаємо тільки унікальні вершини
+	G.add_edges_from(edges)
+
 	# Створюємо оновлений список ребер
 	# Цей вираз створює новий список ребер, але замість початкових точок використовує їхні згруповані версії
-	new_edges = [(clusters[points.index(start)], clusters[points.index(end)]) for start, end in edges]
-
+	new_edges = [(merged_points[clusters[points.index(start)]], merged_points[clusters[points.index(end)]]) for start, end in edges]
 	# Видаляємо дублікати ребер
-	edges = list(set(new_edges))
+	# edges = list(set(new_edges))
+	edges = new_edges
+
+	print('##########   D E B U G   #############')
+	print('cluster values', clusters.values())
+	print('edges', edges)
+	print('merged points', merged_points )
+	# Створюємо JSON-дані
+	json_data = {
+		"coords": [[float(pt[0]), float(pt[1])] for pt in merged_points],
+		"edges": edges
+	}
+	# Перетворюємо на JSON-рядок
+	json_str = json.dumps(json_data)
+	print('json string', json_str)
 
 	# Додаємо вершини
 	# Додаємо вершини та ребра у граф
-	G.add_nodes_from(set(clusters.values()))  # Додаємо тільки унікальні вершини
-	G.add_edges_from(new_edges)
+	# G.add_nodes_from(set(clusters.values()))  # Додаємо тільки унікальні вершини
+	# G.add_edges_from(new_edges)
 	# Дебаг: Виводимо вершини графа
-	print("Graph vershyny", G.nodes(data=True))
+	# print("Graph vershyny", G.nodes(data=True))
 	# visualize_graph(G)
+    # Тепер передаємо цей рядок як аргумент в іншу функцію
+	return json_str
 
-	model.predict_similarity("../backend/MLmodels/complexFigure/trainingData/graph5.json", "../backend/MLmodels/complexFigure/trainingData/graph6.json")

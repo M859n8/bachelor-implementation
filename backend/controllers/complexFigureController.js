@@ -23,7 +23,7 @@ const complexFigureController = {
 
 
 		 // Викликаємо Python скрипт, передаючи шлях до SVG файлу
-		const child = spawn('python3', ['../backend/MLmodels/complexFigure/normalize.py', './assets/originalDrawing.svg']);
+		const child = spawn('python3', ['../backend/MLmodels/complexFigure/main.py', './assets/originalDrawing.svg']);
 
 		 // Обробляємо вивід з Python скрипта
 		child.stdout.on('data', (data) => {

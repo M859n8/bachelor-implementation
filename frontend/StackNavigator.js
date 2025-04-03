@@ -13,10 +13,7 @@ import Balance from "./screens/tests/Balance";
 import BellsCancellation from "./screens/tests/BellsCancellation";
 import BlockDesign from "./screens/tests/BlockDesign";
 import ComplexFigure from "./screens/tests/ComplexFigure";
-import Drawing from "./screens/tests/Drawing";
-import FacialRecognition from "./screens/tests/FacialRecognition";
 import LineTracking from "./screens/tests/LineTracking";
-import Steadiness from "./screens/tests/Steadiness";
 import TransferringPennies from "./screens/tests/TransferringPennies";
 import VisualOrganization from "./screens/tests/VisualOrganization";
 
@@ -79,10 +76,7 @@ export default function StackNavigator() {
           <Stack.Screen name="BellsCancellation" component={BellsCancellation} />
           <Stack.Screen name="BlockDesign" component={BlockDesign} />
           <Stack.Screen name="ComplexFigure" component={ComplexFigure} />
-          <Stack.Screen name="Drawing" component={Drawing} />
-          <Stack.Screen name="FacialRecognition" component={FacialRecognition} />
           <Stack.Screen name="LineTracking" component={LineTracking} />
-          <Stack.Screen name="Steadiness" component={Steadiness} />
           <Stack.Screen name="TransferringPennies" component={TransferringPennies}  options={{ gestureEnabled: false }}/>
           <Stack.Screen name="VisualOrganization" component={VisualOrganization} />
         </Stack.Group>

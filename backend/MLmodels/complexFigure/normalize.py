@@ -5,7 +5,7 @@ import svgpathtools
 from svgwrite import Drawing
 from sklearn.metrics.pairwise import cosine_similarity
 
-import convert_to_graph
+# import convert_to_graph
 
 def extract_lines(svg_path):
     # Зчитуємо всі шляхи з SVG
@@ -50,47 +50,6 @@ def extract_example_lines(svg_path):
     
     return extracted_lines
 
-# def merge_lines(features, angle_threshold=np.deg2rad(20)):
-#     merged_features = []
-
-#     for path in features:
-#         merged_path = []
-#         i = 0  # Ітератор для сегментів в шляху
-
-#         while i < len(path) - 1:
-#             x1, y1, x2, y2, length1, angle1 = path[i]
-#             x3, y3, x4, y4, length2, angle2 = path[i + 1]
-
-#             # Якщо кут між лініями малий – об'єднуємо
-#             if abs(angle1 - angle2) < angle_threshold:
-#                 # Продовжуємо об'єднувати, поки кути схожі
-#                 new_line = [x1, y1, x4, y4, length1 + length2, (angle1 + angle2) / 2]
-
-#                 # Замість додавання окремого сегмента, з'єднуємо їх
-#                 while i < len(path) - 2:  # Перевірка для наступних сегментів
-#                     x3, y3, x4, y4, length3, angle3 = path[i + 2]
-                    
-#                     # Якщо кут між останнім сегментом і наступним також малий, продовжуємо об'єднання
-#                     if abs(angle2 - angle3) < angle_threshold:
-#                         new_line[2] = x4  # Оновлюємо кінцеву точку
-#                         new_line[3] = y4
-#                         new_line[4] += length3  # Додаємо довжину
-#                         new_line[5] = (new_line[5] + angle3) / 2  # Оновлюємо середній кут
-#                         i += 1  # Переходимо до наступного сегмента
-#                     else:
-#                         break
-
-#                 merged_features.append(new_line)
-#                 i += 1  # Перехід до наступного сегмента після об'єднання
-#             else:
-#                 merged_features.append(path[i])  # Якщо кути не схожі, додаємо поточний сегмент
-#                 i += 1  # Переходимо до наступного сегмента
-
-#         merged_features.append(merged_path)
-
-#     # print ('merged features ', merged_features)
-
-#     return merged_features
 
 def distance(x1, y1, x2, y2):
     return np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
@@ -182,22 +141,7 @@ def clean_zero_lines(features):
      
 	return cleaned_lines
 
-# def save_lines_to_svg(lines, output_path, width=500, height=500):
-#     # Створюємо новий SVG-документ
-#     dwg = Drawing(output_path, size=(f"{width}px", f"{height}px"))
-
-#     # Додаємо білий фон
-#     dwg.add(dwg.rect(insert=(0, 0), size=(width, height), fill='white'))
-
-#     # Додаємо лінії
-#     for line in lines:
-#         for segment in line:
-#             x1, y1, x2, y2, _, _ = segment
-#             dwg.add(dwg.line(start=(x1, y1), end=(x2, y2), stroke="black", stroke_width=2))
-
-#     # Зберігаємо файл
-#     dwg.save()
-
+#debug
 def save_lines_to_svg(lines, output_path):
     # Створюємо список шляхи (paths) для збереження
     paths = []
@@ -215,10 +159,10 @@ def save_lines_to_svg(lines, output_path):
 
 
 
-def normalize_drawings(svg_template, svg_user):
+def normalize_drawings(svg_user):
 	# extract template features
-    template_features = extract_example_lines(svg_template)
-    print('template features ', template_features)
+    # template_features = extract_example_lines(svg_template)
+    # print('template features ', template_features)
 	# extract user features
     user_features = extract_lines(svg_user)
     # print('user features ', user_features)
@@ -232,16 +176,10 @@ def normalize_drawings(svg_template, svg_user):
 	# clean small lines 
     result_features = clean_small_lines(merged_lines, 5.0)
 	
-    convert_to_graph.build_graph(result_features)
-    convert_to_graph.build_graph(template_features)
+    # convert_to_graph.build_graph(result_features)
+    # convert_to_graph.build_graph(template_features)
 
     save_lines_to_svg(result_features, './assets/normalizedOutput.svg')
     # print(merged_features)
-    return
+    return result_features
 
-if __name__ == "__main__":
-    template_path = './assets/example2.svg'
-    user_path = sys.argv[1]
-    
-    similarity = normalize_drawings(template_path, user_path)
-    # print(similarity)

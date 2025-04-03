@@ -11,7 +11,7 @@ import ResultsModal from '../../shared/resultsModal.js';
 
 const { width, height } = Dimensions.get('window');
 
-export default function ComplexFigure({route}) {
+export default function ComplexFigure() {
   	const [modalVisible, setModalVisible] = useState(true);
 	const [resultsModal, setResultsModal] = useState(false);
 	const [results, setResults] = useState({ finalScore: 100 });
