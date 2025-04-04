@@ -161,25 +161,25 @@ def save_lines_to_svg(lines, output_path):
 
 def normalize_drawings(svg_user):
 	# extract template features
-    # template_features = extract_example_lines(svg_template)
-    # print('template features ', template_features)
+	# template_features = extract_example_lines(svg_template)
+	# print('template features ', template_features)
 	# extract user features
-    user_features = extract_lines(svg_user)
-    # print('user features ', user_features)
+	user_features = extract_lines(svg_user)
+	# print('user features ', user_features)
 
 	# clean zero lines . they could mess up next step
-    maximaze_features = clean_zero_lines(user_features)
+	maximaze_features = clean_zero_lines(user_features)
 	# merge segments in one curve
-    merged_features = merge_segments(maximaze_features)
+	merged_features = merge_segments(maximaze_features)
 	# merge all lines
-    merged_lines = merge_lines(merged_features)
+	merged_lines = merge_lines(merged_features)
 	# clean small lines 
-    result_features = clean_small_lines(merged_lines, 5.0)
-	
-    # convert_to_graph.build_graph(result_features)
-    # convert_to_graph.build_graph(template_features)
+	result_features = clean_small_lines(merged_lines, 5.0)
 
-    save_lines_to_svg(result_features, './assets/normalizedOutput.svg')
-    # print(merged_features)
-    return result_features
+	# convert_to_graph.build_graph(result_features)
+	# convert_to_graph.build_graph(template_features)
+
+	save_lines_to_svg(result_features, './assets/normalizedOutput.svg')
+	# print(merged_features)
+	return result_features
 

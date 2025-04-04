@@ -4,6 +4,7 @@ import torch.optim as optim
 import json
 from torch_geometric.nn import GCNConv, global_mean_pool
 from torch_geometric.data import Data, Batch
+import os
 
 # Graph Matching Network (GMN)
 class GCN(nn.Module):
@@ -29,6 +30,7 @@ class GCN(nn.Module):
 		
 		# Прогноз схожості через повнозв'язний шар
 		out = self.fc(x)
+		# return out
 		return torch.sigmoid(out)  # Оскільки схожість від 0 до 1, застосуємо сигмоїду
 
 # Load graph data from JSON
@@ -39,11 +41,31 @@ def load_data_from_json(file_path, train=True):
 
 # Create graph with coordinates
 def create_graph(data_json, train):
-    coords = torch.tensor(data_json["coords"], dtype=torch.float)  # Вершини
-    edge_index = torch.tensor(data_json["edges"], dtype=torch.long).t().contiguous()  # Ребра
-    y = torch.tensor([data_json["similarity"]], dtype=torch.float) if train else None  # Цільове значення
-    
-    return Data(x=coords, edge_index=edge_index, y=y)
+	coords = torch.tensor(data_json["coords"], dtype=torch.float)  # Вершини
+
+	edges = data_json.get("edges", [])
+	# if len(edges) == 0:
+	#     # Якщо немає ребер, додаємо self-loop на кожну вершину
+	#     num_nodes = len(coords)
+	#     edge_index = torch.tensor([[i, i] for i in range(num_nodes)], dtype=torch.long).t().contiguous()
+	# else:
+	#     edge_index = torch.tensor(edges, dtype=torch.long).t().contiguous()
+
+
+	edge_index = torch.tensor(edges, dtype=torch.long).t().contiguous()
+
+
+
+	if train:
+		# y = torch.tensor([data_json["similarity"]], dtype=torch.float)
+		y = torch.tensor([data_json["similarity"]], dtype=torch.float).unsqueeze(0)
+	else:
+		y = None
+		print('given similarity ', data_json["similarity"]) #debug only
+
+
+	data = Data(x=coords, edge_index=edge_index, y=y)
+	return data
 
 def accuracy(pred_y, y, threshold=0.1):
     return ((pred_y - y).abs() < threshold).float().mean()  # Частка передбачень, які в межах 10%
@@ -52,18 +74,36 @@ def accuracy(pred_y, y, threshold=0.1):
 # Тренування запускається тільки якщо файл виконується напряму
 if __name__ == "__main__":
 	# Load training graphs and similarity labels
-	train_data = [
-		load_data_from_json("./trainingData/graph1.json"),
-		load_data_from_json("./trainingData/graph2.json"),
-		load_data_from_json("./trainingData/graph3.json"),
-		load_data_from_json("./trainingData/graph4.json"),
-		load_data_from_json("./trainingData/graph5.json"),
-		load_data_from_json("./trainingData/graph6.json"),
-	]
+	folder_path = "./trainingData/trainingDataGenerated"
+	# folder_path = "./trainingData"
+	# train_data = [
+	# 	load_data_from_json("./trainingData/graph1.json"),
+	# 	load_data_from_json("./trainingData/graph2.json"),
+	# 	load_data_from_json("./trainingData/graph3.json"),
+	# 	load_data_from_json("./trainingData/graph4.json"),
+	# 	load_data_from_json("./trainingData/graph5.json"),
+	# 	load_data_from_json("./trainingData/graph6.json"),
+	# ]
+
+
+	# Отримуємо всі файли, які закінчуються на .json
+	train_data_files = [f for f in os.listdir(folder_path) if f.endswith(".json")]
+
+	# Сортуємо за назвою, щоб порядок був передбачуваний (наприклад, graph1.json, graph2.json...)
+	# train_data_files.sort()
+
+	# Завантажуємо всі графи
+	train_data = [load_data_from_json(os.path.join(folder_path, filename)) for filename in train_data_files]
+
+	for i, data in enumerate(train_data):
+			print(f"{i}: {data.y}")
 
 	# Model setup
+	# input_dim - Кількість ознак (features) на кожній вершині графа.
+	# hidden_dim - Кількість нейронів у прихованому (hidden) шарі графової нейромережі.
 	model = GCN(input_dim=2, hidden_dim=16)
 	criterion = nn.MSELoss()
+	# criterion = nn.BCEWithLogitsLoss()
 	optimizer = optim.Adam(model.parameters(), lr=0.01)
 	# Training loop
 	for epoch in range(100):
@@ -74,13 +114,15 @@ if __name__ == "__main__":
 
 			# Прогнозування схожості
 			similarity_pred = model(data)
-
+			# print("Raw output:", similarity_pred)
 			# Обчислення втрат
 			loss = criterion(similarity_pred, data.y)
 			acc = accuracy(similarity_pred, data.y)
 			loss.backward()
-
+			# print(f"Before step: {model.fc.weight}")
 			optimizer.step()
+			# print(f"After step: {model.fc.weight}")
+
 
 			total_loss += loss.item()
 			# if epoch % 10 == 0: #bad debug
@@ -89,7 +131,12 @@ if __name__ == "__main__":
 			print(similarity_pred[:10], data.y[:10])
 			print(f'Epoch {epoch}, Loss: {total_loss / len(train_data)}, Accurancy: {acc*100:.2f}%')
 
+		# for i, data in enumerate(train_data):
+		# 	print(f"{i}: {data.y}")
+
     # Save trained model
 	torch.save(model.state_dict(), "gcn_model.pth")
+	# torch.save(model, "gcn_model.pth")
+
 
 # predict_similarity("./trainingData/graph5.json", "./trainingData/graph6.json")

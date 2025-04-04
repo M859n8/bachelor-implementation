@@ -1,22 +1,54 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000" style="background-color: white;">
   <!-- Прямокутник розкреслений на чотири менші прямокутники -->
-  <rect x="200" y="300" width="500" height="350" fill="none" stroke="black" stroke-width="2"/>
+  <line x1="200" y1="300" x2="700" y2="300" stroke="black" stroke-width="2"/> 
+  <line x1="200" y1="300" x2="200" y2="650" stroke="black" stroke-width="2"/>
+  <line x1="700" y1="300" x2="700" y2="650" stroke="black" stroke-width="2"/> 
+  <line x1="200" y1="650" x2="700" y2="650" stroke="black" stroke-width="2"/>
+	<!-- медіанні лінї -->
   <line x1="200" y1="475" x2="700" y2="475" stroke="black" stroke-width="2"/> 
   <line x1="450" y1="300" x2="450" y2="650" stroke="black" stroke-width="2"/>
-
 	<!-- діагональні лінї -->
   <line x1="200" y1="300" x2="700" y2="650" stroke="black" stroke-width="2"/>
   <line x1="200" y1="650" x2="700" y2="300" stroke="black" stroke-width="2"/>
   
-  
   <!-- Трикутник -->
-  <polygon points="700,300 900,475 700,650" fill="none" stroke="black" stroke-width="2"/>
-  <line x1="700" y1="475" x2="900" y2="475" stroke="black" stroke-width="2"/>
-
-  
+  <line x1="700" y1="300" x2="900" y2="475" stroke="black" stroke-width="2"/>
+  <line x1="700" y1="650" x2="900" y2="475" stroke="black" stroke-width="2"/>
   <!-- Лінія всередині трикутника -->
-  <line x1="800" y1="475" x2="850" y2="475" stroke="black" stroke-width="2"/>
+  <line x1="700" y1="475" x2="900" y2="475" stroke="black" stroke-width="2"/>
   <line x1="755" y1="350" x2="755" y2="600" stroke="black" stroke-width="2"/>
+
+	<!-- top triangle -->
+  <line x1="450" y1="200" x2="700" y2="300" stroke="black" stroke-width="2"/>
+  <line x1="450" y1="200" x2="450" y2="300" stroke="black" stroke-width="2"/>
+
+	<!-- left side rectangle -->
+  <line x1="200" y1="370" x2="300" y2="370" stroke="black" stroke-width="2"/>
+  <line x1="200" y1="580" x2="300" y2="580" stroke="black" stroke-width="2"/>
+  <line x1="300" y1="370" x2="300" y2="580" stroke="black" stroke-width="2"/>
+	<!-- left side rectangle diagonals -->
+  <line x1="200" y1="370" x2="300" y2="580" stroke="black" stroke-width="2"/>
+  <line x1="300" y1="370" x2="200" y2="580" stroke="black" stroke-width="2"/>
+	<!-- left botom rectangle with diagonal -->
+  <line x1="200" y1="650" x2="200" y2="750" stroke="black" stroke-width="2"/>
+  <line x1="300" y1="650" x2="300" y2="750" stroke="black" stroke-width="2"/>
+  <line x1="200" y1="750" x2="300" y2="750" stroke="black" stroke-width="2"/>
+  <line x1="200" y1="650" x2="300" y2="750" stroke="black" stroke-width="2"/>
+
+  <line x1="450" y1="700" x2="450" y2="650" stroke="black" stroke-width="2"/>
+  <line x1="300" y1="700" x2="650" y2="700" stroke="black" stroke-width="2"/>
+  <line x1="600" y1="675" x2="600" y2="725" stroke="black" stroke-width="2"/>
+
+
+
+
+
+
+
+
+
+
+
 
   
   <!-- Лінія, що проходить через вершину трикутника -->

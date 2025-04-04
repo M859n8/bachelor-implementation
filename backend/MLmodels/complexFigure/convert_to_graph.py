@@ -13,6 +13,9 @@ def visualize_graph(G):
     nx.draw(G, pos, with_labels=True, node_color='lightblue', edge_color='gray', node_size=300)
     plt.show()
  
+# def to_edge_index(edges):
+#     edge_index = list(zip(*[(u, v) for u, v in edges] + [(v, u) for u, v in edges]))
+#     return [list(edge_index[0]), list(edge_index[1])]
 
 def build_graph(lines, threshold=30):
 	G = nx.Graph()
@@ -26,7 +29,7 @@ def build_graph(lines, threshold=30):
 
 	# Витягуємо всі унікальні точки
 	points = list(set([pt for edge in edges for pt in edge]))
-	print('Points before cluster', points)
+	# print('Points before cluster', points)
 
 	# Використовуємо KDTree для кластеризації близьких точок
 	tree = KDTree(points)
@@ -56,18 +59,38 @@ def build_graph(lines, threshold=30):
 	# Створюємо оновлений список ребер
 	# Цей вираз створює новий список ребер, але замість початкових точок використовує їхні згруповані версії
 	new_edges = [(merged_points[clusters[points.index(start)]], merged_points[clusters[points.index(end)]]) for start, end in edges]
-	# Видаляємо дублікати ребер
-	# edges = list(set(new_edges))
-	edges = new_edges
+	# # Видаляємо дублікати ребер
+	# # edges = list(set(new_edges))
 
-	print('##########   D E B U G   #############')
-	print('cluster values', clusters.values())
-	print('edges', edges)
-	print('merged points', merged_points )
+	# print('	EDGES', new_edges)
+	normalized_edges = []
+	num_nodes = len(merged_points)
+	for u, v in new_edges:
+		normalized_edges.append((u, v))
+		normalized_edges.append((v, u))
+	# Додаємо петельні ребра (від вузла до самого себе)
+	loop_index = [(i, i) for i in range(num_nodes)]  # Створюємо петлі для кожного вузла
+	normalized_edges.extend(loop_index)  # Додаємо їх до списку ребер
+	# Окремо масиви "from" і "to"
+	# edge_index = [
+	# 	[start for start, end in normalized_edges],
+	# 	[end for start, end in normalized_edges]
+	# ]
+
+	# edge_index = to_edge_index(new_edges)
+
+	# print('##########   D E B U G   #############')
+	# print('cluster values', clusters.values())
+	# print('edges', edges)
+	# print('merged points', merged_points )
 	# Створюємо JSON-дані
 	json_data = {
-		"coords": [[float(pt[0]), float(pt[1])] for pt in merged_points],
-		"edges": edges
+		"coords": [[float(pt[0])/10.0, float(pt[1])/10.0] for pt in merged_points],
+		# "coords": [[float(pt[0]), float(pt[1])] for pt in merged_points],
+
+		# "edges": edge_index
+		"edges": normalized_edges
+
 	}
 	# Перетворюємо на JSON-рядок
 	json_str = json.dumps(json_data)
