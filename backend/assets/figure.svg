@@ -23,35 +23,46 @@
   <line x1="450" y1="200" x2="450" y2="300" stroke="black" stroke-width="2"/>
 
 	<!-- left side rectangle -->
-  <line x1="200" y1="370" x2="300" y2="370" stroke="black" stroke-width="2"/>
-  <line x1="200" y1="580" x2="300" y2="580" stroke="black" stroke-width="2"/>
-  <line x1="300" y1="370" x2="300" y2="580" stroke="black" stroke-width="2"/>
+  <line x1="200" y1="390" x2="330" y2="390" stroke="black" stroke-width="2"/>
+  <line x1="200" y1="560" x2="330" y2="560" stroke="black" stroke-width="2"/>
+  <line x1="330" y1="390" x2="330" y2="560" stroke="black" stroke-width="2"/>
+
+  <line x1="200" y1="375" x2="307" y2="375" stroke="black" stroke-width="2"/>
+
 	<!-- left side rectangle diagonals -->
-  <line x1="200" y1="370" x2="300" y2="580" stroke="black" stroke-width="2"/>
-  <line x1="300" y1="370" x2="200" y2="580" stroke="black" stroke-width="2"/>
+  <line x1="200" y1="390" x2="330" y2="560" stroke="black" stroke-width="2"/>
+  <line x1="330" y1="390" x2="200" y2="560" stroke="black" stroke-width="2"/>
 	<!-- left botom rectangle with diagonal -->
   <line x1="200" y1="650" x2="200" y2="750" stroke="black" stroke-width="2"/>
   <line x1="300" y1="650" x2="300" y2="750" stroke="black" stroke-width="2"/>
   <line x1="200" y1="750" x2="300" y2="750" stroke="black" stroke-width="2"/>
   <line x1="200" y1="650" x2="300" y2="750" stroke="black" stroke-width="2"/>
-
+	<!-- bottom line and cross -->
   <line x1="450" y1="700" x2="450" y2="650" stroke="black" stroke-width="2"/>
   <line x1="300" y1="700" x2="650" y2="700" stroke="black" stroke-width="2"/>
   <line x1="600" y1="675" x2="600" y2="725" stroke="black" stroke-width="2"/>
+	<!-- four paralel lines top left -->
+  <line x1="250" y1="335" x2="450" y2="335" stroke="black" stroke-width="2"/>
+  <line x1="300" y1="370" x2="450" y2="370" stroke="black" stroke-width="2"/>
+  <line x1="350" y1="405" x2="450" y2="405" stroke="black" stroke-width="2"/>
+  <line x1="400" y1="440" x2="450" y2="440" stroke="black" stroke-width="2"/>
+	<!-- cross top left  -->
+  <line x1="150" y1="335" x2="200" y2="335" stroke="black" stroke-width="2"/>
+  <line x1="150" y1="200" x2="150" y2="475" stroke="black" stroke-width="2"/>
+  <line x1="120" y1="225" x2="180" y2="225" stroke="black" stroke-width="2"/>
+	<!-- січна в правій верхній частині Прямокутника -->
+  <line x1="520" y1="300" x2="520" y2="425" stroke="black" stroke-width="2"/>
+	<!-- diamond -->
+  <line x1="900" y1="475" x2="925" y2="525" stroke="black" stroke-width="2"/>
+  <line x1="925" y1="525" x2="900" y2="575" stroke="black" stroke-width="2"/>
+  <line x1="900" y1="475" x2="875" y2="525" stroke="black" stroke-width="2"/>
+  <line x1="875" y1="525" x2="900" y2="575" stroke="black" stroke-width="2"/>
 
+  <line x1="635" y1="645" x2="675" y2="595" stroke="black" stroke-width="2"/>
+  <line x1="590" y1="615" x2="630" y2="565" stroke="black" stroke-width="2"/>
+  <line x1="550" y1="585" x2="590" y2="535" stroke="black" stroke-width="2"/>
+  <line x1="505" y1="555" x2="545" y2="505" stroke="black" stroke-width="2"/>
+  <line x1="465" y1="530" x2="505" y2="480" stroke="black" stroke-width="2"/>
 
-
-
-
-
-
-
-
-
-
-
-  
-  <!-- Лінія, що проходить через вершину трикутника -->
-  <!-- <line x1="700" y1="100" x2="300" y2="100" stroke="black" stroke-width="2"/> -->
   
 </svg>

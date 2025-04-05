@@ -94,7 +94,7 @@ def build_graph(lines, threshold=30):
 	}
 	# Перетворюємо на JSON-рядок
 	json_str = json.dumps(json_data)
-	print('json string', json_str)
+	# print('json string', json_str)
 
 	# Додаємо вершини
 	# Додаємо вершини та ребра у граф

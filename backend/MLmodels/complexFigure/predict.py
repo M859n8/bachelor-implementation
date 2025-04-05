@@ -10,7 +10,7 @@ def load_data_json_string(json_string):
 
 
 def predict_similarity(graph_json):
-	model = GCN(input_dim=2, hidden_dim=16)  # Ініціалізуємо архітектуру
+	model = GCN(input_dim=2, hidden_dim=36)  # Ініціалізуємо архітектуру
 	model.load_state_dict(torch.load("gcn_model.pth"))  # Завантажуємо збережені ваги
 	model.eval()  # Переводимо в режим передбачення
 
@@ -27,14 +27,13 @@ def predict_similarity(graph_json):
 	return similarity
 
 def predict_similarity_test(num=1):
-	model = GCN(input_dim=2, hidden_dim=16)  # Ініціалізуємо архітектуру
+	model = GCN(input_dim=2, hidden_dim=36)  # Ініціалізуємо архітектуру
 	model.load_state_dict(torch.load("gcn_model.pth"))  # Завантажуємо збережені ваги
 	model.eval()  # Переводимо в режим передбачення
 
 	# graph = load_data_from_json(graph_json)
 	graph = load_data_from_json(f"./trainingData/generated/graph{num}.json", False)
 	# graph = load_data_from_json(f"./trainingData/graph{num}.json", False)
-
 
 	with torch.no_grad():
 		similarity = model(graph).item()

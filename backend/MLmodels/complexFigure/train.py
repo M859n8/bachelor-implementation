@@ -5,6 +5,7 @@ import json
 from torch_geometric.nn import GCNConv, global_mean_pool
 from torch_geometric.data import Data, Batch
 import os
+import random
 
 # Graph Matching Network (GMN)
 class GCN(nn.Module):
@@ -13,6 +14,7 @@ class GCN(nn.Module):
 		self.conv1 = GCNConv(input_dim, hidden_dim) #Це графові згорткові шари (Graph Convolutional Network, GCN), 
 													#які обробляють графові структури.
 		self.conv2 = GCNConv(hidden_dim, hidden_dim)
+		self.conv3 = GCNConv(hidden_dim, hidden_dim)
 		self.fc = nn.Linear(hidden_dim, 1) # Повнозв’язний шар, 
 							# що зменшує розмірність прихованого представлення графів 
 							# до одного числа (ймовірність схожості).
@@ -24,6 +26,8 @@ class GCN(nn.Module):
 		# Проходимо через два GCN шари
 		x = self.conv1(x, edge_index).relu()
 		x = self.conv2(x, edge_index).relu()
+		x = self.conv3(x, edge_index).relu()
+
 		
 		# Глобальний пулінг
 		x = global_mean_pool(x, batch)
@@ -56,12 +60,15 @@ def create_graph(data_json, train):
 
 
 
-	if train:
-		# y = torch.tensor([data_json["similarity"]], dtype=torch.float)
-		y = torch.tensor([data_json["similarity"]], dtype=torch.float).unsqueeze(0)
-	else:
-		y = None
-		print('given similarity ', data_json["similarity"]) #debug only
+	if not train:
+		print('given similarity ', data_json["similarity"])
+	# 	# y = torch.tensor([data_json["similarity"]], dtype=torch.float)
+	# 	y = torch.tensor([data_json["similarity"]], dtype=torch.float).unsqueeze(0)
+	# else:
+	# 	y = None
+	# 	print('given similarity ', data_json["similarity"]) #debug only
+	y = torch.tensor([data_json["similarity"]], dtype=torch.float).unsqueeze(0)
+
 
 
 	data = Data(x=coords, edge_index=edge_index, y=y)
@@ -89,8 +96,8 @@ if __name__ == "__main__":
 	# Отримуємо всі файли, які закінчуються на .json
 	train_data_files = [f for f in os.listdir(folder_path) if f.endswith(".json")]
 
-	# Сортуємо за назвою, щоб порядок був передбачуваний (наприклад, graph1.json, graph2.json...)
-	# train_data_files.sort()
+	# Перемішуємо список файлів
+	random.shuffle(train_data_files)
 
 	# Завантажуємо всі графи
 	train_data = [load_data_from_json(os.path.join(folder_path, filename)) for filename in train_data_files]
@@ -101,12 +108,12 @@ if __name__ == "__main__":
 	# Model setup
 	# input_dim - Кількість ознак (features) на кожній вершині графа.
 	# hidden_dim - Кількість нейронів у прихованому (hidden) шарі графової нейромережі.
-	model = GCN(input_dim=2, hidden_dim=16)
+	model = GCN(input_dim=2, hidden_dim=36)
 	criterion = nn.MSELoss()
 	# criterion = nn.BCEWithLogitsLoss()
-	optimizer = optim.Adam(model.parameters(), lr=0.01)
+	optimizer = optim.Adam(model.parameters(), lr=0.001) # останній аргумент це швидкість навчання. зменшуй коли великі дані на вході 
 	# Training loop
-	for epoch in range(100):
+	for epoch in range(200):
 		model.train()
 		total_loss = 0
 		for data in train_data:
@@ -127,8 +134,11 @@ if __name__ == "__main__":
 			total_loss += loss.item()
 			# if epoch % 10 == 0: #bad debug
 			# 	print(similarity_pred[:10], data.y[:10])
+			# print("data.y:", data.y)  # має бути tensor([0.0]) або tensor([1.0])
+			# print("similarity_pred:", similarity_pred)  # типу tensor([[0.23]])
+
 		if epoch % 10 == 0:
-			print(similarity_pred[:10], data.y[:10])
+			# print(similarity_pred, data.y)
 			print(f'Epoch {epoch}, Loss: {total_loss / len(train_data)}, Accurancy: {acc*100:.2f}%')
 
 		# for i, data in enumerate(train_data):
