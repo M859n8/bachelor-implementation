@@ -8,7 +8,7 @@ import convert_to_graph
 
 
 def generate_graphs(template_graph, max_simularity, min_simularity,offset, num_graphs=5 ):
-	output_dir="trainingData/trainingDataGenerated"
+	output_dir="trainingData/generated"
 	os.makedirs(output_dir, exist_ok=True)
 
 	# Базовий шаблонний граф (можеш змінити під свої потреби)
@@ -67,7 +67,7 @@ if __name__ == "__main__":
 	for i in range(max_iterations):
 		current_min = max_sim - (i + 1) * step_percent
 		current_max = current_min + step_percent
-		print('range', current_min, current_max)
+		print('range', current_min, current_max, 'current i ', i)
 		if current_min < min_sim:
 			break  # припиняємо, якщо вийшли за межі допустимої схожості
 

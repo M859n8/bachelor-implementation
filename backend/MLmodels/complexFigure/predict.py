@@ -32,7 +32,7 @@ def predict_similarity_test(num=1):
 	model.eval()  # Переводимо в режим передбачення
 
 	# graph = load_data_from_json(graph_json)
-	graph = load_data_from_json(f"./trainingData/trainingDataGenerated/graph{num}.json", False)
+	graph = load_data_from_json(f"./trainingData/generated/graph{num}.json", False)
 	# graph = load_data_from_json(f"./trainingData/graph{num}.json", False)
 
 

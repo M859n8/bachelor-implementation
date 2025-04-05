@@ -74,7 +74,7 @@ def accuracy(pred_y, y, threshold=0.1):
 # Тренування запускається тільки якщо файл виконується напряму
 if __name__ == "__main__":
 	# Load training graphs and similarity labels
-	folder_path = "./trainingData/trainingDataGenerated"
+	folder_path = "./trainingData/generated"
 	# folder_path = "./trainingData"
 	# train_data = [
 	# 	load_data_from_json("./trainingData/graph1.json"),
@@ -95,8 +95,8 @@ if __name__ == "__main__":
 	# Завантажуємо всі графи
 	train_data = [load_data_from_json(os.path.join(folder_path, filename)) for filename in train_data_files]
 
-	for i, data in enumerate(train_data):
-			print(f"{i}: {data.y}")
+	# for i, data in enumerate(train_data):
+	# 		print(f"{i}: {data.y}")
 
 	# Model setup
 	# input_dim - Кількість ознак (features) на кожній вершині графа.
