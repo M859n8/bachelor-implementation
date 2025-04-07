@@ -4,26 +4,34 @@ import { useState, useRef, useEffect } from 'react';
 import Animated from 'react-native-reanimated';
 import {
 	useSharedValue,useAnimatedStyle,withSpring,
-	withTiming,runOnJS,useAnimatedRef, measure, runOnUI
+	withTiming,runOnJS,useAnimatedRef, measure, runOnUI, getRelativeCoords 
   } from 'react-native-reanimated';
 import { StyleSheet, Dimensions, View } from 'react-native';
 
 
-export default function Block({ blockId, gridPosition }) {
+export default function Block({ blockId, gridPosition, refCallback, setBlocks }) {
 	const isPressed = useSharedValue(false);
 	const offset = useSharedValue({ x: 0, y: 0 });
 	const color = useSharedValue('red');
-	const colors = ['white', 'mixed', 'red'];
+	const colors = ['white', 'mixed1', 'red'];
 	const colorIndex = useSharedValue(0);
 	const rotation = useSharedValue(0);
 
 	// const blockRef = useRef(null);
-	const blockRef = useAnimatedRef();
+	// const blockRef = useAnimatedRef();
 
 	const blockLayout = useSharedValue({ x: 0, y: 0 });
+	const localRef = useRef(null);
+
+	useEffect(() => {
+		if (refCallback) {
+			refCallback(localRef.current);
+		}
+	}, [refCallback]);
 
 
 	const animatedStyles = useAnimatedStyle(() => {
+	
 		return {
 		transform: [
 			{ translateX: offset.value.x },
@@ -31,60 +39,62 @@ export default function Block({ blockId, gridPosition }) {
 			{ rotate: `${rotation.value}deg` },
 			{ scale: withSpring(isPressed.value ? 1.01 : 1) },
 		],
-		backgroundColor: colors[colorIndex.value] === 'mixed' ? 'red' : colors[colorIndex.value],
+		backgroundColor: colors[colorIndex.value] === 'mixed1' ? 'red' : colors[colorIndex.value],
+		// backgroundColor: colors[colorIndex.value] === 'mixed1' ? 'red' : colors[colorIndex.value] === 'mixed2' ? 'white' : colors[colorIndex.value],
+
 		};
   	});
 	const innerAnimatedStyles = useAnimatedStyle(() => {
 		// console.log('Current color index:', colorIndex.value);  // Перевіряємо поточне значення індексу
    		// console.log('Color at this index:', colors[colorIndex.value]);
 		return {
-			backgroundColor: colors[colorIndex.value] === 'red' ? 'red' : 'white', // Змінюється тільки коли квадрат червоний
-			
+			backgroundColor: colors[colorIndex.value] === 'red'  ? 'red' : 'white', // Змінюється тільки коли квадрат червоний
+			// backgroundColor: (colors[colorIndex.value] === 'red' || colors[colorIndex.value] === 'mixed2') ? 'red' : 'white',
+
 		};
 
 	});
-	const identifyCell = (blockPosition) => {
-		// console.log('identify cell')
-		const relativeX = blockPosition.x + blockLayout.value.x - gridPosition.value.x;
-		const relativeY = blockPosition.y + blockLayout.value.y - gridPosition.value.y;
 
-		console.log('grid position ', gridPosition.value, 'current block position', blockPosition)
-		console.log(`relative position {${relativeX},${relativeY}}`)
-		const screenWidth = Dimensions.get("window").width;
-
-		const gridWidth = screenWidth * 0.45; // або скільки % займає твоя сітка
-		const cellSize = gridWidth / 3;
-
-		const col = relativeX / cellSize;
-		const row = relativeY / cellSize;
-		console.log('row is ', row, ' column is', col)
-		return { row, col };
-
-
-	}
-	const measureBlock = () => {
-		blockRef.current?.measure((fx, fy, width, height, px, py) => {
-			console.log('Absolute X:', px, 'Y:', py);
-			blockLayout.value = { x : px, y : py };
-
-			// identifyCell({ x: px, y: py }); // викликаємо функцію визначення клітинки
+	const updateBlockColor = (newColor) => {
+		setBlocks((prevBlocks) => {
+			const updatedBlock = {
+				...prevBlocks[blockId],
+				color: newColor,
+			};
+			return [
+				...prevBlocks.slice(0, blockId),
+				updatedBlock,
+				...prevBlocks.slice(blockId + 1)
+			];
 		});
 	};
-	// useEffect(() => {
-	// 	console.log('Absolute X:', px, 'Y:', py);
-		
-	// }, [blockRef]); 
+	const updateBlockRotation = (newRotation) => {
+		setBlocks((prevBlocks) => {
+			const updatedBlock = {
+				...prevBlocks[blockId],
+				rotation: newRotation,
+			};
+			return [
+				...prevBlocks.slice(0, blockId),
+				updatedBlock,
+				...prevBlocks.slice(blockId + 1)
+			];
+		});
+	};
+	
 
 	const tapGesture = Gesture.Tap()
 		.onEnd(() => {
 			colorIndex.value = (colorIndex.value + 1) % colors.length;
 			// console.log('Updated colorIndex:', colorIndex.value);
-
+			runOnJS(updateBlockColor)(colors[colorIndex.value]);
 		});
 	const doubleTapGesture = Gesture.Tap()
-		.numberOfTaps(2) // Дабл-тап
+		.numberOfTaps(2)
 		.onEnd(() => {
-			rotation.value = withTiming(rotation.value + 45, { duration: 200 }); // Обертання на 45°
+			const newRotation = rotation.value + 45;
+			rotation.value = withTiming(newRotation, { duration: 100 });
+			runOnJS(updateBlockRotation)(newRotation);
 		});
 
 	const start = useSharedValue({ x: 0, y: 0 });
@@ -100,26 +110,13 @@ export default function Block({ blockId, gridPosition }) {
 				y: e.translationY + start.value.y,
 			};
 		})
-		.onEnd(() => {
+		.onEnd((e) => {
 			start.value = {
 				x: offset.value.x,
 				y: offset.value.y,
 			};
 			isPressed.value = false;
-			console.log('zero')
-			// runOnJS(measureBlock)();
-			runOnUI(() => {
-				const measured = measure(blockRef);
-				if (measured) {
-					const { x, y, width, height, pageX, pageY } = measured;
-					console.log('Absolute X:', pageX, 'Y:', pageY, 'and in elem coords ', x, 'and', y);
-					
-					// runOnJS(identifyCell)({ x: pageX, y: pageY });
-				}
-			})();
-			// runOnJS(identifyCell)(start.value);
-			// start.value = {x:-115, y:-342}
-			// runOnJS(why)();
+		
 
 		})
 		// .onFinalize(() => {
@@ -128,20 +125,24 @@ export default function Block({ blockId, gridPosition }) {
 
 		// });
 	
-
-
 	// allows both gestures to work together
-	const gesture = Gesture.Simultaneous(tapGesture, panGesture, doubleTapGesture);
+	// Дабл-тап має вищий пріоритет
+	const tapGestures = Gesture.Exclusive(doubleTapGesture, tapGesture);
+
+	const gesture = Gesture.Simultaneous(tapGestures, panGesture);
+
 	return (
-		// <View ref={blockRef}>
+		<View >
 
 		<GestureDetector gesture={gesture}>
-			<Animated.View  ref={blockRef} style={[styles.square, animatedStyles]} >
+			<Animated.View  ref={localRef} style={[styles.square, animatedStyles]} >
 				<Animated.View style={[styles.whiteHalf, innerAnimatedStyles]} />
 			</Animated.View>
 			
 		</GestureDetector>
-		// </View>
+		<View style={styles.dot}/>
+
+		</View>
 
 	);
 	}
@@ -159,6 +160,9 @@ const styles = StyleSheet.create({
 		backgroundColor: 'white',
 		alignSelf: 'center',
 		position: 'absolute', //позиція абсолют, щоб болк рухався фактично, а не тільки в леєрі уі
+		zIndex: 1, 
+		top:0,
+		left: 0,
 		overflow: 'hidden'
 	},
 	whiteHalf: {
@@ -171,4 +175,14 @@ const styles = StyleSheet.create({
 		top: '25%',
 		left: '25%',
 	},
+	dot: {
+		width: 40,
+		height: 40,
+		borderRadius: 20,
+		backgroundColor: 'green',
+		position: 'absolute',
+		top: 220,
+		left: 399,
+
+	  }
 });

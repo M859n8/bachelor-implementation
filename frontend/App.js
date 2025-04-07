@@ -8,6 +8,7 @@ import StackNavigator from "./StackNavigator";
 function App() {
     return (
         // <GestureHandlerRootView style={{ flex: 1 }}>
+		
             <NavigationContainer>
                 <StackNavigator />
             </NavigationContainer>
