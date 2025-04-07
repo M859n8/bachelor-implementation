@@ -8,14 +8,7 @@ import convert_to_graph
 
 
 def generate_graphs(output_dir, template_graph, max_simularity, min_simularity,offset, num_graphs=20):
-	
 
-	# Базовий шаблонний граф (можеш змінити під свої потреби)
-	# template_graph = {
-	# 	"coords": [[450.0, 650.0], [200.0, 300.0], [700.0, 300.0], [200.0, 650.0], [700.0, 650.0], [755.0, 350.0], [755.0, 600.0], [900.0, 475.0], [200.0, 475.0], [700.0, 475.0], [450.0, 300.0]], 
-	# 	"edges": [[1, 2], [1, 3], [2, 4], [3, 4], [8, 9], [10, 0], [1, 4], [3, 2], [2, 7], [4, 7], [2, 4], [9, 7], [5, 6]],
-	# 	"similarity": 1.0
-	# }
 	template_graph = json.loads(template_graph) #transform string into dict
 
 	for i in range(num_graphs):
@@ -61,8 +54,8 @@ if __name__ == "__main__":
 	# print('length of the features', len(template_features))
 	total_lines = len(template_features)
 	print('total lines', total_lines)
-	step_lines = 4 # Скільки ліній видаляємо на кожному кроці
-	step_percent = 9
+	step_lines = 4 #на кожному кроці видаляємо по 4 лінії, бо так найбільш логічно видаляються фігури 
+	step_percent = 9 # 44/4= 11 , 100%/11 = 9
 
 	max_sim = 100
 	min_sim = 1
