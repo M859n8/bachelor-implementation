@@ -58,9 +58,38 @@ export default function BlockDesign() {
 				console.log(`Блок ${index} — Рядок ${row}, Колонка ${col}`);
 			});
 		});
+		sendToBackend()
 		// });
 	};
-	
+	async function sendToBackend() {
+		console.log('got to send to backend');
+		const requestBody ={
+            blocksGrid : blocks,
+            additionalData : additionalData,
+        }
+
+        const token = await AsyncStorage.getItem('authToken');
+		// try {
+        //     console.log("phase 1");
+        //     const response = await fetch('http://192.168.0.12:5000/api/result/block/saveResponse', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //             'Authorization': `Bearer ${token}`
+
+        //         },
+        //         body: JSON.stringify(requestBody),  //перетворює масив або об'єкт на JSON-рядок
+        //     })
+        //     if (response.ok) {
+        //         Alert.alert('Success', 'Your answers sent!');
+        //         setGotResults(true);
+        //     }
+        // } catch (error) {
+        // 	Alert.alert('Failure', 'Can not send answers');
+
+        // }
+		
+	}
 
 
   return (
@@ -99,7 +128,6 @@ export default function BlockDesign() {
 		>
 			<Grid/>
 		</View>
-		<View style={styles.dot}/>
 
 	
 			

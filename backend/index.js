@@ -14,7 +14,7 @@ import testRoutes from './routes/testRoutes.js';
 
 app.use(cors());
 // app.use(cors({
-//     origin: 'http://localhost:8081', // Дозволяємо тільки запити від React Native Metro Bundler
+//     origin: 'http://192.168.0.12:8081', // Дозволяємо тільки запити від React Native Metro Bundler
 //     methods: 'GET,POST,PUT,DELETE', //дозволені методи 
 //     allowedHeaders: 'Content-Type,Authorization' //дозволені заголовки
 //   }));

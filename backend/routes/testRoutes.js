@@ -3,6 +3,8 @@ import visualorganizationController from "../controllers/visualorganizationContr
 import transferringPenniesController from "../controllers/transferringPenniesController.js";
 import bellsCancellationController from "../controllers/bellsCancellationController.js";
 import complexFigureController from "../controllers/complexFigureController.js";
+import blockDesignController from "../controllers/blockDesignController.js";
+
 
 
 import authMiddleware from "../controllers/authMiddleware.js";
@@ -20,6 +22,9 @@ router.post('/bels/saveResponse',authMiddleware, bellsCancellationController.sav
 
 
 router.post('/figure/saveResponse',authMiddleware, complexFigureController.saveResponse);
+
+router.post('/block/saveResponse',authMiddleware, blockDesignController.saveResponse);
+
 
 
 
