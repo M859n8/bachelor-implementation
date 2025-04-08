@@ -9,7 +9,7 @@ import {
 import { StyleSheet, Dimensions, View } from 'react-native';
 
 
-export default function Block({ blockId, gridPosition, refCallback, setBlocks }) {
+export default function Block({ blockId, gridPosition, refCallback, setBlocks, updateBlockValue }) {
 	const isPressed = useSharedValue(false);
 	const offset = useSharedValue({ x: 0, y: 0 });
 	const color = useSharedValue('red');
@@ -68,6 +68,19 @@ export default function Block({ blockId, gridPosition, refCallback, setBlocks })
 			];
 		});
 	};
+	// const updateBlockValue = (newValue, type) => {
+	// 	setBlocks((prevBlocks) => {
+	// 		const updatedBlock = {
+	// 			...prevBlocks[blockId],
+	// 			[type]: newValue,
+	// 		};
+	// 		return [
+	// 			...prevBlocks.slice(0, blockId),
+	// 			updatedBlock,
+	// 			...prevBlocks.slice(blockId + 1)
+	// 		];
+	// 	});
+	// };
 	const updateBlockRotation = (newRotation) => {
 		setBlocks((prevBlocks) => {
 			const updatedBlock = {
@@ -87,14 +100,19 @@ export default function Block({ blockId, gridPosition, refCallback, setBlocks })
 		.onEnd(() => {
 			colorIndex.value = (colorIndex.value + 1) % colors.length;
 			// console.log('Updated colorIndex:', colorIndex.value);
-			runOnJS(updateBlockColor)(colors[colorIndex.value]);
+			// runOnJS(updateBlockColor)(colors[colorIndex.value]);
+			runOnJS(updateBlockValue)(colors[colorIndex.value], 'color', blockId);
+
+			
 		});
 	const doubleTapGesture = Gesture.Tap()
 		.numberOfTaps(2)
 		.onEnd(() => {
 			const newRotation = rotation.value + 45;
 			rotation.value = withTiming(newRotation, { duration: 100 });
-			runOnJS(updateBlockRotation)(newRotation);
+			// runOnJS(updateBlockRotation)(newRotation);
+			runOnJS(updateBlockValue)(newRotation, 'rotation', blockId);
+
 		});
 
 	const start = useSharedValue({ x: 0, y: 0 });

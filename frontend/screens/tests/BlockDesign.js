@@ -1,8 +1,10 @@
 import React from 'react';
 import { StyleSheet, Text, View, Dimensions, Button,  TouchableOpacity, Image, Alert } from 'react-native';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {useSharedValue, useAnimatedRef} from 'react-native-reanimated';
 import { Gesture, GestureHandlerRootView, GestureDetector } from 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import Block from '../../shared/Block.js';
 import Grid from '../../shared/Grid.js';
 
@@ -25,6 +27,22 @@ export default function BlockDesign() {
 	]);
 	const gridLayout = useSharedValue({ x: 0, y: 0 });
 	const blockRefs= useRef([]); // пустий масив refs
+	const [sendingData, setSendingData] = useState(false);
+
+	const updateBlockValue = (newValue, type, blockId) => {
+		setBlocks((prevBlocks) => {
+			const updatedBlock = {
+				...prevBlocks[blockId],
+				[type]: newValue,
+			};
+			return [
+				...prevBlocks.slice(0, blockId),
+				updatedBlock,
+				...prevBlocks.slice(blockId + 1)
+			];
+		});
+		console.log('updated');
+	};
 
 	// const blockLayout = useSharedValue([{ x: 0, y: 0 }, { x: 0, y: 0 } , { x: 0, y: 0 }, { x: 0, y: 0 } ,]);
 	const checkBlocks = () => {
@@ -36,7 +54,9 @@ export default function BlockDesign() {
 		// 		width: gWidth,
 		// 		height: gHeight,
 		// 	};
-	console.log(blocks)
+		const updates = []; // Сюди збиратимемо оновлення
+
+    	let measuredCount = 0;
 			// Для кожного блоку зробити .measure
 		blockRefs.current.forEach((ref, index) => {
 			ref?.measure((bx, by, bWidth, bHeight, bPageX, bPageY) => {
@@ -56,38 +76,78 @@ export default function BlockDesign() {
 				const row = Math.round(relativeY / cellSize);
 
 				console.log(`Блок ${index} — Рядок ${row}, Колонка ${col}`);
+				updateBlockValue(col, 'col', index)
+				updateBlockValue(row, 'row', index)
+				updates[index] = { row, col };
+
+            	measuredCount++;
+				 // Коли всі блоки виміряні — оновлюємо state
+				//  if (measuredCount === blockRefs.current.length) {
+				// 	// Коли всі блоки виміряні
+				// 	setBlocks((prev) =>
+				// 		prev.map((block, i) => ({
+				// 			...block,
+				// 			row: updates[i]?.row ?? block.row,
+				// 			col: updates[i]?.col ?? block.col,
+				// 		}))
+				// 	);
+				// }
+
 			});
+			// setBlocks((prevBlocks) =>
+			// 	prevBlocks.map((block, i) => ({
+			// 		...block,
+			// 		...updates[i],
+			// 	}))
+			// );
 		});
-		sendToBackend()
+		updateBlockValue('red', 'color', 0)
+		setSendingData(true)
 		// });
 	};
-	async function sendToBackend() {
+	useEffect(() => {
+		console.log('gggegelgjegj')
+		console.log(blocks)
+		if(sendingData){
+			sendDataToBackend()
+			setSendingData(false)
+		}
+		
+	}, [blocks]); 
+
+	
+    const sendDataToBackend = async () => {
 		console.log('got to send to backend');
 		const requestBody ={
             blocksGrid : blocks,
-            additionalData : additionalData,
+            additionalData : blocks,
         }
+		console.log('filled data for  backend');
 
         const token = await AsyncStorage.getItem('authToken');
-		// try {
-        //     console.log("phase 1");
-        //     const response = await fetch('http://192.168.0.12:5000/api/result/block/saveResponse', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //             'Authorization': `Bearer ${token}`
+		// console.log(blocks);
 
-        //         },
-        //         body: JSON.stringify(requestBody),  //перетворює масив або об'єкт на JSON-рядок
-        //     })
-        //     if (response.ok) {
-        //         Alert.alert('Success', 'Your answers sent!');
-        //         setGotResults(true);
-        //     }
-        // } catch (error) {
-        // 	Alert.alert('Failure', 'Can not send answers');
+		try {
+            console.log("phase 1");
+            const response = await fetch('http://192.168.0.12:5000/api/result/block/saveResponse', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
 
-        // }
+                },
+                body: JSON.stringify(requestBody),  //перетворює масив або об'єкт на JSON-рядок
+            })
+            if (response.ok) {
+                Alert.alert('Success', 'Your answers sent!');
+                setGotResults(true);
+            }
+        } catch (error) {
+        	Alert.alert('Failure', 'Can not send answers');
+
+        }
+		console.log(blocks);
+
 		
 	}
 
@@ -112,7 +172,7 @@ export default function BlockDesign() {
 					gridPosition={gridLayout} 
 					refCallback={(ref) => (blockRefs.current[index] = ref)}
 					setBlocks={setBlocks}
-					
+					updateBlockValue={updateBlockValue}
 				/>
 
 		))}
