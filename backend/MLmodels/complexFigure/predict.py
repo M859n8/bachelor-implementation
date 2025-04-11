@@ -43,5 +43,5 @@ def predict_similarity_test(num=1):
 	return similarity
 
 # дебаг
-if sys.argv[1]:
-	predict_similarity_test(int(sys.argv[1]))
+# if sys.argv[1]:
+# 	predict_similarity_test(int(sys.argv[1]))

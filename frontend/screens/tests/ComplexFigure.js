@@ -1,11 +1,15 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Modal, Button,  TouchableOpacity, Image, Alert } from 'react-native';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Gesture, GestureHandlerRootView, GestureDetector } from 'react-native-gesture-handler';
 import Svg, { Path } from 'react-native-svg';
 import { Dimensions } from "react-native";
 import Icon from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+	useSharedValue,useAnimatedStyle,withSpring,
+	withTiming,runOnJS,useAnimatedRef, measure, runOnUI, getRelativeCoords 
+  } from 'react-native-reanimated';
 import ResultsModal from '../../shared/resultsModal.js';
 
 
@@ -20,6 +24,9 @@ export default function ComplexFigure() {
 	const [pathData, setPathData] = useState('');
 	const [newLine, setNewLine] = useState(true);
 	const [lines, setLines] = useState([]); // Масив для зберігання ліній
+	const currentPoints = useSharedValue([]);
+	const recordedLine = useRef([]);
+
 	// const [eraser, setEraser ] = useState(false);
 	const [tool, setTool] = useState('pencil'); // 'pencil' або 'eraser'
 
@@ -28,19 +35,30 @@ export default function ComplexFigure() {
 	const paintGesture = Gesture.Pan()
 		.onBegin((event) => {
 			const { x , y } = event;
-			setLines((prevLines) => [
-			...prevLines,
-			[{ x: x, y: y }] // Початкова точка для нової лінії
-			]);
+			// setLines((prevLines) => [
+			// ...prevLines,
+			// [{ x: x, y: y }] // Початкова точка для нової лінії
+			// ]);
+			
 		})
 		.onUpdate((event) => {
 			const { x , y } = event;
-			setLines((prevLines) => {
-				const updatedLines = [...prevLines];
-				const lastLine = updatedLines[updatedLines.length - 1];
-				lastLine.push({ x: x, y: y }); // Додаємо нову точку до останньої лінії
-				return updatedLines;
-			});
+			// setLines((prevLines) => {
+			// 	const updatedLines = [...prevLines];
+			// 	const lastLine = updatedLines[updatedLines.length - 1];
+			// 	lastLine.push({ x: x, y: y }); // Додаємо нову точку до останньої лінії
+			// 	return updatedLines;
+			// });
+			// Для відображення
+			currentPoints.value = [...currentPoints.value, { x, y }];
+
+			// Для збереження
+			recordedLine.current.push({ x, y });
+		})
+		.onEnd(() => {
+			// setLines((prev) => [...prev, recordedLine.current]);
+			recordedLine.current = []; // очищаємо
+			currentPoints.value = [];  // очищаємо sharedValue для наступного малювання
 		});
 	
 		// console.log('Array', pathData);
