@@ -1,7 +1,9 @@
+import 'react-native-gesture-handler';
+import { Gesture, GestureHandlerRootView, GestureDetector } from 'react-native-gesture-handler';
+
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Modal, Button,  TouchableOpacity, Image, Alert } from 'react-native';
-import { useState, useRef } from 'react';
-import { Gesture, GestureHandlerRootView, GestureDetector } from 'react-native-gesture-handler';
+import { useState, useRef, useEffect} from 'react';
 import Svg, { Path } from 'react-native-svg';
 import { Dimensions } from "react-native";
 import Icon from 'react-native-vector-icons/Feather';
@@ -32,34 +34,50 @@ export default function ComplexFigure() {
 
 	const [backgroundZoomed, setBackgroundZoomed] = useState(false); // Стан для контролю масштабу
 
+	useEffect(() => {
+		console.log('	Component mounted');
+	}, []);
+	
 	const paintGesture = Gesture.Pan()
 		.onBegin((event) => {
+			console.log('came here')
 			const { x , y } = event;
-			// setLines((prevLines) => [
-			// ...prevLines,
-			// [{ x: x, y: y }] // Початкова точка для нової лінії
-			// ]);
+			console.log('then here')
+
+			setLines((prevLines) => [
+				
+			...prevLines,
+			[{ x: x, y: y }] // Початкова точка для нової лінії
+			
+			]);
+			console.log('omg here')
+
 			
 		})
 		.onUpdate((event) => {
-			const { x , y } = event;
-			// setLines((prevLines) => {
-			// 	const updatedLines = [...prevLines];
-			// 	const lastLine = updatedLines[updatedLines.length - 1];
-			// 	lastLine.push({ x: x, y: y }); // Додаємо нову точку до останньої лінії
-			// 	return updatedLines;
-			// });
-			// Для відображення
-			currentPoints.value = [...currentPoints.value, { x, y }];
+			console.log('even here')
 
-			// Для збереження
-			recordedLine.current.push({ x, y });
+			const { x , y } = event;
+			console.log('shit hello here')
+
+			setLines((prevLines) => {
+				const updatedLines = [...prevLines];
+				const lastLine = updatedLines[updatedLines.length - 1];
+				lastLine.push({ x: x, y: y }); // Додаємо нову точку до останньої лінії
+				return updatedLines;
+			});
+			console.log('you gotta be joking here')
+
+			// // Для відображення
+			// currentPoints.value = [...currentPoints.value, { x, y }];
+			// // Для збереження
+			// recordedLine.current.push({ x, y });
 		})
-		.onEnd(() => {
-			// setLines((prev) => [...prev, recordedLine.current]);
-			recordedLine.current = []; // очищаємо
-			currentPoints.value = [];  // очищаємо sharedValue для наступного малювання
-		});
+		// .onEnd(() => {
+		// 	// setLines((prev) => [...prev, recordedLine.current]);
+		// 	recordedLine.current = []; // очищаємо
+		// 	currentPoints.value = [];  // очищаємо sharedValue для наступного малювання
+		// });
 	
 		// console.log('Array', pathData);
 	const eraseGesture = Gesture.Pan()
