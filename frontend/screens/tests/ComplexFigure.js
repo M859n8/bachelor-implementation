@@ -1,6 +1,5 @@
-import 'react-native-gesture-handler';
+// import 'react-native-gesture-handler';
 import { Gesture, GestureHandlerRootView, GestureDetector } from 'react-native-gesture-handler';
-
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Modal, Button,  TouchableOpacity, Image, Alert } from 'react-native';
 import { useState, useRef, useEffect} from 'react';
@@ -28,6 +27,7 @@ export default function ComplexFigure() {
 	const [lines, setLines] = useState([]); // Масив для зберігання ліній
 	const currentPoints = useSharedValue([]);
 	const recordedLine = useRef([]);
+	const [check , setCheck] = useState(true);
 
 	// const [eraser, setEraser ] = useState(false);
 	const [tool, setTool] = useState('pencil'); // 'pencil' або 'eraser'
@@ -37,67 +37,91 @@ export default function ComplexFigure() {
 	useEffect(() => {
 		console.log('	Component mounted');
 	}, []);
+
+	const updateLines = (x, y) => {
+		console.log('Updating lines with new point:', { x, y }); // Логування перед оновленням ліній
+		setLines((prevLines) => {
+			const updatedLines = [...prevLines];
+			const lastLine = updatedLines[updatedLines.length - 1];
+			lastLine.push({ x, y }); // Додаємо нову точку до останньої лінії
+			console.log('Updated lines:', updatedLines); // Логування оновлених ліній
+			return updatedLines;
+		});
+	};
 	
 	const paintGesture = Gesture.Pan()
 		.onBegin((event) => {
-			console.log('came here')
-			const { x , y } = event;
-			console.log('then here')
-
+			const { x, y } = event;
+			console.log('Gesture started at:', { x, y }); // Логування початкової точки
 			setLines((prevLines) => [
-				
-			...prevLines,
-			[{ x: x, y: y }] // Початкова точка для нової лінії
-			
+				...prevLines,
+				[{ x, y }] // Початкова точка для нової лінії
 			]);
-			console.log('omg here')
-
+			// runOnJS(setLines)((prevLines) => {
+			// 	console.log('in run on js')
+			// 	if (!prevLines) {
+			// 		console.log('prevLines is undefined or null at onBegin. Initializing with an empty array.');
+			// 		prevLines = [];
+			// 	}
+			// 	const newLines = [...prevLines, [{ x, y }]]; // Початкова точка для нової лінії
+			// 	console.log('New line started. Lines:', newLines);
+			// 	return newLines;
+			// });
+			console.log('New line started. Lines:', lines); // Логування після початку малювання
 			
 		})
 		.onUpdate((event) => {
-			console.log('even here')
-
-			const { x , y } = event;
-			console.log('shit hello here')
-
+			const { x, y } = event;
+			console.log('Gesture updated to:', { x, y }); // Логування кожного оновлення жесту
+			
+			// Передаємо координати в функцію через runOnJS
+			// runOnJS(updateLines)(x, y);
+			// runOnJS(setLines)((prevLines) => {
+			// 	const updatedLines = [...prevLines];
+			// 	const lastLine = updatedLines[updatedLines.length - 1];
+			// 	if (!lastLine) {
+			// 		updatedLines.push([{ x, y }]);
+			// 	} else {
+			// 		lastLine.push({ x, y });
+			// 	}
+			// 	console.log('Updated lines:', updatedLines);
+			// 	return updatedLines;
+			// });
 			setLines((prevLines) => {
 				const updatedLines = [...prevLines];
 				const lastLine = updatedLines[updatedLines.length - 1];
 				lastLine.push({ x: x, y: y }); // Додаємо нову точку до останньої лінії
 				return updatedLines;
 			});
-			console.log('you gotta be joking here')
-
-			// // Для відображення
-			// currentPoints.value = [...currentPoints.value, { x, y }];
-			// // Для збереження
-			// recordedLine.current.push({ x, y });
 		})
-		// .onEnd(() => {
-		// 	// setLines((prev) => [...prev, recordedLine.current]);
-		// 	recordedLine.current = []; // очищаємо
-		// 	currentPoints.value = [];  // очищаємо sharedValue для наступного малювання
-		// });
+		.onEnd(() => {
+			console.log('Gesture ended'); // Логування при завершенні жесту
+			console.log('Current lines:', lines);
+
+		})
+		.runOnJS(true);
 	
 		// console.log('Array', pathData);
 	const eraseGesture = Gesture.Pan()
-	.onUpdate((event) => {
-		const { x , y } = event;
-		setLines((prevLines) =>
-			prevLines.filter((line) => {
-			// Перевіряємо кожну точку лінії на відстань до гумки
-			return line.every(
-				//тут повертаютсья всі точки крім видаленої з радіусом 10, 
-				//але нам цей варіант не підходить, бо видаляючи крапку ми 
-				// створюємо пробіл, але не додаємо початок нової лінії, який позначається М
+		.onUpdate((event) => {
+			const { x , y } = event;
+			setLines((prevLines) =>
+				prevLines.filter((line) => {
+				// Перевіряємо кожну точку лінії на відстань до гумки
+				return line.every(
+					//тут повертаютсья всі точки крім видаленої з радіусом 10, 
+					//але нам цей варіант не підходить, бо видаляючи крапку ми 
+					// створюємо пробіл, але не додаємо початок нової лінії, який позначається М
 
-				//на даний момент ця штука працює так, що видаляє цілу лінію і воно в принципі ок
-				//але я не розумію чого воно так. розібратися з цим
-				(point) => Math.sqrt((point.x - x) ** 2 + (point.y - y) ** 2) > 10 //
+					//на даний момент ця штука працює так, що видаляє цілу лінію і воно в принципі ок
+					//але я не розумію чого воно так. розібратися з цим
+					(point) => Math.sqrt((point.x - x) ** 2 + (point.y - y) ** 2) > 10 //
+				);
+				})
 			);
-			})
-		);
-	});
+		})
+		.runOnJS(true);
+
 
 
 	function generateSVGString() {

@@ -6,12 +6,12 @@ import sys
 # Замість читання з файлу, ми парсимо JSON з рядка
 def load_data_json_string(json_string):
 	data = json.loads(json_string)  # Парсимо JSON з рядка
-	return create_graph(data["coords"], data["edges"])
+	return create_graph(data, False)
 
 
 def predict_similarity(graph_json):
-	model = GCN(input_dim=2, hidden_dim=36)  # Ініціалізуємо архітектуру
-	model.load_state_dict(torch.load("gcn_model.pth"))  # Завантажуємо збережені ваги
+	model = GCN(input_dim=2, hidden_dim=36)  # Ініціалізуємо архітектуру ../backend/MLmodels/complexFigure/
+	model.load_state_dict(torch.load("./MLmodels/complexFigure/gcn_model.pth"))  # Завантажуємо збережені ваги
 	model.eval()  # Переводимо в режим передбачення
 
 	# model = torch.load("gcn_model.pth")
@@ -43,5 +43,5 @@ def predict_similarity_test(num=1):
 	return similarity
 
 # дебаг
-# if sys.argv[1]:
-# 	predict_similarity_test(int(sys.argv[1]))
+if sys.argv[1]:
+	predict_similarity_test(int(sys.argv[1]))

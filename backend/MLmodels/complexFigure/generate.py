@@ -38,9 +38,17 @@ def generate_graphs(output_dir, template_graph, max_simularity, min_simularity,o
 		
 		print(f"Generated {file_path} with similarity {similarity}")
 
+
+# def process files(template_features, )
+
 if __name__ == "__main__":
 	# template_path = './assets/example2.svg'
-	template_path = '../../assets/figure.svg'
+	template_path = '../../assets/figure.svg' #MAIN
+	# template_path = '../../assets/normalizedOutput.svg'
+	# template_path = '../../assets/complexFigureTemplates'
+
+
+	
 	output_dir="trainingData/generated"
 	# Видаляємо директорію, якщо існує
 	if os.path.exists(output_dir):
@@ -54,8 +62,8 @@ if __name__ == "__main__":
 	# print('length of the features', len(template_features))
 	total_lines = len(template_features)
 	print('total lines', total_lines)
-	step_lines = 4 #на кожному кроці видаляємо по 4 лінії, бо так найбільш логічно видаляються фігури 
-	step_percent = 9 # 44/4= 11 , 100%/11 = 9
+	step_lines = 2 #на кожному кроці видаляємо по 4 лінії, бо так найбільш логічно видаляються фігури 
+	step_percent = 4.5 # 44/4= 11 , 100%/11 = 9
 
 	max_sim = 100
 	min_sim = 1

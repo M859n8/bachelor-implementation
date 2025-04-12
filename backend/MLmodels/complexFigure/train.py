@@ -45,6 +45,7 @@ def load_data_from_json(file_path, train=True):
 
 # Create graph with coordinates
 def create_graph(data_json, train):
+
 	coords = torch.tensor(data_json["coords"], dtype=torch.float)  # Вершини
 
 	edges = data_json.get("edges", [])
@@ -60,16 +61,17 @@ def create_graph(data_json, train):
 
 
 
-	if not train:
-		print('given similarity ', data_json["similarity"])
+	if train:
+		# print('given similarity ', data_json["similarity"])
 	# 	# y = torch.tensor([data_json["similarity"]], dtype=torch.float)
 	# 	y = torch.tensor([data_json["similarity"]], dtype=torch.float).unsqueeze(0)
 	# else:
 	# 	y = None
 	# 	print('given similarity ', data_json["similarity"]) #debug only
-	y = torch.tensor([data_json["similarity"]], dtype=torch.float).unsqueeze(0)
-
-
+		y = torch.tensor([data_json["similarity"]], dtype=torch.float).unsqueeze(0) #ЯКЩО ПРОБЛЕМИ ПРИ ТРЕНУВАННІ ПРОСТО ВИНЕСИ ЦЕ З ІФУ
+	else:
+		y=None
+	print('given similarity ', data_json["similarity"]) #delete after test
 
 	data = Data(x=coords, edge_index=edge_index, y=y)
 	return data
