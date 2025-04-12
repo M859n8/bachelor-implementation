@@ -18,7 +18,8 @@ app.use(cors());
 //     methods: 'GET,POST,PUT,DELETE', //дозволені методи 
 //     allowedHeaders: 'Content-Type,Authorization' //дозволені заголовки
 //   }));
-app.use(express.json()); 
+// app.use(express.json()); 
+app.use(express.json({ limit: '1mb' })); //щоб надсилалося більше 42 фіч в комплекс фігюр
 
 app.get('/', (req, res) => {
     res.send('Server is running!');

@@ -55,6 +55,7 @@ def build_graph(lines, threshold=30):
 
 	G.add_nodes_from(set(clusters.values()))  # Додаємо тільки унікальні вершини
 	G.add_edges_from(edges)
+	print('Amount of points', len(set(clusters.values())))
 
 	# Створюємо оновлений список ребер
 	# Цей вираз створює новий список ребер, але замість початкових точок використовує їхні згруповані версії
@@ -99,10 +100,13 @@ def build_graph(lines, threshold=30):
 	# Додаємо вершини
 	# Додаємо вершини та ребра у граф
 	# G.add_nodes_from(set(clusters.values()))  # Додаємо тільки унікальні вершини
-	# G.add_edges_from(new_edges)
+	# G.add_edges_from(normalized_edges)
 	# Дебаг: Виводимо вершини графа
 	# print("Graph vershyny", G.nodes(data=True))
 	# visualize_graph(G)
     # Тепер передаємо цей рядок як аргумент в іншу функцію
+	
+	# print(json_str)
+
 	return json_str
 
