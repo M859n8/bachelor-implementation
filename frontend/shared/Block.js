@@ -55,45 +55,7 @@ export default function Block({ blockId, gridPosition, refCallback, setBlocks, u
 
 	});
 
-	const updateBlockColor = (newColor) => {
-		setBlocks((prevBlocks) => {
-			const updatedBlock = {
-				...prevBlocks[blockId],
-				color: newColor,
-			};
-			return [
-				...prevBlocks.slice(0, blockId),
-				updatedBlock,
-				...prevBlocks.slice(blockId + 1)
-			];
-		});
-	};
-	// const updateBlockValue = (newValue, type) => {
-	// 	setBlocks((prevBlocks) => {
-	// 		const updatedBlock = {
-	// 			...prevBlocks[blockId],
-	// 			[type]: newValue,
-	// 		};
-	// 		return [
-	// 			...prevBlocks.slice(0, blockId),
-	// 			updatedBlock,
-	// 			...prevBlocks.slice(blockId + 1)
-	// 		];
-	// 	});
-	// };
-	const updateBlockRotation = (newRotation) => {
-		setBlocks((prevBlocks) => {
-			const updatedBlock = {
-				...prevBlocks[blockId],
-				rotation: newRotation,
-			};
-			return [
-				...prevBlocks.slice(0, blockId),
-				updatedBlock,
-				...prevBlocks.slice(blockId + 1)
-			];
-		});
-	};
+	
 	
 
 	const tapGesture = Gesture.Tap()

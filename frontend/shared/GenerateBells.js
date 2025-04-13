@@ -17,8 +17,8 @@ const generateObjects = () => {
     const GAME_WIDTH = Dimensions.get("window").width * 0.90; // 90% екрану
     const GAME_HEIGHT = Dimensions.get("window").height * 0.75; // 75% екрану
 
-    const CELL_WIDTH = 65;
-    const CELL_HEIGHT = 65;
+    const CELL_WIDTH = 52;
+    const CELL_HEIGHT = 52;
 
     const GRID_COLUMNS = Math.floor(GAME_WIDTH / CELL_WIDTH);
     const GRID_ROWS = Math.floor(GAME_HEIGHT / CELL_HEIGHT);
@@ -46,11 +46,14 @@ const generateObjects = () => {
                 y = row * CELL_HEIGHT + Math.random() * (CELL_HEIGHT * 0.7) + CELL_HEIGHT * 0.01;
             
             } while (takenPositions.has(`${x}-${y}`));
-
+			if(x > GAME_WIDTH-30 || y> GAME_HEIGHT-40){
+				// console.log('skip');
+				continue
+			}
             takenPositions.add(`${x}-${y}`);
 
             // categoryIndex = (categoryIndex + 1) % 15;
-            const categoryIndex = Math.floor(Math.random() * 15);
+            const categoryIndex = Math.floor(Math.random() * 14);
 
             objects.push({
                 id: i,

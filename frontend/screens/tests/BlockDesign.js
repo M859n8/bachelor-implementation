@@ -101,7 +101,6 @@ export default function BlockDesign() {
 			// 	}))
 			// );
 		});
-		updateBlockValue('red', 'color', 0)
 		setSendingData(true)
 		// });
 	};

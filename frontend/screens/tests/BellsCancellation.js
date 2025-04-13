@@ -6,11 +6,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import useTestObjects from '../../shared/GenerateBells.js';
 // import generateObjects from '../../shared/GenerateBells.js';
+import ResultsModal from '../../shared/resultsModal.js';
+import RulesModal from '../../shared/RulesModal.js';
 
 export default function BellsCancellation({route}) {
-    const [modalVisible, setModalVisible] = useState(true);
+	const [rulesModal, setRulesModal] = useState(true);
+	const [resultsModal, setResultsModal] = useState(false);
+	const [results, setResults] = useState({ finalScore: 100 });
+
     const [objects, setObjects] = useState(useTestObjects()); //array with objects 
-    const [gotResults, setGotResults] = useState(false); // Стан гри
     const [isLoading, setIsLoading] = useState(false); 
     // const [additionalData, setAdditionalData] = useState({
     //     startTime: null,
@@ -28,14 +32,15 @@ export default function BellsCancellation({route}) {
         4: require("../../assets/bells/processed_4.png"),
         5: require("../../assets/bells/processed_5.png"),
         6: require("../../assets/bells/processed_6.png"),
-        7: require("../../assets/bells/processed_7.png"),
+        // 7: require("../../assets/bells/processed_7.png"),
+        7: require("../../assets/bells/processed_14.png"),
+
         8: require("../../assets/bells/processed_8.png"),
         9: require("../../assets/bells/processed_9.png"),
         10: require("../../assets/bells/processed_10.png"),
         11: require("../../assets/bells/processed_11.png"),
         12: require("../../assets/bells/processed_12.png"),
         13: require("../../assets/bells/processed_13.png"),
-        14: require("../../assets/bells/processed_14.png"),
     };
     
     // const objects = useTestObjects();
@@ -58,39 +63,24 @@ export default function BellsCancellation({route}) {
     //     };
     // }, []);
 
-    const handleModalClose = () => {
-        setModalVisible(false);  // Закриваємо модальне вікно
-        // setAdditionalData(prevData => ({
-        //     ...prevData,
-        //     startTime: Date.now(),  // Записуємо час початку
-        // }));
-        startTime.current = Date.now();
-        console.log("start time recorded");
-    };
+
 
 
     const handleImageClick = (clickedImg) => {
-		console.log('entered');
+		// console.log('entered');
       
-        // const filterdObjects = objects.filter(obj => clickedImg.id === obj.id && obj.type === 0 && obj.touched === false);
-        const filterdObjects = objects.filter(obj => clickedImg.id === obj.id && obj.touched === false);
-
-        
-        if (filterdObjects.length ===1) {
-        // console.log(`got coords ${clickedImg.x}, ${clickedImg.y}`);
-
-            // setClickedObjects((prev) => [...prev, { id: clickedImg.id, x: clickedImg.x, y: clickedImg.y, time: Date.now() }]); 
-
-            // timeA = Date.now();
-            setObjects((prevObjects) =>
-                prevObjects.map((img) =>
-                    img.id === clickedImg.id ? { ...img, touched: true, time: Date.now() } : img
-                )
-            );
-            console.log(`time a : ${Date.now()}`);
+        setObjects((prevObjects) =>
+			prevObjects.map((img) => {
+				if (img.id === clickedImg.id && img.touched === false) {
+					console.log(`got coords ${clickedImg.x}, ${clickedImg.y}, id ${img.id}, type ${img.type}`);
+					return { ...img, touched: true, time: Date.now() };
+				}
+				return img;
+			})
+		);
+            // console.log(`time a : ${Date.now()}`);
             
-        }
-        // console.log(clickedObjects);
+        // console.log(objects);
     };
     
     // useEffect(()=>{
@@ -105,9 +95,9 @@ export default function BellsCancellation({route}) {
         setIsLoading(true);
 
         const bellsObjects = objects.filter(obj => obj.type === 0);
-		console.log('bells', bellsObjects);
+		// console.log('bells', bellsObjects);
         const otherObjects = objects.filter(obj => obj.type !== 0 && obj.touched === true);
-		console.log('other', otherObjects)
+		// console.log('other', otherObjects)
 
 
 
@@ -116,6 +106,7 @@ export default function BellsCancellation({route}) {
             endTime: Date.now(),  // Оновлюємо тільки endTime
             screenWidth: Dimensions.get('window').width,
             screenHeight:  Dimensions.get('window').height,
+			allObjectsCount: objects.length,
         };
 
 
@@ -141,9 +132,11 @@ export default function BellsCancellation({route}) {
                 },
                 body: JSON.stringify(requestBody),  //перетворює масив або об'єкт на JSON-рядок
             })
+			const result = await response.json();
+
             if (response.ok) {
-                Alert.alert('Success', 'Your answers sent!');
-                setGotResults(true);
+                setResults(result); 
+				setResultsModal(true);
             }
         } catch (error) {
         Alert.alert('Failure', 'Can not send answers');
@@ -153,7 +146,7 @@ export default function BellsCancellation({route}) {
 
     return (
         <View style={styles.container}>
-            <Modal
+            {/* <Modal
                 animationType="slide"
                 transparent={true}
                 visible={modalVisible}
@@ -162,42 +155,49 @@ export default function BellsCancellation({route}) {
                     <Text style={styles.modalText}>Among the objects in the picture, click on all the bells as quickly as possible. When you find all the bells, end the game.</Text>
                     <Button title="Start" onPress={handleModalClose} />
                 </View>
-            </Modal>
-            {!gotResults ? (
-            <>
-                <View  style={styles.gameArea}>
+            </Modal> */}
+			<RulesModal 
+				visible={rulesModal} 
+				rules='Among the objects in the picture, click on all the bells as quickly as possible. When you find all the bells, end the game.' 
+				onClose={() => {
+					setRulesModal(false);
+					startTime.current = Date.now();
 
-                    {objects.map((img) => (
-                        <TouchableOpacity
-                        key={img.id}
-                        onPress={() => handleImageClick(img)} // Обробка натискання
-                        >
-        
-                            <View key={img.id} style={[styles.bellImg, { left: img.x, top: img.y }]}>
-                                <Image 
-                                    source={imageMap[img.type] || require("../../assets/bells/processed_0.png")} 
-                                    style={[styles.image, (img.touched && img.type === 0) ? { opacity: 0.1 } : {}]}
+				}} 
+			/>
 
-									// Закреслюємо зображення} 
-                                />
-                            </View>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-                <Button onPress={endGame} 
-                        title={isLoading ? 'Loading ...' : 'End Game'}
-                        disabled={isLoading}
-                />
-            </>
+			<ResultsModal 
+				visible={resultsModal} 
+				results={results} 
+				onClose={() => setResultsModal(false)} 
+			/>
 
-            ):(
-                <View>
-                <Text>Results:</Text>
-                {/* <Text>{JSON.stringify(results)}</Text>  */}
-                
-                </View>
+            
+		<View  style={styles.gameArea}>
 
-            )}
+			{objects.map((img) => (
+				<TouchableOpacity
+				key={img.id}
+				onPress={() => handleImageClick(img)} // Обробка натискання
+				>
+
+					<View key={img.id} style={[styles.bellImg, { left: img.x, top: img.y }]}>
+						<Image 
+							source={imageMap[img.type] || require("../../assets/bells/processed_0.png")} 
+							style={[styles.image, (img.touched && img.type === 0) ? { opacity: 0.1 } : {}]}
+
+							// Закреслюємо зображення} 
+						/>
+					</View>
+				</TouchableOpacity>
+			))}
+		</View>
+		<Button onPress={endGame} 
+				title={isLoading ? 'Loading ...' : 'End Game'}
+				disabled={isLoading}
+		/>
+
+	
             
 
         </View>
@@ -242,8 +242,8 @@ const styles = StyleSheet.create({
         position: "absolute", // Фіксує положення на екрані
     },
     image: {
-        width: 50,  // Розмір зображення (можна змінити)
-        height: 50,
+        width: 40,  // Розмір зображення (можна змінити)
+        height: 40,
         resizeMode: "contain", // Адаптація зображення
     },
 });
