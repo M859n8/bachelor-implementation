@@ -156,13 +156,13 @@ export default function ComplexFigure() {
 				body: JSON.stringify({ svg: svgString })
 			});
 
+			const result = await response.json();
 			
 			console.log('send to the backend');
 			if (response.ok) {
 				// Alert.alert('Success', 'Your answers sent!');
-				const data = await response.json();
-				console.log('Server response:', data);
-				setResults(response); 
+				// console.log('Server response:', data);
+				setResults(result); 
 				setResultsModal(true);
 			}
 		} catch (error) {
@@ -188,11 +188,22 @@ export default function ComplexFigure() {
                     resizeMode: "contain"}}
             />
 		</View> */}
-		{/* <ResultsModal 
+		{/* <RulesModal 
+			visible={rulesModal} 
+			rules='Complete a template using blocks.' 
+			onClose={() => {
+				setRulesModal(false);
+				// startTime.current = Date.now();
+				setTimerIsRunning(true);
+
+			}} 
+		/> */}
+
+		<ResultsModal 
 			visible={resultsModal} 
 			results={results} 
 			onClose={() => setResultsModal(false)} 
-		/> */}
+		/>
 
 		<View style={styles.buttonContainer}>
 			<TouchableOpacity

@@ -7,6 +7,8 @@ import * as ScreenOrientation from "expo-screen-orientation";
 import LockOrientation from '../../shared/LockOrientation.js';
 import ResultsModal from '../../shared/resultsModal.js';
 import RulesModal from '../../shared/RulesModal.js';
+import Timer from '../../shared/Timer.js';
+
 // import DeviceInfo from 'react-native-device-info';
 
 // const screenWidth = Dimensions.get("window").width;
@@ -21,6 +23,8 @@ export default function TransferringPennies({route}) {
 	const [round2Modal, setRound2Modal] = useState(false);
 	const [resultsModal, setResultsModal] = useState(false);
 	const [results, setResults] = useState({ finalScore: 100 });
+
+	const [timerIsRunning, setTimerIsRunning] = useState(false); 
 
 	const [coinData, setCoinData] = useState([]); // Структура з coins
 
@@ -105,15 +109,18 @@ export default function TransferringPennies({route}) {
                 console.log('R.O.U.N.D 2');
                 setRound(2);
 				additionalData.current.timeEndRound1 = Date.now();
+				setTimerIsRunning(false);
 
                 // Можна додати повідомлення чи анімацію між раундами
 				setRound2Modal(true);
+
             }
             
         } else if (round === 2) {
             const allInLeftZone = elements.every((el) => el.status === 'left');
             if (allInLeftZone) {
 				additionalData.current.timeEndRound2 = Date.now();
+				setTimerIsRunning(false);
 
                 // setGameOver(true); // Гра завершена
                 sendDataToBackend();
@@ -252,6 +259,7 @@ export default function TransferringPennies({route}) {
 				onClose={() => {
 					setRulesModal(false);
 					additionalData.current.timeStartRound1 = Date.now();
+					setTimerIsRunning(true);
 
 				}} 
 			/>
@@ -262,6 +270,7 @@ export default function TransferringPennies({route}) {
 				onClose={() => {
 					setRound2Modal(false);
 					additionalData.current.timeStartRound2 = Date.now();
+					setTimerIsRunning(true);
 
 				}} 
 			/>
@@ -271,6 +280,8 @@ export default function TransferringPennies({route}) {
 				results={results} 
 				onClose={() => setResultsModal(false)} 
 			/>
+			<Timer isRunning={timerIsRunning} startTime={additionalData.current.timeStartRound1}/>
+
 
             <View style={styles.gameArea}>
             <View style={styles.dropArea}>

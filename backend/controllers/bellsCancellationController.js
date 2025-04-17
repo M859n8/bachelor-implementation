@@ -14,17 +14,16 @@ const bellsCancellationController = {
         }
 
 
-        console.log("clicked obj", bellsObjects);
-        console.log("additional data", additionalData);
-        console.log("other objects", otherObjects);
+        // console.log("clicked obj", bellsObjects);
+        // console.log("additional data", additionalData);
+        // console.log("other objects", otherObjects);
+		console.log("test time duration", (additionalData.endTime-additionalData.startTime)/1000)
 
 		const result = bellsCancellationController.calculateResults(bellsObjects, additionalData, otherObjects);
 		console.log(result)
         res.json({ 
 			message: "Response saved locally",
-			finalScore: `Overall result ${result.finalScore}\n 
-						Asymmetry score ${result.asymmetryScore} \n 
-						Asymmetry ditrection ${result.asymmetryDirection}`, 
+			finalScore: `Overall result ${result.finalScore}\n Asymmetry score ${result.asymmetryScore} \n Asymmetry ditrection ${result.asymmetryDirection}`, 
 		});
 
     },

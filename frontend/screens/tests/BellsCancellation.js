@@ -8,11 +8,16 @@ import useTestObjects from '../../shared/GenerateBells.js';
 // import generateObjects from '../../shared/GenerateBells.js';
 import ResultsModal from '../../shared/resultsModal.js';
 import RulesModal from '../../shared/RulesModal.js';
+import Timer from '../../shared/Timer.js';
+
 
 export default function BellsCancellation({route}) {
 	const [rulesModal, setRulesModal] = useState(true);
 	const [resultsModal, setResultsModal] = useState(false);
 	const [results, setResults] = useState({ finalScore: 100 });
+
+	const [timerIsRunning, setTimerIsRunning] = useState(false); 
+
 
     const [objects, setObjects] = useState(useTestObjects()); //array with objects 
     const [isLoading, setIsLoading] = useState(false); 
@@ -93,7 +98,7 @@ export default function BellsCancellation({route}) {
     const endGame = async () => {
         // setGameOver(true);
         setIsLoading(true);
-
+		setTimerIsRunning(false);
         const bellsObjects = objects.filter(obj => obj.type === 0);
 		// console.log('bells', bellsObjects);
         const otherObjects = objects.filter(obj => obj.type !== 0 && obj.touched === true);
@@ -162,6 +167,7 @@ export default function BellsCancellation({route}) {
 				onClose={() => {
 					setRulesModal(false);
 					startTime.current = Date.now();
+					setTimerIsRunning(true);
 
 				}} 
 			/>
@@ -171,7 +177,7 @@ export default function BellsCancellation({route}) {
 				results={results} 
 				onClose={() => setResultsModal(false)} 
 			/>
-
+		<Timer isRunning={timerIsRunning} startTime={startTime.current} />
             
 		<View  style={styles.gameArea}>
 

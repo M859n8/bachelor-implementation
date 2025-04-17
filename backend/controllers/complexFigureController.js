@@ -25,11 +25,13 @@ const complexFigureController = {
 		 // Викликаємо Python скрипт, передаючи шлях до SVG файлу
 		const child = spawn('python3', ['../backend/MLmodels/complexFigure/main.py', './assets/originalDrawing.svg']);
 
+		let output = '';
 		 // Обробляємо вивід з Python скрипта
 		child.stdout.on('data', (data) => {
 		   console.log(`stdout: ${data.toString()}`);
+		   output += data.toString();
 		});
-	   
+		
 		 // Обробляємо помилки
 		child.stderr.on('data', (data) => {
 		   console.error(`stderr: ${data.toString()}`);
@@ -39,7 +41,7 @@ const complexFigureController = {
 		child.on('close', (code) => {
 		   if (code === 0) {
 			 // Якщо Python скрипт успішно завершився, надсилаємо відповідь користувачу
-			 res.json({ message: 'SVG saved and processed successfully' });
+			 res.json({ message: 'SVG saved and processed successfully', finalScore: `${output}` });
 		   } else {
 			 // Якщо процес завершився з помилкою
 			 res.status(500).json({ error: 'Error processing SVG' });

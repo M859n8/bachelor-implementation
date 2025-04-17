@@ -9,17 +9,18 @@ import {
 import { StyleSheet, Text, View, Modal, Button,  TouchableOpacity, Image, Alert } from 'react-native';
 
 
-export default function Grid({ onBlockMove }){
-	const rows = 3;
-	const cols = 3;
-	
+
+export default function Grid({ currentRound , cellSize, dimention}){
+
+	console.log(cellSize, 'and', dimention)
+	const gridWidth= cellSize*dimention
 	// Створення сітки 3x3
 	return (
-	  <View style={styles.grid}>
-		{Array.from({ length: rows }).map((_, rowIndex) => (
+	  <View style={[styles.grid, {width: gridWidth, aspectRatio: 1}]}>
+		{Array.from({ length: dimention }).map((_, rowIndex) => (
 		  <View key={rowIndex} style={styles.row}>
-			{Array.from({ length: cols }).map((_, colIndex) => (
-			  <View key={colIndex} style={styles.cell}>
+			{Array.from({ length: dimention }).map((_, colIndex) => (
+			  <View key={colIndex} style={[styles.cell, { width: cellSize, aspectRatio: 1,}]}>
 				<Text>{`(${rowIndex},${colIndex})`}</Text>
 			  </View>
 			))}
@@ -37,6 +38,8 @@ export default function Grid({ onBlockMove }){
 		flexDirection: 'column',
 		justifyContent: 'space-between',
 		alignItems: 'center',
+		borderWidth: 1,
+		borderColor: 'black',
 	  },
 	  row: {
 		flexDirection: 'row',
@@ -44,12 +47,11 @@ export default function Grid({ onBlockMove }){
 		width: '100%',
 	  },
 	  cell: {
-		width: '34%',
-		height: 'auto',
-    	aspectRatio: 1, 
+		// width: '34%',
+		// height: 'auto',
+    	// aspectRatio: 1, 
 		justifyContent: 'center',
 		alignItems: 'center',
-		borderWidth: 1,
-		borderColor: 'black',
+		
 	  },
   });
