@@ -107,9 +107,10 @@ export default function BlockDesign() {
 		const totalBlocks = dimention * dimention;
 		const newBlocks = Array.from({ length: totalBlocks }, (_, i) => ({
 			id: i,
-			position: [],
-			color: ['white'],
-			rotation: [0],
+			position: { row: 0, col: 0},
+			color: "white",
+			rotation: 0,
+			changesCount: 0,
 		}));
 
 		setBlocks(newBlocks);
@@ -149,18 +150,19 @@ export default function BlockDesign() {
 		
 		setBlocks((prevBlocks) => {
 
-			// const updatedBlock = {
-			// 	...prevBlocks[blockId],
-			// 	[type]: newValue,
-			// };
-			const updatedBlock = { 
-			  ...prevBlocks[blockId],
-			  // В залежності від типу додаємо нове значення до відповідного масиву
-			  [type]: [
-				...prevBlocks[blockId][type],
-				newValue
-			]
+			const updatedBlock = {
+				...prevBlocks[blockId],
+				[type]: type === 'changesCount'
+				? prevBlocks[blockId][type] + 1
+				: newValue,
 			};
+			// const updatedBlock = { 
+			//   ...prevBlocks[blockId],
+			//   // В залежності від типу додаємо нове значення до відповідного масиву
+			//   [type]: type === 'changesCount'
+			// 	? prevBlocks[blockId][type] + 1
+			// 	: [...prevBlocks[blockId][type], newValue]
+			// };
 		
 			return [
 			  ...prevBlocks.slice(0, blockId),

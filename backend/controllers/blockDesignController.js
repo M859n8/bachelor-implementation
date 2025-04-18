@@ -1,19 +1,21 @@
 const roundTemplates = [
     {
-        round: 0,
-        duration: 60, // у секундах (1 хв)
+        round: 0, //template 11
+        duration: 210, // у секундах 
         gridSize: 3, // 3x3
-		expectedActions: 10,
+		expectedActions: 9,
+		maxActions: 19,
+
         correctBlocks: [
-            { row: 0, col: 0, color: 'red', rotation: 0 },
-            { row: 0, col: 1, color: 'white', rotation: 0 },
-            { row: 0, col: 2, color: 'white', rotation: 0 },
+            { row: 0, col: 0, color: 'mixed', rotation: 180 },
+            { row: 0, col: 1, color: 'red', rotation: 0 },
+            { row: 0, col: 2, color: 'mixed', rotation: 270 },
 			{ row: 1, col: 0, color: 'red', rotation: 0 },
-            { row: 1, col: 1, color: 'white', rotation: 0 },
-            { row: 1, col: 2, color: 'white', rotation: 0 },
-			{ row: 2, col: 0, color: 'red', rotation: 0 },
+            { row: 1, col: 1, color: 'mixed', rotation: 90 },
+            { row: 1, col: 2, color: 'red', rotation: 0 },
+			{ row: 2, col: 0, color: 'mixed', rotation: 0 },
             { row: 2, col: 1, color: 'white', rotation: 0 },
-            { row: 2, col: 2, color: 'white', rotation: 0 },
+            { row: 2, col: 2, color: 'mixed', rotation: 0 },
             // і т.д. для всіх 9 або скільки там блоків
         ]
     },
@@ -21,37 +23,59 @@ const roundTemplates = [
         round: 1,
         duration: 120, // 2 хв
         gridSize: 4,
-		expectedActions: 20,
+		expectedActions: 17,
+		maxActions: 32,
 
         correctBlocks: [
             { row: 0, col: 0, color: 'red', rotation: 0 },
-            { row: 0, col: 1, color: 'blue', rotation: 45 },
-            { row: 0, col: 2, color: 'yellow', rotation: 90 },
-			{ row: 1, col: 0, color: 'red', rotation: 0 },
-            { row: 1, col: 1, color: 'blue', rotation: 45 },
-            { row: 1, col: 2, color: 'yellow', rotation: 90 },
-			{ row: 2, col: 0, color: 'red', rotation: 0 },
-            { row: 2, col: 1, color: 'blue', rotation: 45 },
-            { row: 2, col: 2, color: 'yellow', rotation: 90 },
-            // і далі...
+            { row: 0, col: 1, color: 'mixed', rotation: 90 },
+            { row: 0, col: 2, color: 'mixed', rotation: 0 },
+            { row: 0, col: 3, color: 'red', rotation: 0 },
+
+			{ row: 1, col: 0, color: 'mixed', rotation: 90 },
+            { row: 1, col: 1, color: 'mixed', rotation: 270 },
+            { row: 1, col: 2, color: 'mixed', rotation: 180 },
+			{ row: 1, col: 3, color: 'mixed', rotation: 0 },
+
+			{ row: 2, col: 0, color: 'mixed', rotation: 180 },
+            { row: 2, col: 1, color: 'mixed', rotation: 0 },
+            { row: 2, col: 2, color: 'mixed', rotation: 90 },
+            { row: 2, col: 3, color: 'mixed', rotation: 270 },
+
+			{ row: 3, col: 0, color: 'red', rotation: 0 },
+            { row: 3, col: 1, color: 'mixed', rotation: 180 },
+            { row: 3, col: 2, color: 'mixed', rotation: 270 },
+            { row: 3, col: 3, color: 'red', rotation: 0 },
+
         ]
     },
     {
         round: 2,
         duration: 180, // 3 хв
         gridSize: 4,
-		expectedActions: 20,
+		expectedActions: 17,
+		maxActions: 32,
 
         correctBlocks: [
-            { row: 0, col: 0, color: 'red', rotation: 0 },
-            { row: 0, col: 1, color: 'blue', rotation: 45 },
-            { row: 0, col: 2, color: 'yellow', rotation: 90 },
+			{ row: 0, col: 0, color: 'mixed', rotation: 180 },
+            { row: 0, col: 1, color: 'mixed', rotation: 180 },
+            { row: 0, col: 2, color: 'mixed', rotation: 270 },
+            { row: 0, col: 3, color: 'white', rotation: 0 },
+
 			{ row: 1, col: 0, color: 'red', rotation: 0 },
-            { row: 1, col: 1, color: 'blue', rotation: 45 },
-            { row: 1, col: 2, color: 'yellow', rotation: 90 },
-			{ row: 2, col: 0, color: 'red', rotation: 0 },
-            { row: 2, col: 1, color: 'blue', rotation: 45 },
-            { row: 2, col: 2, color: 'yellow', rotation: 90 },
+            { row: 1, col: 1, color: 'mixed', rotation: 0 },
+            { row: 1, col: 2, color: 'mixed', rotation: 0 },
+			{ row: 1, col: 3, color: 'mixed', rotation: 180 },
+
+			{ row: 2, col: 0, color: 'mixed', rotation: 0 },
+            { row: 2, col: 1, color: 'mixed', rotation: 180 },
+            { row: 2, col: 2, color: 'red', rotation: 0 },
+            { row: 2, col: 3, color: 'mixed', rotation: 0 },
+
+			{ row: 3, col: 0, color: 'mixed', rotation: 90 },
+            { row: 3, col: 1, color: 'mixed', rotation: 0 },
+            { row: 3, col: 2, color: 'mixed', rotation: 90 },
+            { row: 3, col: 3, color: 'white', rotation: 0 },
         ]
     }
 ];
@@ -74,9 +98,20 @@ const blockDesignController = {
 		console.log(JSON.stringify(roundBlocks, null, 2));
 
         // console.log("additional data", additionalData);
-		blockDesignController.calculateResults(roundBlocks)
+		const resultsPerRound = await blockDesignController.calculateResults(roundBlocks)
 
-        res.json({ message: "Response saved locally" });
+		//send to backend by rounds 
+		console.log(JSON.stringify(resultsPerRound, null, 2));
+		const finalScoreText = resultsPerRound.map(r => 
+			`Round ${r.round}: ${r.totalScore}%`
+		).join(', ');
+
+		let allRoundsScore = 0;
+		resultsPerRound.forEach((round) => {
+			allRoundsScore += round.totalScore / 3; 
+		})
+
+        res.json({ message: "Response saved locally", finalScore: `Results for each round: ${finalScoreText},\n and final score is ${allRoundsScore}`  });
 
     },
 
@@ -93,48 +128,66 @@ const blockDesignController = {
 			const errorsCount = blockDesignController.checkBlocksPosition(roundData, template);
 			const accuracyPercent = Math.max(0, 100 * (gridSize - errorsCount) / gridSize);
 
-			console.log(errorsCount, 'and ', accuracyPercent)
+			console.log('Accuracy ', errorsCount, 'and ', accuracyPercent)
 
 			// 2. Порахувати час і швидкість
 			const duration = (roundData.endTime - roundData.startTime) / 1000; // в секундах
 			const maxAllowed = template.duration; // наприклад, 60, 120, 180
-			const speedPercent = Math.min(100, 100 * (maxAllowed - duration) / maxAllowed);
-			console.log(maxAllowed, 'and ', speedPercent)
+			// const speedPercent = Math.min(100, 100 * (maxAllowed - duration) / maxAllowed);
+			const speedPercent = duration > maxAllowed 
+			? 0 
+			: ((maxAllowed - duration) / maxAllowed) * 100;
+
+			console.log('Time ' , maxAllowed, 'and ', speedPercent)
 
 
 			// 3. Кількість дій
+			// const actionsCount = roundData.blocks.reduce((total, block) => {
+			// 	return total 
+			// 		+ (block.position?.length || 0) 
+			// 		+ (block.color?.length || 0) 
+			// 		+ (block.rotation?.length || 0);
+			// }, 0);
+
 			const actionsCount = roundData.blocks.reduce((total, block) => {
-				return total 
-					+ (block.position?.length || 0) 
-					+ (block.color?.length || 0) 
-					+ (block.rotation?.length || 0);
+				return total += block.changesCount;
 			}, 0);
 
 			const expectedActions = template.expectedActions; // число з шаблону
-			const efficiencyPercent = Math.min(100, 100 * expectedActions / actionsCount);
-			console.log(actionsCount, 'and ', efficiencyPercent)
+			const maxActions = template.maxActions; // число з шаблону
+
+
+			const efficiencyPercent = actionsCount <= expectedActions
+			? 100
+			: actionsCount <= maxActions
+				? 100 * ((maxActions - actionsCount) / expectedActions)
+				: 0;
+
+
+			// const efficiencyPercent = Math.min(100, 100 * expectedActions / actionsCount);
+			console.log('ActionsCount', actionsCount, 'and ', efficiencyPercent)
 
 			// 4. Загальна оцінка як середнє (або з вагою — якщо треба)
-			const totalScore = ((accuracyPercent + speedPercent + efficiencyPercent) / 3).toFixed(1);
+			// const totalScore = ((accuracyPercent + speedPercent + efficiencyPercent) / 3).toFixed(1);
+
+			const totalScore = (!accuracyPercent || !speedPercent || !efficiencyPercent)
+			? 0
+			: (accuracyPercent * 0.5 + speedPercent * 0.3 + efficiencyPercent * 0.2).toFixed(1);
 
 
-			
 			return {
 				round: roundData.round,
 				totalScore: parseFloat(totalScore)
 			};
 		});
 	
-		// console.log('Results:', results);
-		console.log(JSON.stringify(results, null, 2));
+		console.log('Results:', results);
+		// console.log(JSON.stringify(results, null, 2));
 
 		return results;
 	},
 
 	checkBlocksPosition: (roundData, template)=>{
-
-		
-
 		const userBlocks = roundData.blocks;
 		let errorsCount =0;
 
@@ -142,27 +195,56 @@ const blockDesignController = {
 			const { row, col, color: correctColor, rotation: correctRotation } = correctBlock;
 
 			const userBlock = userBlocks.find(b => 
-				b.position?.some(pos => pos.row === row && pos.col === col)
+				b.position.row === row && b.position.col === col
 			);
-
+			
 			if (!userBlock) {
-				errorsCount+=1;
+				console.log('error pos', row, col);
+				errorsCount += 1;
 				return;
 			}
 
-			const userColor = userBlock.color?.at(-1);
-			const userRotation = userBlock.rotation?.at(-1);
+			const userColor = userBlock.color;
+			const userRotation = userBlock.rotation;
 
-			if (userColor !== correctColor || userRotation !== correctRotation) {
-				errorsCount+=1;
+			const isRotationValid = (() => {
+			
+				if (correctColor === 'mixed') {
+					return userRotation === correctRotation;
+				}
+			
+				if (correctColor === 'white' || correctColor === 'red') {
+					return userRotation % 90 === 0;
+				}
+			
+				// На всяк випадок — якщо колір неочікуваний
+				return false;
+			})();
+			
+			if (userColor !== correctColor || !isRotationValid) {
+				// console.log('error color', row, col)
 
+				errorsCount += 1;
 			}
+			// if (userColor !== correctColor ) {
+			// 	console.log('error color', userColor , correctColor)
+
+			// 	errorsCount += 1;
+			// }else if ( !isRotationValid) {
+			// 	console.log('error rotation', userRotation, correctRotation)
+
+			// 	errorsCount += 1;
+			// }
 		});
 		console.log(errorsCount);
 		return errorsCount;
 	
 
-	}
+	}, 
+	
+	sendToDataBase: () => {
+
+	},
 	
 
 }
