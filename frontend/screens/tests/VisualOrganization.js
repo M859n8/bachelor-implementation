@@ -1,7 +1,7 @@
 
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Modal, Button, Image, TextInput, Alert } from 'react-native';
-import { useState, useEffect  } from 'react';
+import { useState, useEffect, useRef  } from 'react';
 
 import ResultsModal from '../../shared/resultsModal.js';
 import RulesModal from '../../shared/RulesModal.js';
@@ -39,21 +39,22 @@ const images = {
 };
 
 
-export default function VisualOrganization({route}) {
-  const [modalVisible, setModalVisible] = useState(true);
+export default function VisualOrganization() {
+	const [modalVisible, setModalVisible] = useState(true);
 
-  const [textResponse, setTextResponse] = useState(''); // Для вводу тексту
-  const [isLoading, setIsLoading] = useState(false);
+	const [textResponse, setTextResponse] = useState(''); // Для вводу тексту
 
-  // const images = [1, 2, 3, 4, 5]; // Масив зображень
-  const [currentImageIndex, setCurrentImageIndex] = useState(1); // Поточний індекс зображення
+	const [isLoading, setIsLoading] = useState(false);
 
-  const [resultsModal, setResultsModal] = useState(false);
-  const [results, setResults] = useState({ finalScore: 100 });
+	// const images = [1, 2, 3, 4, 5]; // Масив зображень
+	const [currentImageIndex, setCurrentImageIndex] = useState(1); // Поточний індекс зображення
 
-  const [rulesModal, setRulesModal] = useState(true);
+	const [resultsModal, setResultsModal] = useState(false);
+	const [results, setResults] = useState({ finalScore: 100 });
 
-
+	const [rulesModal, setRulesModal] = useState(true);
+	const answersRef = useRef([]);
+	// const currentAnswerRef = useRef('');
 
   // const image_id = 1; // Ідентифікатор картинки
 
@@ -67,66 +68,45 @@ export default function VisualOrganization({route}) {
       return;
     }
 
-    const token = await AsyncStorage.getItem('authToken');
-    setIsLoading(true);  // Тільки зараз починаємо показувати завантаження
-
-    try {
-      const response = await fetch('http://192.168.0.12:5000/api/result/saveResponse', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          image_id: currentImageIndex, // Поточне зображення
-          text_response: textResponse,
-        }),
-      });
-     
-      const result = await response.json();
-
-      if (response.ok) {
-        // Alert.alert('Success', 'Your answers sent!');
-        // Оновлюємо індекс для наступного зображення
-          // Оновлюємо індекс для наступного зображення
-          if (currentImageIndex < Object.keys(images).length) {
-            setCurrentImageIndex(currentImageIndex + 1); // Перехід до наступного зображення
-          } else {
-            // Alert.alert('Успіх', 'Це була остання картинка!');
-            fetchResults(); // Викликаємо функцію для отримання результатів
-          }
-      } 
-    } catch (error) {
-    //   console.error('Помилка при відправці:', error);
-      Alert.alert('Failure', 'Can not send answers');
-    } finally {
-      setIsLoading(false);
-    }
+	if (currentImageIndex < Object.keys(images).length) {
+		answersRef.current.push(textResponse);
+		// answersRef.current.push(currentAnswerRef.current);
+		setCurrentImageIndex(currentImageIndex + 1); // Перехід до наступного зображення
+	} else {
+		sendToBackend(); // Викликаємо функцію для отримання результатів
+	}
+  
   };
 
     // Функція для отримання результатів після завершення всіх картинок
-    const fetchResults = async () => {
-      try {
-        const token = await AsyncStorage.getItem('authToken');
-        
-        const response = await fetch('http://192.168.0.12:5000/api/result/calculateResults', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-  
-        const result = await response.json();
-  
-        if (response.ok) {
-          setResults(result); // Зберігаємо результати
-          setResultsModal(true); // Показуємо картку з результатами
-        }
-      } catch (error) {
-        // console.error('Помилка при отриманні результатів:', error);
-        Alert.alert('Error', 'Sending results to backend');
-      }
+    const sendToBackend = async () => {
+		try {
+			const token = await AsyncStorage.getItem('authToken');
+			setIsLoading(true);  // Тільки зараз починаємо показувати завантаження
+			
+			const response = await fetch('http://192.168.0.12:5000/api/result/saveResponse', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${token}`,
+				},
+				body: JSON.stringify({
+					answersArr: answersRef.current, // Поточне зображення
+				}),
+			});
+	
+			const result = await response.json();
+	
+			if (response.ok) {
+				setResults(result); // Зберігаємо результати
+				setResultsModal(true); // Показуємо картку з результатами
+			}
+		} catch (error) {
+			// console.error('Помилка при отриманні результатів:', error);
+			Alert.alert('Error', 'Sending results to backend');
+		}finally {
+			setIsLoading(false);
+		}
     };
 
   return (
@@ -159,24 +139,20 @@ export default function VisualOrganization({route}) {
 			onClose={() => setResultsModal(false)} 
 		/>
 		
-        {/* ) : ( */}
-          <>
-            <View style={styles.card}>
-              <Image source={images[currentImageIndex]} style={styles.image} resizeMode="contain"/>
-            </View >
-            <TextInput
-              value={textResponse}
-              onChangeText={setTextResponse}
-              placeholder="Enter your answer"
-			  style = {styles.textInput}
-            />
-            <Button
-              title={isLoading ? 'Loading...' : 'Send'}
-              onPress={handleSubmit}
-              disabled={isLoading}
-            />
-          </>
-      {/* )} */}
+		<View style={styles.card}>
+			<Image source={images[currentImageIndex]} style={styles.image} resizeMode="contain"/>
+		</View >
+		<TextInput
+			value={textResponse}
+			onChangeText={setTextResponse}
+			placeholder="Enter your answer"
+			style = {styles.textInput}
+		/>
+		<Button
+			title={isLoading ? 'Loading...' : 'Send'}
+			onPress={handleSubmit}
+			disabled={isLoading}
+		/>
       </View>
   );
 };
