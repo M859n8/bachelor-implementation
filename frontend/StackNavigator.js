@@ -6,6 +6,8 @@ import { createStackNavigator } from "@react-navigation/stack"
 import { useNavigation } from '@react-navigation/native';
 import Home from "./screens/Home";
 import Login from './screens/Login';
+import ResultsScreen from './screens/ResultsScreen';
+
 
 // import Second from "./screens/Second";
 
@@ -79,6 +81,7 @@ export default function StackNavigator() {
           <Stack.Screen name="LineTracking" component={LineTracking} />
           <Stack.Screen name="TransferringPennies" component={TransferringPennies}  options={{ gestureEnabled: false }}/>
           <Stack.Screen name="VisualOrganization" component={VisualOrganization} />
+		  <Stack.Screen name="Results" component={ResultsScreen} />
         </Stack.Group>
         ) : ( 
         <Stack.Group>

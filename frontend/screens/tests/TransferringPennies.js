@@ -33,7 +33,9 @@ export default function TransferringPennies({route}) {
 	const [, forceUpdate] = useState(0);
 	/////////
 	const screenWidth = Dimensions.get("window").width;
-	const coinSize = screenWidth * 0.05;
+	const screenHeight = Dimensions.get("window").height;
+
+	const coinSize = screenHeight * 0.06;
 	// const screenSizeInches = DeviceInfo.getScreenSize();S 
 	const widthInInches = (screenWidth * 0.8 - 20 - 20)/ 160;
 	//можливо для переводу в дюцми працюватиме ось це ділення на 160
@@ -63,10 +65,10 @@ export default function TransferringPennies({route}) {
 		{ id: 3, status: 'left' },
         { id: 4, status: 'left' },
 		{ id: 5, status: 'left' },
-		// { id: 6, status: 'left' },
-        // { id: 7, status: 'left' },
-		// { id: 8, status: 'left' },
-		// { id: 9, status: 'left' },
+		{ id: 6, status: 'left' },
+        { id: 7, status: 'left' },
+		{ id: 8, status: 'left' },
+		{ id: 9, status: 'left' },
 	 
   ]);
 
@@ -285,7 +287,6 @@ export default function TransferringPennies({route}) {
 
             <View style={styles.gameArea}>
             <View style={styles.dropArea}>
-                <Text style={styles.areaText}>Ліва зона</Text>
                 
                 {round === 1 && elements.map((el) => (
                 
@@ -297,15 +298,16 @@ export default function TransferringPennies({route}) {
                         checkRoundCompletion={checkRoundCompletion}
                         round={round}
                         setCoinData={setCoinData}
+						coinSize={coinSize}
 					handChangePointsTest={handChangePointsTest} //test purposes
+
                         
                         />
                 ))}
             </View>
             {/* Права зона для монеток */}
             <View style={[styles.dropAreaR,{zIndex: round}]}>
-                <Text style={styles.areaText}>Права зона</Text>
-                {round === 2 && elements.map((el) => (
+                 {round === 2 && elements.map((el) => (
 
                 <Penny 
                     key={el.id} 
@@ -315,6 +317,8 @@ export default function TransferringPennies({route}) {
                     checkRoundCompletion={checkRoundCompletion}
                     round={round}
                     setCoinData={setCoinData}
+					coinSize={coinSize}
+
 					handChangePointsTest={handChangePointsTest} //test purposes
                     />                    
             ))}
@@ -366,11 +370,16 @@ const styles = StyleSheet.create({
         width: '10%', // Ширина зон ~10% екрану
         height: '100%', // Висота зони ~60% of the parent zone
         backgroundColor: "#d3d3d3",
-        alignItems: "center",
-        justifyContent: "center",
+        // alignItems: "center",
+        // justifyContent: "center",
         borderRadius: 10,
         position: 'relative',
         //pointerEvents: "none",
+
+		flexDirection: 'col',
+		// flexWrap: 'wrap',
+		gap: '9%',
+		padding: 10,
         zIndex: 2,
     },
     dropAreaR: {

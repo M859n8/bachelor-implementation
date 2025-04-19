@@ -7,14 +7,14 @@ import { Image, Dimensions, StyleSheet, View, Animated, PanResponder } from "rea
 
 // const coinSize = screenWidth * 0.05; // 15% ширини екрана
 
-export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinData, handChangePointsTest}) {
+export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinData,coinSize, handChangePointsTest}) {
 
     const position = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
     const startCoords = { x: position.x.__getValue(), y: position.y.__getValue() };
     // const [data, setData] = useState({ coins: [] }); // Структура з coins
 
-	const screenWidth = Dimensions.get("window").width;
-	const coinSize = screenWidth * 0.05; // Розмір монетки (~15% ширини екрану)
+	// const screenWidth = Dimensions.get("window").width;
+	// const coinSize = screenWidth * 0.05; // Розмір монетки (~15% ширини екрану)
 
 
     const lastSpeed = useRef(0);
@@ -377,7 +377,7 @@ export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinDa
 
 const styles = StyleSheet.create({
     coinContainer: {
-        position: "absolute",
+        // position: "absolute",
     },
     // coinImage: {
     //     width: coinSize,

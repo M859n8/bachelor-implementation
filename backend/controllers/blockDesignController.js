@@ -86,22 +86,22 @@ const blockDesignController = {
 
     //Використання async/await забезпечить, що ваш сервер не буде блокуватися при виконанні обчислень.
     saveResponse: async (req, res) => {
-        const {roundBlocks, additionalData}= req.body;
+        const {roundBlocks}= req.body;
         const user_id = req.user.id;
-        if (!user_id || !roundBlocks || !additionalData) {
+        if (!user_id || !roundBlocks ) {
 
             return res.status(400).json({ error: "Missing required fields" });
         }
 
 
-        console.log("blocks");
-		console.log(JSON.stringify(roundBlocks, null, 2));
+        // console.log("blocks");
+		// console.log(JSON.stringify(roundBlocks, null, 2));
 
         // console.log("additional data", additionalData);
 		const resultsPerRound = await blockDesignController.calculateResults(roundBlocks)
 
 		//send to backend by rounds 
-		console.log(JSON.stringify(resultsPerRound, null, 2));
+		// console.log(JSON.stringify(resultsPerRound, null, 2));
 		const finalScoreText = resultsPerRound.map(r => 
 			`Round ${r.round}: ${r.totalScore}%`
 		).join(', ');

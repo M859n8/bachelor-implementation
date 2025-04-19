@@ -1,109 +1,88 @@
 import React from 'react';
-import { StyleSheet, Text, View, Dimensions, Button,  TouchableOpacity, Image, Alert } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, Button, Modal, TouchableOpacity, Image, Alert } from 'react-native';
 import { useState, useRef, useEffect } from 'react';
 import {useSharedValue, useAnimatedRef} from 'react-native-reanimated';
 import { Gesture, GestureHandlerRootView, GestureDetector } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 import * as ScreenOrientation from 'expo-screen-orientation';
 
-
-import ResultsModal from '../../shared/resultsModal.js';
 import RulesModal from '../../shared/RulesModal.js';
-
 import Block from '../../shared/Block.js';
 import Grid from '../../shared/Grid.js';
 import Timer from '../../shared/Timer.js';
 
 export default function BlockDesign() {
 	const [rulesModal, setRulesModal] = useState(true);
-	const [resultsModal, setResultsModal] = useState(false);
-	const [results, setResults] = useState({ finalScore: 100 });
-	const [timerIsRunning, setTimerIsRunning] = useState(false); 
-	const [backgroundZoomed, setBackgroundZoomed] = useState(false);
-	const handleImagePress = () => {
-		setBackgroundZoomed(!backgroundZoomed); // Перемикання стану для збільшення
-	};
-	const [blocks, setBlocks] = useState([
-		// { id: 0, position: [{ row: -1, col: -1 }], color: ['white'], rotation: [0 ]},
-		// { id: 1, position: [{ row: -1, col: -1 }], color: ['white'], rotation: [0 ]},
-		// { id: 2, position: [{ row: -1, col: -1 }], color: 'white', rotation: 0 },
-		// { id: 3, position: [{ row: -1, col: -1 }], color: 'white', rotation: 0 },
-		// { id: 4, position: [{ row: -1, col: -1 }], color: 'white', rotation: 0 },
-		// { id: 5, position: [{ row: -1, col: -1 }], color: 'white', rotation: 0 },
-		// { id: 6, position: [{ row: -1, col: -1 }], color: 'white', rotation: 0 },
-		// { id: 7, position: [{ row: -1, col: -1 }], color: 'white', rotation: 0 },
-		// { id: 8, position: [{ row: -1, col: -1 }], color: 'white', rotation: 0 },
-	]);
-	const gridLayout = useSharedValue({ x: 0, y: 0 });
-	const blockRefs= useRef([]); // пустий масив refs
-	const gridRef = useRef(null);
-	const isFocused = useIsFocused(); //returns true when animation ended
+	// const [resultsModal, setResultsModal] = useState(false);
+	// const [results, setResults] = useState({ finalScore: 100 });
+	const [timerIsRunning, setTimerIsRunning] = useState(false); //state for timer
+	// const [currentImageIndex, setCurrentImageIndex] = useState(1); //current template index
+	
+	const [blocks, setBlocks] = useState([]); //blocks array
+	const gridLayout = useSharedValue({ x: 0, y: 0 }); //grid position
+	const blockRefs= useRef([]); // array for blocks refs
+	const gridRef = useRef(null); //grid fer
+	// const isFocused = useIsFocused(); //returns true when animation ended
 
-	const [sendingData, setSendingData] = useState(false);
+	// const [sendingData, setSendingData] = useState(false);
 
-	const templates = {
-		1: require('../../assets/blockdesign.png'),
-		2: require('../../assets/visual_organiz/2.png'),
-		3: require('../../assets/visual_organiz/3.png'),
+	const templates = { //templates array
+		0: require('../../assets/blockdesign.png'),
+		1: require('../../assets/visual_organiz/2.png'),
+		2: require('../../assets/visual_organiz/3.png'),
 	};
 
-	// const gridSize = minDimension * 0.45;
-	// const blockSize = minDimension * 0.15;
-
-
-	const [cellSize, setCellSize] = useState(0);
-	const [gridDimention, setGridDimention] = useState(3)
-	const [blockSize, setBlockSize] = useState(100);
-	const [currentRound, setCurrentRound] = useState(0);
+	const [cellSize, setCellSize] = useState(0); //cell size, adaptive to orientation
+	const [blockSize, setBlockSize] = useState(100); //block size, adaptive to orientation changes
+	const [gridDimention, setGridDimention] = useState(3) //grid dimension, varies by round
+	const [currentRound, setCurrentRound] = useState(0); 
 	const totalRounds = 3;
 
-	const [allRoundsData, setAllRoundsData] = useState([]);
-	const [roundStartTime, setRoundStartTime] = useState(null);
+	const [allRoundsData, setAllRoundsData] = useState([]); //data for all rounds, this array will be send to backend
+	const [roundStartTime, setRoundStartTime] = useState(null); //to save each round start time
 
+	const navigation = useNavigation(); //for navigation home
 
-	// console.log('grid size', gridSize, 'block size', blockSize)
-	
-	const [currentImageIndex, setCurrentImageIndex] = useState(1);
+	const [backgroundZoomed, setBackgroundZoomed] = useState(false); //state for zooming template picture
+	const handleImagePress = () => {
+		setBackgroundZoomed(!backgroundZoomed); 
+	};
  
 
 	useEffect(() => {
 		
-		if (!rulesModal) { //measure when rules are closed
-			// setTimeout(() => {
+		if (!rulesModal) { //measure grid position after closiing rules
 			  gridRef.current?.measure((x, y, width, height, pageX, pageY) => {
-				console.log('Grid coords after navigation:', { pageX, pageY });
+				// console.log('Grid coords after navigation:', { pageX, pageY });
 				gridLayout.value = { x: pageX, y: pageY }; 
 			  });
-			// }, 0); // трохи зачекати після фокусу
 		  }
 	}, [rulesModal]);
 
-	useEffect(() => { //debug
-		const unsubscribe = Dimensions.addEventListener('change', ({ window }) => {
-			console.log('📐 Orientation changed:', window.width, window.height);
-			// Тут можеш перевиміряти layout
-		});
+	// useEffect(() => { //debug
+	// 	const unsubscribe = Dimensions.addEventListener('change', ({ window }) => {
+	// 		console.log('📐 Orientation changed:', window.width, window.height);
+	// 		// Тут можеш перевиміряти layout
+	// 	});
 	
-		return () => unsubscribe?.remove?.(); // безпечне видалення
-	}, []);
+	// 	return () => unsubscribe?.remove?.(); // безпечне видалення
+	// }, []);
 
-	useEffect(() => {
-		console.log('changing roudn');
-		// Визначаємо розмір сітки
+	useEffect(() => { //for each round calculate grid, cell and block size
 		
 		const { width, height } = Dimensions.get('window');
 		const minDimension = Math.min(width, height);
 
-		const dimention = currentRound === 0 ? 3 : 4;
+		const dimention = currentRound === 0 ? 3 : 4; //3 cells only on zero round
 		setGridDimention(dimention)
-		const currentCellSize= currentRound === 0 ? minDimension*0.45/dimention : minDimension*0.45/dimention;
+		const currentCellSize = minDimension * 0.45 / dimention;
 		setCellSize(currentCellSize);
 		setBlockSize(currentCellSize);
 	
-		console.log('dimention in chenging round', dimention, 'and', currentCellSize)
-		// Створюємо масив блоків
+		//initialise blocks
 		const totalBlocks = dimention * dimention;
 		const newBlocks = Array.from({ length: totalBlocks }, (_, i) => ({
 			id: i,
@@ -114,18 +93,15 @@ export default function BlockDesign() {
 		}));
 
 		setBlocks(newBlocks);
-		setCurrentImageIndex(currentImageIndex + 1);
-		// Скидуємо таймер
-		// setTimer(15); // або інше значення для цього раунду
-		console.log('from usestate', gridDimention, 'and', cellSize)
 	
 	}, [currentRound]);
 
 	
 	const goToNextRound = () => {
+		//get end time
 		const now = Date.now();
-		// Зберігаємо поточні блоки у масив з історією
-		const newRoundData = {
+		// save current round data
+		const currentRoundData = {
 			round: currentRound,
 			gridDimention: gridDimention,
 			startTime: roundStartTime,
@@ -133,21 +109,22 @@ export default function BlockDesign() {
 			blocks: [...blocks],
 
 		};
+		//if it not last round
 		if (currentRound + 1 < totalRounds) {
-			setAllRoundsData((prev) => [...prev, newRoundData]);
+			setAllRoundsData((prev) => [...prev, currentRoundData]);
+			//go to next round
 			setCurrentRound((prev) => prev + 1);
 			setRoundStartTime(Date.now()); 
 		} else {
-			// останній — додаємо в ручну копію allRoundsData
-			const finalData = [...allRoundsData, newRoundData];
-			sendDataToBackend(finalData); //посилаю в цю функцію мануально, а не через юзстейт, бо він не встигаж оновитися 
+			//otherwise set final data for all rounds (i do not use useState because it does not have time to update)
+			const finalData = [...allRoundsData, currentRoundData];
+			sendDataToBackend(finalData); 
 		}
 	};
 
-
+	//updating block value of a given type
 	const updateBlockValue = (newValue, type, blockId) => {
-		console.log('got to update block value', newValue, 'type', type)
-		
+		//for changesCount just increase value by 1
 		setBlocks((prevBlocks) => {
 
 			const updatedBlock = {
@@ -171,33 +148,17 @@ export default function BlockDesign() {
 			];
 		  });
 		
-		
-		// console.log('updated');
 	};
 
-	// useEffect(() => {
-	// 	checkBlocks();
-	// }, [elements]);
-
-
-	
-	
     const sendDataToBackend = async (data) => {
-		console.log('got to send to backend');
+		//stoop the timer
 		setTimerIsRunning(false);
 
-		const requestBody ={
-            roundBlocks: data,
-            additionalData : blocks,
-        }
-		console.log('filled data for  backend');
-		console.log(JSON.stringify(allRoundsData, null, 2));
+		// console.log(JSON.stringify(allRoundsData, null, 2));
 
-        const token = await AsyncStorage.getItem('authToken');
-		// console.log(blocks);
+        const token = await AsyncStorage.getItem('authToken'); //get authorization token
 
 		try {
-            console.log("phase 1");
             const response = await fetch('http://192.168.0.12:5000/api/result/block/saveResponse', {
                 method: 'POST',
                 headers: {
@@ -205,12 +166,15 @@ export default function BlockDesign() {
                     'Authorization': `Bearer ${token}`
 
                 },
-                body: JSON.stringify(requestBody),  //перетворює масив або об'єкт на JSON-рядок
+                body: JSON.stringify({roundBlocks: data}),  //transform object into json string
             })
+
 			const result = await response.json();
+
             if (response.ok) {
-				setResults(result); 
-				setResultsModal(true);
+				//go to result page
+				navigation.navigate('Results', { result });
+
             }
         } catch (error) {
         	Alert.alert('Failure', 'Can not send answers');
@@ -223,7 +187,6 @@ export default function BlockDesign() {
 
   return (
     <View style={styles.container}>
-		<View style={styles.dot}/> 
 		<RulesModal 
 			visible={rulesModal} 
 			rules='Complete a template using blocks.' 
@@ -234,20 +197,20 @@ export default function BlockDesign() {
 
 			}} 
 		/>
-
+{/* 
 		<ResultsModal 
 			visible={resultsModal} 
 			results={results} 
 			onClose={() => setResultsModal(false)} 
-		/>
-		<Timer isRunning={timerIsRunning} startTime={0}/>
+		/> */}
+		<Timer isRunning={timerIsRunning} startTime={roundStartTime}/>
 
 		<TouchableOpacity 
 			style={[styles.imageContainer, { position: 'absolute', top: 10, right: 10 }]} 
 			onPress={handleImagePress}
 		>
 			<Image 
-			source={templates[currentImageIndex]} // Ваша URL картинки
+			source={templates[currentRound]} // Ваша URL картинки
 			style={[styles.image, backgroundZoomed ? styles.zoomedImage : {}]} 
 			resizeMode="contain"
 			/>

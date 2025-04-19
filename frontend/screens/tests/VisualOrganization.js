@@ -10,7 +10,7 @@ import RulesModal from '../../shared/RulesModal.js';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Масив зображень, що відповідають файлам
+//array of images
 const images = [
 	require('../../assets/visual_organiz/1.png'),
 	require('../../assets/visual_organiz/2.png'),
@@ -42,76 +42,55 @@ const images = [
 
 export default function VisualOrganization() {
 
-	const [textResponse, setTextResponse] = useState(''); // Для вводу тексту
+	const [textResponse, setTextResponse] = useState(''); //for text field
+	const [isLoading, setIsLoading] = useState(false); //loading indicator
+	const inputRef = useRef(null); //ref on input field
+	const [currentImageIndex, setCurrentImageIndex] = useState(0); //current image
 
-	const [isLoading, setIsLoading] = useState(false);
-	const inputRef = useRef(null);
-	// const images = [1, 2, 3, 4, 5]; // Масив зображень
-	const [currentImageIndex, setCurrentImageIndex] = useState(0); // Поточний індекс зображення
-
-	const [resultsModal, setResultsModal] = useState(false);
+	const [resultsModal, setResultsModal] = useState(false); 
 	const [results, setResults] = useState({ finalScore: 100 });
-	const [showEmptyConfirm, setShowEmptyConfirm] = useState(false);
+	const [rulesModal, setRulesModal] = useState(true); //
+	const [showEmptyConfirm, setShowEmptyConfirm] = useState(false); //modal to confirm empty answer
 
-	const [rulesModal, setRulesModal] = useState(true);
-	const answersRef = useRef([]);
-	// const currentAnswerRef = useRef('');
+	const answersRef = useRef([]); //ref for user answers
+
+	//calculate the card size
 	const { width, height } = Dimensions.get('window');
 	const minDimension = Math.min(width, height);
 	const cardSize = 0.4*minDimension;
 
-  // const image_id = 1; // Ідентифікатор картинки
-
-	// useEffect(() => {
-	// 	// console.log(' isLoading changed:', isLoading);
-	// }, [isLoading]); // Після зміни isLoading, логувати його значення
-
-	// useEffect(() => {
-	// 	if(!rulesModal && !resultsModal){
-	// 		inputRef.current?.focus();
-	// 	}
-	//   }, [currentImageIndex]);
-
 	const handleSubmit = async () => {
-		// Keyboard.dismiss(); //DONT WORKING !!!!
-		setIsLoading(true);
 
+		setIsLoading(true);
 		if (!textResponse.trim()) {
+			//show modal if response is empty 
 			setShowEmptyConfirm(true);
 			return;
 		}
-		// inputRef.current?.focus();
-		// if (currentImageIndex < images.length-1) {
-		// 	answersRef.current.push(textResponse);
-		// 	// answersRef.current.push(currentAnswerRef.current);
-		// 	setCurrentImageIndex(currentImageIndex + 1); // Перехід до наступного зображення
-		// 	setTextResponse(''); 
-		// } else {
-		// 	sendToBackend(); // Викликаємо функцію для отримання результатів
-		// }
+		
 		submitResult();
 	
 	};
-	const submitResult = () => {
-		// inputRef.current?.focus();
-		if (currentImageIndex < images.length-1) {
-			answersRef.current.push(textResponse);
-			// answersRef.current.push(currentAnswerRef.current);
-			setIsLoading(false);
 
-			setCurrentImageIndex(currentImageIndex + 1); // Перехід до наступного зображення
-			setTextResponse(''); 
+	//go to next image or send data to backend
+	const submitResult = () => {
+
+		if (currentImageIndex < images.length-1) {
+			//save user answer
+			answersRef.current.push(textResponse);
+			setIsLoading(false); //end liading status
+			setCurrentImageIndex(currentImageIndex + 1); //go to next img
+			setTextResponse(''); //clear response field
 		} else {
-			sendToBackend(); // Викликаємо функцію для отримання результатів
+			sendToBackend(); 
 		}
 	};
   
 
-    // Функція для отримання результатів після завершення всіх картинок
     const sendToBackend = async () => {
 		try {
 			const token = await AsyncStorage.getItem('authToken');
-			setIsLoading(true);  // Тільки зараз починаємо показувати завантаження
+			setIsLoading(true);  //start loading process untill we got data from backend
 			
 			const response = await fetch('http://192.168.0.12:5000/api/result/saveResponse', {
 				method: 'POST',
@@ -120,19 +99,19 @@ export default function VisualOrganization() {
 					'Authorization': `Bearer ${token}`,
 				},
 				body: JSON.stringify({
-					answersArr: answersRef.current, // Поточне зображення
+					answersArr: answersRef.current, 
 				}),
 			});
 	
 			const result = await response.json();
 	
 			if (response.ok) {
-				setResults(result); // Зберігаємо результати
+				setResults(result); //save results
 				Keyboard.dismiss();
-				setResultsModal(true); // Показуємо картку з результатами
+				setResultsModal(true); //show results modal
 			}
 		} catch (error) {
-			// console.error('Помилка при отриманні результатів:', error);
+			
 			Alert.alert('Error', 'Sending results to backend');
 		}finally {
 			setIsLoading(false);
@@ -141,21 +120,7 @@ export default function VisualOrganization() {
 
   return (
       <View style={styles.container}>
-          {/* <Modal
-              animationType="slide"
-              transparent={true}
-              visible={modalVisible}
-          >
-              <View style={styles.modalContainer}>
-                  <Text style={styles.modalText}>Правила тесту: Прочитайте інструкцію перед початком.</Text>
-                  <Button title="Почати" onPress={() => setModalVisible(false)} />
-              </View>
-          </Modal> */}
-        {/* {resultsModal ? (
-        <View style={styles.card} >
-          <Text>Results:</Text>
-          <Text style={styles.screenText}>{results.finalScore}</Text> 
-        </View> */}
+     
 
 		 {/* Модальне вікно */}
 		<RulesModal 
@@ -240,67 +205,67 @@ export default function VisualOrganization() {
 };
 
 const styles = StyleSheet.create({
-  container: {
-      flex: 1,
-    //   justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'white'
-  },
-  screenText: {
-      fontSize: 24
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContainer: {
-	width: '80%',
-	backgroundColor: 'white',
-	padding: 20,
-	borderRadius: 12,
-	alignItems: 'center',
-  },
-  modalTitle: {
-	fontSize: 16,
-	fontWeight: '500',
-	marginBottom: 20,
-	textAlign: 'center',
-  },
-  buttonRow: {
-	flexDirection: 'row',
-	justifyContent: 'space-between',
-	width: '100%',
-	gap: 10, // якщо підтримується, або можеш використати marginRight у першої кнопки
-  },
-  mainZone: {
-	padding: '105'
+	container: {
+		flex: 1,
+		//   justifyContent: 'center',
+		alignItems: 'center',
+		backgroundColor: 'white'
+	},
+	screenText: {
+		fontSize: 24
+	},
+	modalOverlay: {
+		flex: 1,
+		backgroundColor: 'rgba(0,0,0,0.3)',
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	modalContainer: {
+		width: '80%',
+		backgroundColor: 'white',
+		padding: 20,
+		borderRadius: 12,
+		alignItems: 'center',
+	},
+	modalTitle: {
+		fontSize: 16,
+		fontWeight: '500',
+		marginBottom: 20,
+		textAlign: 'center',
+	},
+	buttonRow: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		width: '100%',
+		gap: 10, // якщо підтримується, або можеш використати marginRight у першої кнопки
+	},
+	mainZone: {
+		padding: '105'
 
-  },
-  card: {
-	// width: '60%', // конкретний розмір картки
-	// height: '60%', // конкретний розмір картки
-	borderRadius: 6,
-	elevation: 3,
-	backgroundColor: '#fff',
-	shadowOffset: { width: 1, height: 1 },
-	shadowColor: '#333',
-	shadowOpacity: 0.3,
-	shadowRadius: 2,
-	marginHorizontal: 4,
-	marginVertical: 6,
-	alignItems:'center'
-  },
-  image: {
-	width: '100%', // картинка займатиме всю ширину картки
-	// height: '100%', // картинка займатиме всю висоту картки
-	
-  },
-  textInput: {
-	padding: 5,
-	fontSize: 22,
-  },
+	},
+	card: {
+		// width: '60%', // конкретний розмір картки
+		// height: '60%', // конкретний розмір картки
+		borderRadius: 6,
+		elevation: 3,
+		backgroundColor: '#fff',
+		shadowOffset: { width: 1, height: 1 },
+		shadowColor: '#333',
+		shadowOpacity: 0.3,
+		shadowRadius: 2,
+		marginHorizontal: 4,
+		marginVertical: 6,
+		alignItems:'center'
+	},
+	image: {
+		width: '100%', // картинка займатиме всю ширину картки
+		// height: '100%', // картинка займатиме всю висоту картки
+		
+	},
+	textInput: {
+		padding: 5,
+		fontSize: 22,
+	},
  
  
 });
