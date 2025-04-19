@@ -97,7 +97,7 @@ const visualorganizationController ={
 		// 	}
 		// });
 		try {
-			await connection.execute(`
+			connection.execute(`
 			  INSERT INTO test_results (user_id, test_type, score)
 			  VALUES (?, ?, ?)
 			`, [user_id, "visualClosure", finalScore]);
