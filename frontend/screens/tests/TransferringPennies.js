@@ -10,34 +10,27 @@ import RulesModal from '../../shared/RulesModal.js';
 import Timer from '../../shared/Timer.js';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
-// import DeviceInfo from 'react-native-device-info';
-
-// const screenWidth = Dimensions.get("window").width;
-// const screenHeight = Dimensions.get("window").height;
-// const coinSize = screenWidth * 0.05; // Розмір монетки (~15% ширини екрану)
-// const dropZoneWidth = screenWidth * 0.1;
-// const dropZoneHeight = screenHeight * 0.6;
-
 export default function TransferringPennies({route}) {
 
 	const [rulesModal, setRulesModal] = useState(true);
 	const [round2Modal, setRound2Modal] = useState(false);
-	// const [resultsModal, setResultsModal] = useState(false);
-	// const [results, setResults] = useState({ finalScore: 100 });
 	const navigation = useNavigation(); //for navigation home
 
 	const [timerIsRunning, setTimerIsRunning] = useState(false); 
 
-	const [coinData, setCoinData] = useState([]); // Структура з coins
+	const [coinData, setCoinData] = useState([]); //structure to send to backend
 
 	////test only
 	const handChangePointsTest = useRef([]);
 	const [, forceUpdate] = useState(0);
 	/////////
-	const screenWidth = Dimensions.get("window").width;
-	const coinSize = screenWidth * 0.05;
+	const { width, height } = Dimensions.get('window');
+	const minDimension = Math.min(width, height);
+	const maxDimension = Math.max(width, height);
+
+	const coinSize = minDimension * 0.05;
 	// const screenSizeInches = DeviceInfo.getScreenSize();S 
-	const widthInInches = (screenWidth * 0.8 - 20 - 20)/ 160;
+	const widthInInches = (maxDimension * 0.8 - 20 - 20)/ 160;
 	//можливо для переводу в дюцми працюватиме ось це ділення на 160
 
 	// const screenHeight = Dimensions.get("window").height;
@@ -61,10 +54,10 @@ export default function TransferringPennies({route}) {
    // Масиви монеток для лівої і правої сторін
 	const [elements, setElements] = useState([
 		{ id: 1, status: 'left' },
-		// { id: 2, status: 'left' },
-		// { id: 3, status: 'left' },
-        // { id: 4, status: 'left' },
-		// { id: 5, status: 'left' },
+		{ id: 2, status: 'left' },
+		{ id: 3, status: 'left' },
+        { id: 4, status: 'left' },
+		{ id: 5, status: 'left' },
 		// { id: 6, status: 'left' },
         // { id: 7, status: 'left' },
 		// { id: 8, status: 'left' },
@@ -415,7 +408,11 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         borderRadius: 10,
         position: 'relative',
-        //pointerEvents: "none",
+			flexDirection: 'col',
+			flexWrap: 'wrap',
+			justifyContent: 'center',
+			// gap: '5%',
+			paddingTop: 10,
         zIndex: 2,
     },
     dropAreaR: {
@@ -426,6 +423,10 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		borderRadius: 10,
 		position: 'relative',
+		flexDirection: 'col',
+		flexWrap: 'wrap',
+
+		// gap: '5%',
       //pointerEvents: "none",
       // zIndex: round,
   },

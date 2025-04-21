@@ -237,7 +237,7 @@ export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinDa
 	};
 
 	const handleDrop = async (e) => {
-		try {
+		// try {
 			// const coinLayout = await measureAsync(localRef);
 	
 			// const relativeX = coinLayout.x - targetZonePos.x;
@@ -253,12 +253,14 @@ export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinDa
 				// console.log("after move Hand change points:", handChangePoints.current);
 			} else {
 				// console.log('diff between measure ', coinLayout, 'and event', e.absoluteX, e.absoluteY)
+				console.log('diff between event', e.absoluteX, e.absoluteY)
+
 				registerDroppedCoin(e.absoluteX, e.absoluteY, Date.now());
 				droppedCoin.current = true;
 			}
-		} catch (err) {
-			console.error("Failed to measure coin layout:", err);
-		}
+		// } catch (err) {
+		// 	console.error("Failed to measure coin layout:", err);
+		// }
 	};
 	
 	
@@ -309,13 +311,15 @@ export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinDa
 				x: offset.value.x,
 				y: offset.value.y,
 			};
-		})
-		.onFinalize((e) => {
-			// setTimeout(() => {
-				handleDrop(e);
-			// }, 10); // 10–50мс зазвичай вистачає
+			handleDrop(e);
 
 		})
+		// .onFinalize((e) => {
+		// 	// setTimeout(() => {
+		// 		handleDrop(e);
+		// 	// }, 10); // 10–50мс зазвичай вистачає
+
+		// })
 		.runOnJS(true);
 		const gesture = Gesture.Simultaneous(panGesture);
           		
@@ -331,7 +335,9 @@ export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinDa
 				{
 					width: coinSize,
 					height: coinSize,
-					position: 'absolute', // <- ДОДАЙ ЦЕ
+					// position: 'absolute', // <- ДОДАЙ ЦЕ
+					marginBottom: 10,
+
 					zIndex: 3,
 				},
 				animatedStyle,
@@ -342,7 +348,6 @@ export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinDa
                 style={{width: coinSize,
                     height: coinSize,
                     position: "absolute",
-
                     zIndex: 2,
                     resizeMode: "contain"}}
             />
