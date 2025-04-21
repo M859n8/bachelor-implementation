@@ -11,71 +11,40 @@ import debounce from 'lodash.debounce';
 import { useCallback } from 'react';
 
 export default function Block({ blockId, gridPosition, refCallback, setBlocks, updateBlockValue, blockSize, cellSize }) {
-	const isPressed = useSharedValue(false);
-	const offset = useSharedValue({ x: 0, y: 0 });
-	// const color = useSharedValue('red');
+	const isPressed = useSharedValue(false); //я його не використовую, воно типу само створилося 
+	const offset = useSharedValue({ x: 0, y: 0 }); //current block position during drag
+
 	const colors = ['white', 'mixed', 'red'];
 	const colorIndex = useSharedValue(0);
 	const rotation = useSharedValue(0);
-	// const positionRef = useRef({ row: 0, col: 0 });
 
+	const localRef = useRef(null); //ref to the block , for position measurement
 
-	const [previousStates, setPreviousStates] = useState({});
-
-	const blockLayout = useSharedValue({ x: 0, y: 0 });
-	const localRef = useRef(null);
-	// useEffect(() => {
-	// 	if (localRef.current) {
-	// 		localRef.current.measure((x, y, width, height, pageX, pageY) => {
-	// 			console.log('Координати блоку:', { pageX, pageY, width, height });
-	// 			blockLayout.value = { x: pageX, y: pageY };
-	// 		});
-	// 	}
-	// }, [isPressed]);
 	useEffect(() => {
 		if (refCallback) {
 			refCallback(localRef.current);
 		}
 	}, [refCallback]);
 
+	//calculate row and col at the end of the movement
 	const checkBlockPosition = (relativeX, relativeY) =>{
 		const col = Math.round(relativeX / cellSize);
 		const row = Math.round(relativeY / cellSize);
-
-		console.log(`Блок ${blockId} — Рядок ${row}, Колонка ${col}`);
 				
-		// positionRef.current= { row: row, col: col };
 		updateBlockValue({ row: row, col: col }, 'position', blockId);
 	}
 
-	// const comparePositions =()=>{
-	// 	const newState = {
-	// 		position: currentPos, // наприклад, { x, y }
-	// 		rotation: rotation,
-	// 		color: colorIndex,
-	// 	};
-	
-	// 	const prev = previousStates[blockId];
-
-	// let actionEndTimeout;
-
-	// const resetActionSeriesTimer = () => {
-	// 	clearTimeout(actionEndTimeout);
-	// 	actionEndTimeout = setTimeout(() => {
-	// 		updateBlockValue(0, 'changesCount', blockId);
-	// 		console.log('End of gesture series');
-	// 	}, 2000); // або будь-який інший час очікування
-	// };
+	//debounce function for identificating series of gestures
 	const debouncedActionEnd = useCallback(
 		debounce(() => {
-			console.log('Серія жестів завершена');
+			// console.log('Серія жестів завершена');
 			updateBlockValue(0, 'changesCount', blockId);
 		}, 1500),
 		[] // дуже важливо: залежності порожні, щоб debounce не створювався заново
 	);
 
+	//animation for whole square 
 	const animatedStyles = useAnimatedStyle(() => {
-	
 		return {
 		transform: [
 			{ translateX: offset.value.x },
@@ -87,30 +56,24 @@ export default function Block({ blockId, gridPosition, refCallback, setBlocks, u
 
 		};
   	});
+	//for inner half of the square
 	const innerAnimatedStyles = useAnimatedStyle(() => {
-		// console.log('Current color index:', colorIndex.value);  // Перевіряємо поточне значення індексу
-   		// console.log('Color at this index:', colors[colorIndex.value]);
 		return {
 			backgroundColor: colors[colorIndex.value] === 'red'  ? 'red' : 'white', // Змінюється тільки коли квадрат червоний
-			// backgroundColor: (colors[colorIndex.value] === 'red' || colors[colorIndex.value] === 'mixed2') ? 'red' : 'white',
 
 		};
 
 	});
 
 	
-	
-
 	const tapGesture = Gesture.Tap()
 		.onEnd(() => {
 
 			const newIndex = (colorIndex.value + 1) % colors.length;
 			colorIndex.value = newIndex;
-			// runOnJS(updateBlockColor)(colors[colorIndex.value]);
 			updateBlockValue(colors[newIndex], 'color', blockId);
 
 			debouncedActionEnd();
-			// resetActionSeriesTimer();
 		})
 		.runOnJS(true);
 
@@ -119,24 +82,17 @@ export default function Block({ blockId, gridPosition, refCallback, setBlocks, u
 		.onEnd(() => {
 			const newRotation = (rotation.value + 45) % 360;
 			rotation.value = withTiming(newRotation, { duration: 100 });
-			// runOnJS(updateBlockRotation)(newRotation);
-
 			updateBlockValue(newRotation, 'rotation', blockId);
 			debouncedActionEnd();
-			// resetActionSeriesTimer();
-			
 
 		})
 		.runOnJS(true);
 
-	const start = useSharedValue({ x: 0, y: 0 });
-	const touchOffset = useSharedValue({ x: 0, y: 0 }); // різниця між торком і верхнім лівим кутом
+	const start = useSharedValue({ x: 0, y: 0 }); //block position after last move
 	const panGesture = Gesture.Pan()
 		.onBegin((e) => {
 			isPressed.value = true;
 			debouncedActionEnd();
-			
-
 		})
 		.onUpdate((e) => {
 			offset.value = {
@@ -149,44 +105,29 @@ export default function Block({ blockId, gridPosition, refCallback, setBlocks, u
 				x: offset.value.x,
 				y: offset.value.y,
 			};
-			let blockTopLeft;
+			let blockLayout;
 
 			if (localRef.current) {
 				localRef.current.measure((x, y, width, height, pageX, pageY) => {
-					// console.log('Координати блоку:', { pageX, pageY, width, height });
-					blockLayout.value = { x: pageX, y: pageY };
-					blockTopLeft = {
+					blockLayout = { //get block actual pos on screen
 						x: pageX,
 						y: pageY,
 					};
-					// console.log('This position calculation ', touchOffset.value.x,  e.absoluteX - pageX)
 
 				});
 			}
-			const relativeX =  blockTopLeft.x-gridPosition.value.x;
-			const relativeY = blockTopLeft.y-gridPosition.value.y
 
+			//calculate pos relative to grid
+			const relativeX =  blockLayout.x-gridPosition.value.x;
+			const relativeY = blockLayout.y-gridPosition.value.y
 
-			checkBlockPosition(relativeX, relativeY)
-			// const blockCenter = {
-			// 	x: e.absoluteX - touchOffset.value.x + blockWidth / 2,
-			// 	y: e.absoluteY - touchOffset.value.y + blockHeight / 2,
-			// };
+			checkBlockPosition(relativeX, relativeY) //calculate cell and row
 			debouncedActionEnd();
-			// resetActionSeriesTimer();
-
-		
 
 		})
 		.runOnJS(true);
-		// .onFinalize(() => {
-		// 	isPressed.value = false;
-		// 	// identifyCell()
 
-		// });
-	
-	// allows both gestures to work together
-	// Дабл-тап має вищий пріоритет
+		// Дабл-тап має вищий пріоритет
 	const tapGestures = Gesture.Exclusive(doubleTapGesture, tapGesture);
 
 	const gesture = Gesture.Simultaneous(tapGestures, panGesture);

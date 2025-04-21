@@ -133,13 +133,6 @@ export default function BlockDesign() {
 				? prevBlocks[blockId][type] + 1
 				: newValue,
 			};
-			// const updatedBlock = { 
-			//   ...prevBlocks[blockId],
-			//   // В залежності від типу додаємо нове значення до відповідного масиву
-			//   [type]: type === 'changesCount'
-			// 	? prevBlocks[blockId][type] + 1
-			// 	: [...prevBlocks[blockId][type], newValue]
-			// };
 		
 			return [
 			  ...prevBlocks.slice(0, blockId),

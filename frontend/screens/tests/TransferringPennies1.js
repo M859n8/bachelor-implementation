@@ -1,14 +1,20 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Modal, Button, Image, Dimensions, Animated, Alert } from 'react-native';
-import { useState, useEffect , useRef} from 'react';
-import Penny from '../../shared/Penny.js';
+import { StyleSheet, Text, View, Modal, Button, Image, Dimensions, Alert } from 'react-native';
+import { useState, useEffect ,useCallback, useRef} from 'react';
+import Animated from 'react-native-reanimated';
+import {
+	useSharedValue,useAnimatedStyle,withSpring,
+	withTiming,runOnJS,useAnimatedRef, measure, runOnUI, getRelativeCoords 
+  } from 'react-native-reanimated';
+// import Penny from '../../shared/Penny.js';
+import Penny from '../../shared/Penny1.js';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ScreenOrientation from "expo-screen-orientation";
 import LockOrientation from '../../shared/LockOrientation.js';
 import ResultsModal from '../../shared/resultsModal.js';
 import RulesModal from '../../shared/RulesModal.js';
 import Timer from '../../shared/Timer.js';
-import { useNavigation, useRoute } from '@react-navigation/native';
 
 // import DeviceInfo from 'react-native-device-info';
 
@@ -22,9 +28,8 @@ export default function TransferringPennies({route}) {
 
 	const [rulesModal, setRulesModal] = useState(true);
 	const [round2Modal, setRound2Modal] = useState(false);
-	// const [resultsModal, setResultsModal] = useState(false);
-	// const [results, setResults] = useState({ finalScore: 100 });
-	const navigation = useNavigation(); //for navigation home
+	const [resultsModal, setResultsModal] = useState(false);
+	const [results, setResults] = useState({ finalScore: 100 });
 
 	const [timerIsRunning, setTimerIsRunning] = useState(false); 
 
@@ -35,7 +40,9 @@ export default function TransferringPennies({route}) {
 	const [, forceUpdate] = useState(0);
 	/////////
 	const screenWidth = Dimensions.get("window").width;
-	const coinSize = screenWidth * 0.05;
+	const screenHeight = Dimensions.get("window").height;
+
+	const coinSize = screenHeight * 0.06;
 	// const screenSizeInches = DeviceInfo.getScreenSize();S 
 	const widthInInches = (screenWidth * 0.8 - 20 - 20)/ 160;
 	//можливо для переводу в дюцми працюватиме ось це ділення на 160
@@ -45,8 +52,9 @@ export default function TransferringPennies({route}) {
 
 	// console.log(`size of the screen ${screenWidth} and geight ${screenHeight}` );
 	// console.log('width of the screen in cm', widthInInches*2.54, 'height in cm', heightInInches*2.54);
-
-
+	const rightAreaRef = useRef(null);
+	const rightAreaLayout = useSharedValue({ x: 0, y: 0 });
+	const coinRefs= useRef([]);
 
 
 	const additionalData = useRef({
@@ -61,16 +69,25 @@ export default function TransferringPennies({route}) {
    // Масиви монеток для лівої і правої сторін
 	const [elements, setElements] = useState([
 		{ id: 1, status: 'left' },
-		// { id: 2, status: 'left' },
-		// { id: 3, status: 'left' },
-        // { id: 4, status: 'left' },
-		// { id: 5, status: 'left' },
-		// { id: 6, status: 'left' },
-        // { id: 7, status: 'left' },
-		// { id: 8, status: 'left' },
-		// { id: 9, status: 'left' },
+		{ id: 2, status: 'left' },
+		{ id: 3, status: 'left' },
+        { id: 4, status: 'left' },
+		{ id: 5, status: 'left' },
+		{ id: 6, status: 'left' },
+        { id: 7, status: 'left' },
+		{ id: 8, status: 'left' },
+		{ id: 9, status: 'left' },
 	 
-  ]);
+  	]);
+	useEffect(() => {
+			
+		if (!rulesModal) { //measure grid position after closiing rules
+			rightAreaRef.current?.measure((x, y, width, height, pageX, pageY) => {
+				// console.log('Grid coords after navigation:', { pageX, pageY });
+				rightAreaLayout.value = { x: pageX, y: pageY }; 
+			});
+		}
+	}, [rulesModal]);
 
 	const [activeCoin, setActiveCoin] = useState(null);
 	const [round, setRound] = useState(1); // Стан для відстеження поточного раунду
@@ -84,29 +101,21 @@ export default function TransferringPennies({route}) {
     //     lockOrientation();
     // }, []);
     ////////////////////////////////////////////////////////////////////////////////////////
-	const coinRefs= useRef([]);
-	const leftZoneRef = useRef(null);
-const rightZoneRef = useRef(null);
 
-const [leftZonePos, setLeftZonePos] = useState({ x: 0, y: 0 });
-const [rightZonePos, setRightZonePos] = useState({ x: 0, y: 0 });
-
-useEffect(() => {
-	if (leftZoneRef.current) {
-		leftZoneRef.current.measure((x, y, width, height, pageX, pageY) => {
-			setLeftZonePos({ x: pageX, y: pageY, width, height });
-			console.log('measure', { x: pageX, y: pageY })
-		});
-	}
-	if (rightZoneRef.current) {
-		rightZoneRef.current.measure((x, y, width, height, pageX, pageY) => {
-			setRightZonePos({ x: pageX, y: pageY, width, height });
-		});
-	}
-	console.log('measure res', rightZonePos)
-
-}, []);
-
+	const [coins, setCoins] = useState([]);
+	useEffect(() => {
+		const numberOfCoins = 3; // або скільки треба
+	
+		const newCoins = Array.from({ length: numberOfCoins }, (_, i) => ({
+			id: i,
+			status: round === 1 ? 'left' : 'right', // у 1 раунді починають зліва
+			position: { x: 0, y: 0 }, // ініціальні координати, якщо треба
+			moved: false, // чи вже перенесена
+		}));
+	
+		setCoins(newCoins);
+	}, [round]);
+	
 
 
 	const moveCoin = (id, newStatus) => {
@@ -127,8 +136,7 @@ useEffect(() => {
 
 
     const checkRoundCompletion = () => {
-		console.log(JSON.stringify(coinData, null, 2));
-		// console.log('elements', elements)
+    
         if (round === 1) {
             const allInRightZone = elements.every((el) => el.status === 'right');
             if (allInRightZone) {
@@ -161,7 +169,7 @@ useEffect(() => {
 	
     // function to normalize hand_change_points before sending to the backend
 	const normalizeData = (coinData) => {
-		console.log('got to normalized' );
+		console.log('got to normalized');
 		return coinData.map((coin) => {
             //get horizontal middle of the movement
 			const lengthCoordX = Math.abs(coin.end_coordinates.x - coin.start_coordinates.x)
@@ -169,8 +177,8 @@ useEffect(() => {
 			const extremePointsDeleted = coin.hand_change_points.filter((point) => {
 				return Math.abs(point.x) > 0.125 * lengthCoordX && Math.abs(point.x) < 0.875 * lengthCoordX;
 			});
-			console.log('middle of the coords', lengthCoordX, 'and',coin.hand_change_points )
-			console.log('length before merge', extremePointsDeleted.length);
+
+			// console.log('length before merge', extremePointsDeleted.length);
 
 
             //merge points that are located really close and most likely were created in one hand changing move
@@ -195,33 +203,32 @@ useEffect(() => {
                     i++;
                 }
             }
-			console.log('length after merge', extremePointsDeleted.length);
-            console.log('dots after merge', extremePointsDeleted);
+			// console.log('length after merge', extremePointsDeleted.length);
+            // console.log('dots after merge', extremePointsDeleted);
 
             //select one (closest to the middle) point
 			let minDistToMiddleIndex = 0;
             //if there are more than one point
 			if (extremePointsDeleted.length > 1) {
+                //calculate middle of the way
 				const middleX = lengthCoordX / 2;
-				const closestToMiddle = extremePointsDeleted.reduce((closest, point) =>
-					Math.abs(point.x - middleX) < Math.abs(closest.x - middleX) ? point : closest
-				);
-				coin.hand_change_points = closestToMiddle;
-			
-			} else if (extremePointsDeleted.length === 1) {
-				coin.hand_change_points = extremePointsDeleted[0];
-			
-			} else {
-				coin.hand_change_points = coin.errors?.[0]
-					? {
-						x: coin.errors[0].x,
-						y: coin.errors[0].y,
-						time: (coin.errors[0].timeStart + coin.errors[0].timeEnd) / 2
-					}
-					: null;
+                //if current point is closer to the center, than point with minDistToMiddleIndex, set the new index 
+				minDistToMiddleIndex = extremePointsDeleted.reduce((closestIndex, point, index) => {
+					return Math.abs(point.x - middleX) < Math.abs(extremePointsDeleted[closestIndex].x - middleX)
+						? index
+						: closestIndex;
+				}, 0);
+                //set the closest to middle point
+				coin.hand_change_points = extremePointsDeleted[minDistToMiddleIndex];
+
+			}else{
+                //if there is one point in arr
+				// console.log('got to else');
+				coin.hand_change_points = extremePointsDeleted;
+
+
 			}
-			
-			console.log('after unifiing', coin.hand_change_points );
+			// console.log('after unifiing', mergedPoints);
 
 			// /////// for testing purposes
 			// const point = extremePointsDeleted[minDistToMiddleIndex];
@@ -239,21 +246,14 @@ useEffect(() => {
     const sendDataToBackend = async () => {
         const token = await AsyncStorage.getItem('authToken');
 		const normalizedData = normalizeData(coinData); //temporaly
-		console.log('got out of normalize', normalizedData)
-		// console.log(JSON.stringify(coinData, null, 2));
 
 		requestBody = {
 			coinData : normalizedData,
-			// coinData: [],
             additionalData : additionalData.current
 		}
-		console.log('got to send');
-
-		// console.log(JSON.stringify(requestBody, null, 2));
-
 
         // console.log("Coin data being sent: ", normalizedData);
-
+		console.log('got to send');
         //  треба буде десь якось дані про час мвж вибором монеток протягом раунду брати. можна це навіть на бекенді робити
         try {
 			const response = await fetch('http://192.168.0.12:5000/api/result/pennies/saveResponse', {
@@ -271,10 +271,8 @@ useEffect(() => {
 			if (response.ok) {
 				// Alert.alert('Success', 'Ansvers calculated');
 				
-				// setResults(result); 
-				// setResultsModal(true);
-				navigation.navigate('Results', { result });
-
+				setResults(result); 
+				setResultsModal(true);
 			}
         } catch (error) {
         Alert.alert('Failure', 'Can not send answers');
@@ -296,8 +294,6 @@ useEffect(() => {
 					setRulesModal(false);
 					additionalData.current.timeStartRound1 = Date.now();
 					setTimerIsRunning(true);
-					console.log('2 measure res', leftZonePos)
-
 
 				}} 
 			/>
@@ -313,57 +309,47 @@ useEffect(() => {
 				}} 
 			/>
 
-			{/* <ResultsModal 
+			<ResultsModal 
 				visible={resultsModal} 
 				results={results} 
 				onClose={() => setResultsModal(false)} 
-			/> */}
+			/>
 			<Timer isRunning={timerIsRunning} startTime={additionalData.current.timeStartRound1}/>
 
-			<View style={styles.dot}/>
 
             <View style={styles.gameArea}>
-            <View style={styles.dropArea} ref={leftZoneRef}>
-                <Text style={styles.areaText}>Ліва зона</Text>
-                
-                {round === 1 && !rulesModal && elements.map((el, index) => (
-                
-                    <Penny 
-                        key={el.id} 
-                        index={el.id} 
-                        setActiveCoin={setActiveCoin} 
-                        moveCoin={moveCoin}
-                        checkRoundCompletion={checkRoundCompletion}
-                        round={round}
-                        setCoinData={setCoinData}
-					handChangePointsTest={handChangePointsTest} //test purposes
-						refCallback={(ref) => (coinRefs.current[index] = ref)}
-                        targetZonePos={rightZonePos}
-						coinSize={coinSize}
-						/>
-                ))}
-            </View>
-            {/* Права зона для монеток */}
-            <View style={[styles.dropAreaR,{zIndex: round}]} ref={rightZoneRef}>
-                <Text style={styles.areaText}>Права зона</Text>
-                {round === 2 && elements.map((el, index) => (
+				<View style={styles.dropArea}/>
+					
+				{/* Права зона для монеток */}
+				<View style={[styles.dropAreaR,{zIndex: round}]} ref={rightAreaRef}/>
+					
+				<View style={{
+					width: '100%',
+					flexDirection: 'col',
+					justifyContent: round === 1 ? 'flex-start' : 'flex-end',
+					gap: '1%',
+					paddingTop: 10,
+					zIndex: 10,
+					// backgroundColor: 'red',
+				}}>
+					{elements.map((el, index) => (
+						
+						<Penny 
+							key={el.id} 
+							index={el.id} 
+							setActiveCoin={setActiveCoin} 
+							moveCoin={moveCoin}
+							checkRoundCompletion={checkRoundCompletion}
+							round={round}
+							setCoinData={setCoinData}
+							coinSize={coinSize}
+							handChangePointsTest={handChangePointsTest} //test purposes
+							targetZonePos = {rightAreaLayout}
+							refCallback={(ref) => (coinRefs.current[index] = ref)}
+							/>
+					))}
+				</View>
 
-                <Penny 
-                    key={el.id} 
-                    index={el.id} 
-                    setActiveCoin={setActiveCoin} 
-                    moveCoin={moveCoin}
-                    checkRoundCompletion={checkRoundCompletion}
-                    round={round}
-                    setCoinData={setCoinData}
-					refCallback={(ref) => (coinRefs.current[index] = ref)}
-					targetZonePos={leftZonePos}
-					handChangePointsTest={handChangePointsTest} //test purposes
-					coinSize={coinSize}
-
-                    />                    
-            ))}
-            </View>
             </View>
 			
         {/* <h1> Active card {activeCoin}</h1> */}
@@ -411,11 +397,15 @@ const styles = StyleSheet.create({
         width: '10%', // Ширина зон ~10% екрану
         height: '100%', // Висота зони ~60% of the parent zone
         backgroundColor: "#d3d3d3",
-        alignItems: "center",
-        justifyContent: "center",
+        // alignItems: "center",
+        // justifyContent: "center",
         borderRadius: 10,
-        position: 'relative',
+        position: 'absolute',
+		top:0,
+		left: 0,
         //pointerEvents: "none",
+
+		
         zIndex: 2,
     },
     dropAreaR: {
@@ -425,7 +415,9 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		borderRadius: 10,
-		position: 'relative',
+		position: 'absolute',
+		top: 0,
+		right: 0,
       //pointerEvents: "none",
       // zIndex: round,
   },
@@ -435,15 +427,4 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         zIndex: 0,
     },
-		dot: {
-		width: 10,
-		height: 10,
-		borderRadius: 5,
-		backgroundColor: 'green',
-		position: 'absolute',
-		left: 210,
-		top: 364,
-		zIndex: 100,
-
-	  }
 });

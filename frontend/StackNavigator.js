@@ -73,15 +73,23 @@ export default function StackNavigator() {
           {/* <Stack.Screen name="Home" component={Home} /> */}
           <Stack.Screen name="Home" >
             {props => <Home {...props} setIsAuthenticated={setIsAuthenticated} />} 
-          </Stack.Screen>
-          <Stack.Screen name="Balance" component={Balance} />
-          <Stack.Screen name="BellsCancellation" component={BellsCancellation} />
-          <Stack.Screen name="BlockDesign" component={BlockDesign} />
-          <Stack.Screen name="ComplexFigure" component={ComplexFigure} />
-          <Stack.Screen name="LineTracking" component={LineTracking} />
-          <Stack.Screen name="TransferringPennies" component={TransferringPennies}  options={{ gestureEnabled: false }}/>
-          <Stack.Screen name="VisualOrganization" component={VisualOrganization} />
-		  <Stack.Screen name="Results" component={ResultsScreen} />
+			</Stack.Screen>
+			<Stack.Screen name="Balance" component={Balance} />
+			<Stack.Screen name="BellsCancellation" component={BellsCancellation} />
+			<Stack.Screen name="BlockDesign" component={BlockDesign} />
+			<Stack.Screen name="ComplexFigure" component={ComplexFigure} />
+			<Stack.Screen name="LineTracking" component={LineTracking} />
+			<Stack.Screen
+				name="TransferringPennies"
+				component={TransferringPennies}
+				options={{
+					gestureEnabled: false,
+					animation: 'none', // <-- це вимикає slide-перехід
+				}}
+			/>
+
+			<Stack.Screen name="VisualOrganization" component={VisualOrganization} />
+			<Stack.Screen name="Results" component={ResultsScreen} />
         </Stack.Group>
         ) : ( 
         <Stack.Group>

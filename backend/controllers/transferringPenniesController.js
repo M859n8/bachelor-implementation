@@ -43,10 +43,11 @@ const transferringPenniesController ={
 		const results = [];
 		// Обчислення для кожного елементу
 		data.forEach(entry => {
-			const handChange = entry.hand_change_points[0];
-			// console.log('hand change obj', handChange);
+			const handChange = entry.hand_change_points;
+			console.log('hand change obj', handChange, entry);
 			//processing only data where hand change point is detected
 			if (!handChange) return; // Пропускаємо, якщо немає зміни руки 
+			console.log('return check')
 			/*може якщо не було зміни руки, але була помилка, записати це як момент зміни руки
 				потім в обрахувнках до якої області належиться помилка, робити варіант, що якщо помилка 
 				мменше або дірівнює координатам зміни руки, то вона належить до тієї то області
@@ -74,6 +75,7 @@ const transferringPenniesController ={
 				// transferringPenniesController.calculateMLParams(handChangeCoord,coordEnd, timeHandChange, timeEnd, errors, wholeDistance);
 				paramsR = transferringPenniesController.calculateMLParams(coordStart, handChangeCoord, timeStart, timeHandChange, errors, wholeDistance);
 				paramsL = transferringPenniesController.calculateMLParams(handChangeCoord,coordEnd, timeHandChange, timeEnd, errors, wholeDistance);
+			
 			}
 			const {speed: speedLeft, part: partLeft, errNum: errNumLeft,errTime: errTimeLeft} = paramsL;
 			const {speed: speedRight, part: partRight, errNum: errNumRight,errTime: errTimeRight} = paramsR;
@@ -89,21 +91,21 @@ const transferringPenniesController ={
 		
 		});
 		// Показуємо результати
-		// console.log(results);
+		console.log(results);
 		return results;
 	},
 
 	calculateMLParams : (coordStart, coordEnd, timeStart, timeEnd, errors, wholeDistance) => {
 
 		const errInZone = errors.filter(err => 
-			Math.abs(err.x) > Math.abs(coordStart.x) && Math.abs(err.x) < Math.abs(coordEnd.x));
+			Math.abs(err.x) > Math.abs(coordStart.x) && Math.abs(err.x) <= Math.abs(coordEnd.x));
         const errNum = errInZone.length;
         const errTime = errInZone.reduce((sum, err) => sum + err.time, 0);
 		const timeDiff = timeEnd - timeStart - errTime;
         const speed = timeDiff > 0 ? transferringPenniesController.distance(coordStart, coordEnd) / timeDiff : 0;
 		const part = transferringPenniesController.distance(coordStart, coordEnd) /wholeDistance;
 
-		return { speed, part, errNum, errTime  };
+		return { speed, part, errNum, errTime  }; 
 	},
 
 	callModel : (coinData, res)=> {
