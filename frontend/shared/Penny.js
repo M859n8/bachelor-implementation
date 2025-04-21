@@ -1,57 +1,31 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Image, Dimensions, StyleSheet, View, PanResponder } from "react-native";
 
-// import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import Animated, { useSharedValue, useAnimatedStyle, runOnJS} from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
 
 
-export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinData, handChangePointsTest, refCallback, targetZonePos, coinSize}) {
+export default function Penny({index, setElements, round, setCoinData, targetZonePos, coinSize}) {
 
-    // const position = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
     const startCoords = useRef({ x: 0, y: 0 });
-    // const [data, setData] = useState({ coins: [] }); // Структура з coins
-
-	const screenWidth = Dimensions.get("window").width;
+	// const screenWidth = Dimensions.get("window").width;
 	// const coinSize = screenWidth * 0.05; // Розмір монетки (~15% ширини екрану)
 
-
-    const lastSpeed = useRef(0);
-    // const lastDirection = useRef(null);
-    // const lastHandChangeTime = useRef(null);
+    const lastSpeed = useRef(0); //for hand change points detection
     const angleHistory=useRef([]);
-    // const [handChangePoints, setHandChangePoints] = useState([]); 
-
     const handChangePoints = useRef([]);
-
 
 	const offset = useSharedValue({ x: 0, y: 0 });
 	const start = useSharedValue({ x: 0, y: 0 });
 
-    ///////////////////////////////////////////////////////////////////////debug
-    // Додаємо точку зміни руки
-    const registerHandChange = (x, y, time) => { //debug
-        // setHandChangePoints((prevPoints) => {
-        //     const updatedPoints = [...prevPoints, { x, y }];
-        //     console.log("Updated points inside setter:", updatedPoints);
-        //     return updatedPoints;
-        // });
-        handChangePoints.current.push({ x, y , time});
 
-        // Якщо ви хочете перевірити зміни, ви можете додати консоль
-        console.log("Updated hand change points:", handChangePoints.current);
-
-
-    };
-    /////////////////////////////////////////////////////////////////////
-
-	const localRef = useRef(null);
-	useEffect(() => {
-		if (refCallback) {
-			refCallback(localRef.current);
-		}
-	}, [refCallback]);
+	// const localRef = useRef(null);
+	// useEffect(() => {
+	// 	if (refCallback) {
+	// 		refCallback(localRef.current);
+	// 	}
+	// }, [refCallback]);
     
     const startTime = useRef(0); //щоб оновлювалося одразу і не чекало рендерингу як у юзстейт
     // const endTimeBackup = useRef(0);
@@ -79,7 +53,16 @@ export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinDa
 
     };
 
-
+	//change coin status left/fight
+	const moveCoin = (id, newStatus) => {
+		setElements((prevElements) => {
+			
+			const updatedElements = prevElements.map((el) =>
+				el.id === id ? { ...el, status: newStatus } : el
+			);
+			return updatedElements;
+		}); 
+	};
     
 
     const collectCoinData = (coinId, startCoords, endCoords) => {
@@ -106,8 +89,8 @@ export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinDa
 		// console.log('check if array is empty', droppedCoinPoints.current );
         // setCoinData((prevData) => [...prevData, coinData]); 
         updateOrAddCoin(coinData)
-		console.log('hand change points', coinData.hand_change_points)
-		console.log('COIN DATA', coinData)
+		// console.log('hand change points', coinData.hand_change_points)
+		// console.log('COIN DATA', coinData)
 
         // console.log("Hand change points:", handChangePoints);
         // console.log("Error points:", droppedCoinPoints.current);
@@ -185,7 +168,12 @@ export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinDa
 			// console.log(`🔄 Можлива зміна руки! Speed ${speed}, coords ${event.absoluteX}, ${event.absoluteY}`);
 			console.log(`	Можлива зміна руки! Speed ${speed}, coords ${event.absoluteX}, ${event.absoluteY}`);
 
-			registerHandChange(event.absoluteX, event.absoluteY, Date.now());
+			// registerHandChange(event.absoluteX, event.absoluteY, Date.now());
+			handChangePoints.current.push({
+				x: event.absoluteX,
+				y: event.absoluteY,
+				time: Date.now()
+			});
 		}
 		else{
 			// if(lastSpeed.current < 0.2 && speed > 0.2){
@@ -258,6 +246,7 @@ export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinDa
 				registerDroppedCoin(e.absoluteX, e.absoluteY, Date.now());
 				droppedCoin.current = true;
 			}
+			// console.log('elements', elements)
 		// } catch (err) {
 		// 	console.error("Failed to measure coin layout:", err);
 		// }
@@ -269,7 +258,7 @@ export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinDa
 
 	const panGesture = Gesture.Pan()
 		.onBegin((e) => {
-			setActiveCoin(index); // Записуємо, яку монету взяли
+			// setActiveCoin(index); // Записуємо, яку монету взяли
 			startTime.current = Date.now(); // Оновлюється без виклику ререндеру
 			// console.log('start time is ', startTime.current);
 
@@ -303,7 +292,7 @@ export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinDa
 		})
 		.onEnd((e) => {
 			
-			setActiveCoin(null);
+			// setActiveCoin(null);
 			const endCoords = { x: e.absoluteX, y: e.absoluteY };
             collectCoinData(index, startCoords.current, endCoords);
 
@@ -314,12 +303,6 @@ export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinDa
 			handleDrop(e);
 
 		})
-		// .onFinalize((e) => {
-		// 	// setTimeout(() => {
-		// 		handleDrop(e);
-		// 	// }, 10); // 10–50мс зазвичай вистачає
-
-		// })
 		.runOnJS(true);
 		const gesture = Gesture.Simultaneous(panGesture);
           		
@@ -328,9 +311,9 @@ export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinDa
     return( 
         <>
 
-<GestureDetector gesture={gesture}>
+		<GestureDetector gesture={gesture}>
 		<Animated.View
-			ref={localRef}
+			// ref={localRef}
 			style={[
 				{
 					width: coinSize,
@@ -351,8 +334,8 @@ export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinDa
                     zIndex: 2,
                     resizeMode: "contain"}}
             />
-            </Animated.View>
-			</GestureDetector>
+        </Animated.View>
+		</GestureDetector>
             <View style={{ position: "absolute", top: 0, left: 0, backgroundColor: 'blue' }}>
 
             {handChangePoints.current.map((point, index) => (
@@ -372,7 +355,7 @@ export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinDa
                 />
             ))}
 
-			<View style={{ position: "absolute", top: 0, left: 0 }}>
+			{/* <View style={{ position: "absolute", top: 0, left: 0 }}>
 
 			{handChangePointsTest.current.map((point, index) => (
 
@@ -389,7 +372,7 @@ export default function Penny({ index, setActiveCoin, moveCoin, round, setCoinDa
 					}}
 				/>
 			))}
-			</View>
+			</View> */}
         </View>
 
         </>
