@@ -78,7 +78,7 @@ export default function StackNavigator() {
 			<Stack.Screen name="BellsCancellation" component={BellsCancellation} />
 			<Stack.Screen name="BlockDesign" component={BlockDesign} />
 			<Stack.Screen name="ComplexFigure" component={ComplexFigure} />
-			<Stack.Screen name="LineTracking" component={LineTracking} />
+			<Stack.Screen name="LineTracking" component={LineTracking} options={{animation: 'none'}}/>
 			<Stack.Screen
 				name="TransferringPennies"
 				component={TransferringPennies}

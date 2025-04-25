@@ -38,11 +38,19 @@ export default function TransferringPennies({route}) {
         { id: 4, status: 'left' },
 		{ id: 5, status: 'left' },
 		{ id: 6, status: 'left' },
-        { id: 7, status: 'left' },
-		{ id: 8, status: 'left' },
-		{ id: 9, status: 'left' },
+        // { id: 7, status: 'left' },
+		// { id: 8, status: 'left' },
+		// { id: 9, status: 'left' },
 	 
-  ]);
+  	]);
+
+	const additionalData = useRef({
+		timeStartRound1:0,
+		timeEndRound1:0,
+		timeStartRound2:0,
+		timeEndRound2:0,
+		width: 0,
+	});
 
 	const [activeCoin, setActiveCoin] = useState(null); //active coin for debug
 	const [round, setRound] = useState(1); // current round. can be 1 or 2
@@ -79,16 +87,20 @@ export default function TransferringPennies({route}) {
 
 	}, []);
 
-	const widthInInches = (rightZonePos.pageX - (leftZonePos.pageX + leftZonePos.width))/ 160; 
-	//можливо для переводу в дюцми працюватиме ось це ділення на 160
+	useEffect(() => {
+		if (leftZonePos.width && rightZonePos.x) {
+			const calculatedWidth = (rightZonePos.x - (leftZonePos.x + leftZonePos.width)) / 160;
+			console.log('width in inches', calculatedWidth);
+	
+			additionalData.current.width = calculatedWidth; // Зберігаємо в useRef без використання useState
+		}
+	}, [leftZonePos, rightZonePos]);
+	
 
-	const additionalData = useRef({
-		timeStartRound1:0,
-		timeEndRound1:0,
-		timeStartRound2:0,
-		timeEndRound2:0,
-		width: widthInInches,
-	});
+	// const widthInInches = (rightZonePos.x - (leftZonePos.x + leftZonePos.width))/ 160; 
+	//можливо для переводу в дюцми працюватиме ось це ділення на 160
+	// console.log('width in inches', widthInInches)
+	
 
 	useEffect(() => {
 		console.log('before check round coplexion', JSON.stringify(elements, null, 2))
@@ -125,17 +137,38 @@ export default function TransferringPennies({route}) {
     // function to normalize hand_change_points before sending to the backend
 	const normalizeData = (coinData) => {
 		return coinData.map((coin) => {
+			console.log('before normalize', coin.hand_change_points)
             //get horizontal middle of the movement
 			const lengthCoordX = Math.abs(coin.end_coordinates.x - coin.start_coordinates.x)
+			if(coin.end_coordinates.x - coin.start_coordinates.x < 0){
+				console.log('!!!!!!!!!!!!!!!!less')
+
+			}
+			const startX = coin.start_coordinates.x;
+			const endX = coin.end_coordinates.x;
+
+			// визначаємо напрям
+			const goingLeft = startX > endX;
+			if(goingLeft){
+				console.log('going left')
+			}
             //delete extreme points. that are <1/8 and >7/8 of the general path
 			// Гарантуємо, що працюємо з масивом
 			const points = Array.isArray(coin.hand_change_points) ? coin.hand_change_points : [];
 
 			// Видаляємо крайні точки
-			const extremePointsDeleted = points.filter((point) =>
-				Math.abs(point.x) > 0.125 * lengthCoordX &&
-				Math.abs(point.x) < 0.875 * lengthCoordX
-			);
+			const extremePointsDeleted = points.filter((point) => {
+				const relativeX = goingLeft
+					? point.x -endX // якщо йде вліво — вираховуємо відстань "назад"
+					: point.x - startX; // якщо вправо — звичайна різниця
+			
+				return relativeX > 0.125 * lengthCoordX && relativeX < 0.875 * lengthCoordX;
+			});
+			if(goingLeft){
+			console.log('extreme poinst',0.125 * lengthCoordX + endX,  0.875 * lengthCoordX+endX)
+
+
+			}
             //merge points that are located really close and most likely were created in one hand changing move
 			let i = 0;
             while (i < extremePointsDeleted.length - 1) {
@@ -170,7 +203,8 @@ export default function TransferringPennies({route}) {
 				//if we detected one hand change point, save it
 				coin.hand_change_points = extremePointsDeleted[0];
 			
-			} else {
+			} 
+			else {
 				//else try to take error point as hand change
 				coin.hand_change_points = coin.errors?.[0]
 					? {
@@ -180,6 +214,9 @@ export default function TransferringPennies({route}) {
 					}
 					: null;
 			}
+			console.log('after normalize', coin.hand_change_points)
+			console.log('after normalize errors', coin.errors)
+
 			
 			return coin;
 		})
@@ -318,7 +355,7 @@ export default function TransferringPennies({route}) {
             ))}
             </View>
             </View>
-			
+		<View style={styles.dot}/>
         {/* <h1> Active card {activeCoin}</h1> */}
         {/* <Text>Active coin: {activeCoin !== null ? activeCoin : 'None'}  round ${round} </Text> */}
         </View>
@@ -375,15 +412,15 @@ const styles = StyleSheet.create({
         zIndex: 2,
     },
  
-	// dot: {
-	// 	width: 10,
-	// 	height: 10,
-	// 	borderRadius: 5,
-	// 	backgroundColor: 'green',
-	// 	position: 'absolute',
-	// 	left: 210,
-	// 	top: 364,
-	// 	zIndex: 100,
+	dot: {
+		width: 10,
+		height: 10,
+		borderRadius: 5,
+		backgroundColor: 'green',
+		position: 'absolute',
+		left: 361,
+		top: 364,
+		zIndex: 100,
 
-	//   }
+	  }
 });

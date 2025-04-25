@@ -146,35 +146,26 @@ export default function BlockDesign() {
     const sendDataToBackend = async (data) => {
 		//stoop the timer
 		setTimerIsRunning(false);
-
 		// console.log(JSON.stringify(allRoundsData, null, 2));
 
         const token = await AsyncStorage.getItem('authToken'); //get authorization token
-
 		try {
             const response = await fetch('http://192.168.0.12:5000/api/result/block/saveResponse', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
-
                 },
                 body: JSON.stringify({roundBlocks: data}),  //transform object into json string
             })
-
 			const result = await response.json();
-
             if (response.ok) {
 				//go to result page
 				navigation.navigate('Results', { result });
-
             }
         } catch (error) {
         	Alert.alert('Failure', 'Can not send answers');
-
-        }
-
-		
+        }		
 	}
 
 

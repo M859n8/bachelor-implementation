@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS test_results (
     'assemblingObjects'
   ) NOT NULL,
   score FLOAT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 `;
