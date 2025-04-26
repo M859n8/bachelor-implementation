@@ -36,20 +36,19 @@ const createDatabaseAndTable = () => {
   // Створення бази даних
   connection.query(createUserTableQuery, (err) => {
     if (err) {
-      console.error('Error creating database:', err);
+      console.error('Error creating user table:', err);
       return;
     }
 
-    console.log('Database created or already exists');
 
-    // Після створення бази даних вибираємо її
     connection.query(createTestTableQuery, (err) => {
       if (err) {
-        console.error('Error selecting database:', err);
+        console.error('Error creating test table:', err);
         return;
       }
 
-      console.log('Database selected');
+	  console.log('Database created or already exists');
+
 
       connection.end();
     });

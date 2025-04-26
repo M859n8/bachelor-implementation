@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Login from './Login';
 import Chart from '../shared/Chart.js';
 
-const tests = [ "Balance","BellsCancellation","BlockDesign",
+const tests = ["BellsCancellation","BlockDesign",
     "ComplexFigure","TransferringPennies", "VisualOrganization", "LineTracking"];
 
 export default function Home({ setIsAuthenticated }) {

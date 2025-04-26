@@ -1,84 +1,5 @@
-const roundTemplates = [
-    {
-        round: 0, //template 11
-        duration: 210, // у секундах 
-        gridSize: 3, // 3x3
-		expectedActions: 9,
-		maxActions: 19,
-
-        correctBlocks: [
-            { row: 0, col: 0, color: 'mixed', rotation: 180 },
-            { row: 0, col: 1, color: 'red', rotation: 0 },
-            { row: 0, col: 2, color: 'mixed', rotation: 270 },
-			{ row: 1, col: 0, color: 'red', rotation: 0 },
-            { row: 1, col: 1, color: 'mixed', rotation: 90 },
-            { row: 1, col: 2, color: 'red', rotation: 0 },
-			{ row: 2, col: 0, color: 'mixed', rotation: 0 },
-            { row: 2, col: 1, color: 'white', rotation: 0 },
-            { row: 2, col: 2, color: 'mixed', rotation: 0 },
-            // і т.д. для всіх 9 або скільки там блоків
-        ]
-    },
-    {
-        round: 1,
-        duration: 120, // 2 хв
-        gridSize: 4,
-		expectedActions: 17,
-		maxActions: 32,
-
-        correctBlocks: [
-            { row: 0, col: 0, color: 'red', rotation: 0 },
-            { row: 0, col: 1, color: 'mixed', rotation: 90 },
-            { row: 0, col: 2, color: 'mixed', rotation: 0 },
-            { row: 0, col: 3, color: 'red', rotation: 0 },
-
-			{ row: 1, col: 0, color: 'mixed', rotation: 90 },
-            { row: 1, col: 1, color: 'mixed', rotation: 270 },
-            { row: 1, col: 2, color: 'mixed', rotation: 180 },
-			{ row: 1, col: 3, color: 'mixed', rotation: 0 },
-
-			{ row: 2, col: 0, color: 'mixed', rotation: 180 },
-            { row: 2, col: 1, color: 'mixed', rotation: 0 },
-            { row: 2, col: 2, color: 'mixed', rotation: 90 },
-            { row: 2, col: 3, color: 'mixed', rotation: 270 },
-
-			{ row: 3, col: 0, color: 'red', rotation: 0 },
-            { row: 3, col: 1, color: 'mixed', rotation: 180 },
-            { row: 3, col: 2, color: 'mixed', rotation: 270 },
-            { row: 3, col: 3, color: 'red', rotation: 0 },
-
-        ]
-    },
-    {
-        round: 2,
-        duration: 180, // 3 хв
-        gridSize: 4,
-		expectedActions: 17,
-		maxActions: 32,
-
-        correctBlocks: [
-			{ row: 0, col: 0, color: 'mixed', rotation: 180 },
-            { row: 0, col: 1, color: 'mixed', rotation: 180 },
-            { row: 0, col: 2, color: 'mixed', rotation: 270 },
-            { row: 0, col: 3, color: 'white', rotation: 0 },
-
-			{ row: 1, col: 0, color: 'red', rotation: 0 },
-            { row: 1, col: 1, color: 'mixed', rotation: 0 },
-            { row: 1, col: 2, color: 'mixed', rotation: 0 },
-			{ row: 1, col: 3, color: 'mixed', rotation: 180 },
-
-			{ row: 2, col: 0, color: 'mixed', rotation: 0 },
-            { row: 2, col: 1, color: 'mixed', rotation: 180 },
-            { row: 2, col: 2, color: 'red', rotation: 0 },
-            { row: 2, col: 3, color: 'mixed', rotation: 0 },
-
-			{ row: 3, col: 0, color: 'mixed', rotation: 90 },
-            { row: 3, col: 1, color: 'mixed', rotation: 0 },
-            { row: 3, col: 2, color: 'mixed', rotation: 90 },
-            { row: 3, col: 3, color: 'white', rotation: 0 },
-        ]
-    }
-];
+import userModel from '../models/user.js';
+import roundTemplates from '../assets/roundTemplates.js';
 
 
 const blockDesignController = {
@@ -111,7 +32,27 @@ const blockDesignController = {
 			allRoundsScore += round.totalScore / 3; 
 		})
 
-        res.json({ message: "Response saved locally", finalScore: `Results for each round: ${finalScoreText},\n and final score is ${allRoundsScore}`  });
+		const finalScore = (
+			(resultsPerRound[0].totalScore * 8 + resultsPerRound[1].totalScore * 9 + resultsPerRound[2].totalScore * 10) / 
+			(8 + 9 + 10)
+		 ).toFixed(2);
+
+
+
+		try {
+			console.log(`User ${user_id} final score: ${finalScore}%`);
+			await userModel.saveToDatabase(user_id, "assemblingObjects", finalScore)
+
+			res.json({
+				message: "Final score calculated",
+				finalScore: `${finalScore}`,
+			});
+		} catch (error) {
+			console.error(error);
+			res.status(500).json({ error: "Database error" });
+		}
+
+        // res.json({ message: "Response saved locally", finalScore: `${finalScore}`  });
 
     },
 
@@ -242,9 +183,9 @@ const blockDesignController = {
 
 	}, 
 	
-	sendToDataBase: () => {
+	// sendToDataBase: () => {
 
-	},
+	// },
 	
 
 }

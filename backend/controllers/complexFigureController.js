@@ -1,5 +1,7 @@
 
 import fs from 'fs';
+import connection from './../db-config.js';
+import userModel from '../models/user.js';
 
 import {spawn} from 'child_process';
 import path from 'path';
@@ -38,25 +40,55 @@ const complexFigureController = {
 		});
 	   
 		 // Перевірка завершення процесу
-		child.on('close', (code) => {
-		   if (code === 0) {
-			 // Якщо Python скрипт успішно завершився, надсилаємо відповідь користувачу
-			 res.json({ message: 'SVG saved and processed successfully', finalScore: `${output}` });
-		   } else {
-			 // Якщо процес завершився з помилкою
-			 res.status(500).json({ error: 'Error processing SVG' });
-		   }
+		child.on('close', async (code) => {
+			if (code === 0) {
+
+				try {
+					// (Тут можна зберігати фінальний результат у базу)
+					// console.log(`User ${user_id} final score: ${finalScore}%`);
+					let finalScore = parseFloat(output).toFixed(4);
+					finalScore *= 100;
+
+
+		
+					// await complexFigureController.saveToDatabase(user_id, finalScore, res);
+					await userModel.saveToDatabase(user_id, "copyingObjects", finalScore)
+		
+					res.json({
+						message: "Final score calculated",
+						
+						finalScore: `${finalScore}%`,
+					});
+				} catch (error) {
+					console.error(error);
+					res.status(500).json({ error: "Database error" });
+				}
+			} else {
+				// Якщо процес завершився з помилкою
+				res.status(500).json({ error: 'Error processing SVG' });
+			}
 		});
 
 		// res.json({ message: 'SVG saved successfully' });
-
-
-
     },
 
-    calculateResults: async () => {
+	// saveToDatabase: async(user_id, finalScore, res)=>{
+	// 	console.log('got into save', finalScore)
 
-    }
+
+	// 	try {
+	// 		connection.execute(`
+	// 		  INSERT INTO test_results (user_id, test_type, score)
+	// 		  VALUES (?, ?, ?)
+	// 		`, [user_id, "copyingObjects", finalScore]);
+		
+	// 		console.log(`Saved result (${finalScore}) for user ${user_id}`);
+	// 	} catch (err) {
+	// 		console.error("Error saving result:", err);
+    // 		res.status(500).json({ error: 'Error saving result' });
+	// 	}
+
+	// },
 
 }
 

@@ -23,7 +23,7 @@ def predict_similarity(graph_json):
 	with torch.no_grad():
 		similarity = model(graph).item()
 
-	print(f'Similarity: {similarity:.2f}')
+	# print(f'Similarity: {similarity:.2f}')
 	return similarity
 
 def predict_similarity_test(num=1):

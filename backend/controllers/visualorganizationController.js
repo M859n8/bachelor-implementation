@@ -1,6 +1,8 @@
 // import connection from "../config/db.js";
 import connection from './../db-config.js';
 import stringSimilarity from "string-similarity";
+import userModel from '../models/user.js';
+
 const userResponses = {}; // Тимчасове сховище відповідей користувачі
 const correctAnswers = {
 	0: ["fish"],
@@ -70,7 +72,8 @@ const visualorganizationController ={
 			// (Тут можна зберігати фінальний результат у базу)
 			// console.log(`User ${user_id} final score: ${finalScore}%`);
 
-			await visualorganizationController.saveToDatabase(user_id, finalScore, res);
+			// await visualorganizationController.saveToDatabase(user_id, finalScore, res);
+			await userModel.saveToDatabase(user_id, "visualClosure", finalScore)
 
 			res.json({
 				message: "Final score calculated",
@@ -83,32 +86,21 @@ const visualorganizationController ={
 		// res.json({ message: "Response saved locally" });
 	},
 
-    saveToDatabase: async(user_id, finalScore, res)=>{
-		// const query = `
-		// 	INSERT INTO testResults (user_id, test_type, score)
-		// 	VALUES (?, ?)
-		// `;
+    // saveToDatabase: async(user_id, finalScore, res)=>{
 
-		// connection.execute(query, [user_id,"visualClosure", finalScore], (err, results) => {
-		// 	if (err) {
-		// 	console.error("Error saving result:", err);
-		// 	} else {
-		// 	console.log("Result saved successfully:", results.insertId);
-		// 	}
-		// });
-		try {
-			connection.execute(`
-			  INSERT INTO test_results (user_id, test_type, score)
-			  VALUES (?, ?, ?)
-			`, [user_id, "visualClosure", finalScore]);
+	// 	try {
+	// 		connection.execute(`
+	// 		  INSERT INTO test_results (user_id, test_type, score)
+	// 		  VALUES (?, ?, ?)
+	// 		`, [user_id, "visualClosure", finalScore]);
 		
-			// console.log(`Saved ${test_type} result (${score}) for user ${user_id}`);
-		} catch (err) {
-			console.error("Error saving result:", err);
-    		res.status(500).json({ error: 'Error saving result' });
-		}
+	// 		// console.log(`Saved ${test_type} result (${score}) for user ${user_id}`);
+	// 	} catch (err) {
+	// 		console.error("Error saving result:", err);
+    // 		res.status(500).json({ error: 'Error saving result' });
+	// 	}
 
-	},
+	// },
 };
 
 export default visualorganizationController;

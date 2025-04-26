@@ -49,6 +49,7 @@ export default function StackNavigator() {
         setIsAuthenticated(true);
 
         } else {
+			console.log('auth check failed')
           // navigation.replace("Login"); // Якщо токен невалідний — перенаправлення на логін
         setIsAuthenticated(false);
 

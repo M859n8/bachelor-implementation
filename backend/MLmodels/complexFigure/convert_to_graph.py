@@ -55,7 +55,7 @@ def build_graph(lines, threshold=30):
 
 	G.add_nodes_from(set(clusters.values()))  # Додаємо тільки унікальні вершини
 	G.add_edges_from(edges)
-	print('Amount of points', len(set(clusters.values())))
+	# print('Amount of points', len(set(clusters.values())))
 
 	# Створюємо оновлений список ребер
 	# Цей вираз створює новий список ребер, але замість початкових точок використовує їхні згруповані версії

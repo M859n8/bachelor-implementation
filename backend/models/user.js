@@ -2,53 +2,53 @@
 import bcrypt from 'bcryptjs';
 import db from '../db-config.js';
 
-const User = {
-  createUser: (username, password, callback) => {
-    const hashedPassword = bcrypt.hashSync(password, 10);
-    db.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword], (err, results) => {
-      if(err){
-        return callback(err, null);
-      }
-      callback(null, results.insertId);
-    });
-  },
-
-  findByUsername: (username, callback) => {
-    db.query('SELECT * FROM users WHERE username = ?', [username], callback);
-  },
-
-  findById: (id, callback) => {
-    db.query('SELECT id, username FROM users WHERE id = ?', [id], (err, results) => {
-      if (err) return callback(err);
-      callback(null, results[0]); // повертаємо перший (і єдиний) результат
-    });
-  },
-
-  getUserTestResults: (userId, callback) => {
-    db.query(
-        'SELECT test_type, score, created_at FROM test_results WHERE user_id = ?',
-        [userId],
-        (err, results) => {
-            if (err) return callback(err);
-
-			console.log('reults', results)
-            // Групуємо результати по test_type
-            const grouped = results.reduce((acc, { test_type, score, created_at }) => {
-				console.log('created at', created_at);
-				if (!acc[test_type]) acc[test_type] = [];
-				acc[test_type].push({ score, created_at });
-				return acc;
-			}, {});
-			console.log('grouped is', grouped);			
-            callback(null, grouped);
-			}
+const userModel = {
+	createUser: async (username, password) => {
+		const hashedPassword = bcrypt.hashSync(password, 10);
+		const [result] = await db.execute(
+			'INSERT INTO users (username, password) VALUES (?, ?)',
+			[username, hashedPassword]
 		);
-	}
+		return result.insertId;
+	},
 
-  
+	findByUsername: async (username) => {
+		const [rows] = await db.execute(
+			'SELECT * FROM users WHERE username = ?',
+			[username]
+		);
+		return rows[0];
+	},
+	
+    findById: async (id) => {
+        const [rows] = await db.execute(
+            'SELECT id, username FROM users WHERE id = ?',
+            [id]
+        );
+        return rows[0];
+    },
+
+	getUserTestResults: async (userId) => {
+		const [results] = await db.execute(
+			'SELECT test_type, score, created_at FROM test_results WHERE user_id = ?',
+			[userId]
+		);
+		return results;
+	
+	},
+
+	saveToDatabase: async (userId, testType, score)=>{
+		console.log('save to db')
+		await db.execute(
+            `INSERT INTO test_results (user_id, test_type, score)
+            VALUES (?, ?, ?)`,
+            [userId, testType, score]  // передаємо правильні змінні
+        );
+
+	}
 };
 
-export default User;
+export default userModel;
 
 // createUser: (username, password, callback) => {
 //   const query = 'INSERT INTO users (username, password) VALUES (?, ?)';

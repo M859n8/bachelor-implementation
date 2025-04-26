@@ -1,34 +1,37 @@
 import connection from './../db-config.js';
 
-import User from '../models/user.js';
+import userModel from '../models/user.js';
 const userInfoController = {
 
 
-	getUserInfo: (req, res) => {
+	getUserInfo: async (req, res) => {
 		console.log('got to user info')
 		const userId = req.user.id;
+		try {
+			const results = await userModel.getUserTestResults(userId);
+			const user = await userModel.findById(userId);
 
-		User.findById(userId, (err, user) => {
-			if (err || !user) {
-				console.log('err1')
-				return res.status(404).json({ error: 'User not found' });
-			}
-
-			User.getUserTestResults(userId, (err, groupedResults) => {
-				if (err) return res.status(500).json({ error: 'DB error' });
-				// res.json(groupedResults); // наприклад: { memory: [85, 90], attention: [75] }
 			
-		
-		// res.json({ user: { login: "test" }, results: [] });
-
-				res.json({
-					user: {
-					login: user.username
-					},
-					groupedResults
-				});
+			// Групуємо результати по test_type
+			const grouped = results.reduce((acc, { test_type, score, created_at }) => {
+				if (!acc[test_type]) acc[test_type] = [];
+				acc[test_type].push({ score, created_at });
+				return acc;
+			}, {});
+			console.log(grouped)
+	
+			// Відправляємо згруповані результати в клієнт
+			// res.json(grouped);
+			res.json({
+				user: {
+				login: user.username
+				},
+				groupedResults: grouped || []
 			});
-		});
+		} catch (err) {
+			console.error('Error retrieving test results: ', err);
+			res.status(500).json({ error: 'Failed to retrieve test results' });
+		}
 
 	},
 

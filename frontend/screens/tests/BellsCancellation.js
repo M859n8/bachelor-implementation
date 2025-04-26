@@ -37,15 +37,15 @@ export default function BellsCancellation({route}) {
         4: require("../../assets/bells/processed_4.png"),
         5: require("../../assets/bells/processed_5.png"),
         6: require("../../assets/bells/processed_6.png"),
-        // 7: require("../../assets/bells/processed_7.png"),
-        7: require("../../assets/bells/processed_14.png"),
-
+        7: require("../../assets/bells/processed_7.png"),
         8: require("../../assets/bells/processed_8.png"),
         9: require("../../assets/bells/processed_9.png"),
         10: require("../../assets/bells/processed_10.png"),
         11: require("../../assets/bells/processed_11.png"),
         12: require("../../assets/bells/processed_12.png"),
-        13: require("../../assets/bells/processed_13.png"),
+        // 13: require("../../assets/bells/processed_13.png"),
+        13: require("../../assets/bells/processed_14.png"),
+
     };
     
     // const objects = useTestObjects();

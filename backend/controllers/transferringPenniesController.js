@@ -1,4 +1,6 @@
-import {spawn} from 'child_process';
+// import {spawn} from 'child_process';
+import userModel from '../models/user.js';
+
 
 const COINS_PER_ROUND = 5; //will be 10 in final variant
 const REFERENCE_SPEED = 4; //18*10/30 (замінила 15 секунд на 45 а монетки на 10) 
@@ -8,7 +10,7 @@ const REFERENCE_WIDTH = 18; //inches
 const transferringPenniesController ={
 	
 		// Збереження відповіді в локальний масив
-	saveResponse: (req, res) => {
+	saveResponse: async (req, res) => {
 		console.log("got here");
 		// console.log("Request body: ", req.body);
 		const {coinData, additionalData} = req.body;
@@ -17,19 +19,31 @@ const transferringPenniesController ={
 			return res.status(400).json({ error: "Missing required fields" });
 		}
 		// console.log("Data : ", coinData);
-		console.log("Received Data: ", JSON.stringify(coinData, null, 2));
+		// console.log("Received Data: ", JSON.stringify(coinData, null, 2));
 		const features = transferringPenniesController.extractFeatures(coinData);
 		const {resultLeft, resultRight} = transferringPenniesController.assessCoordination(features);
-		console.log(`left percentage is ${resultLeft}, and right is ${resultRight}`);
+		// console.log(`left percentage is ${resultLeft}, and right is ${resultRight}`);
 		const {round1, round2} = transferringPenniesController.assessOverall(additionalData);
+		const finalScore = (round1+round2)/2;
 		// console.trace("Trace: Execution reached 'end'");
 		// transferringPenniesController.callModel(features, res);  //викликатимемо модель для кожного раунду окремо
 		// return;
-		res.json({ 
-			message: "Response saved locally",
-			finalScore: `Left to right hand \n ${resultLeft}% : ${resultRight}% \n Overallresult 
-			\n ${round1}% \n and round 2 ${round2}%`, 
-		});
+		try {
+			await userModel.saveToDatabase(user_id, "fineMotorCoordination", finalScore)
+			await userModel.saveToDatabase(user_id, "bilateralCoordination", resultLeft)
+			res.json({
+				message: "Final score calculated",
+				finalScore: `${finalScore}`,
+			});
+		} catch (error) {
+			console.error(error);
+			res.status(500).json({ error: "Database error" });
+		}
+		// res.json({ 
+		// 	message: "Response saved locally",
+		// 	finalScore: `Left to right hand \n ${resultLeft}% : ${resultRight}% \n Overallresult 
+		// 	\n ${round1}% \n and round 2 ${round2}%`, 
+		// });
 	},
 
 	// Функція для обчислення відстані між точками

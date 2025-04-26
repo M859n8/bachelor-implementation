@@ -1,5 +1,4 @@
-
-// const userResponses = {}; // Тимчасове сховище відповідей користувачі
+import userModel from '../models/user.js';
 
 
 const bellsCancellationController = {
@@ -17,14 +16,31 @@ const bellsCancellationController = {
         // console.log("clicked obj", bellsObjects);
         // console.log("additional data", additionalData);
         // console.log("other objects", otherObjects);
-		console.log("test time duration", (additionalData.endTime-additionalData.startTime)/1000)
+		// console.log("test time duration", (additionalData.endTime-additionalData.startTime)/1000)
 
 		const result = bellsCancellationController.calculateResults(bellsObjects, additionalData, otherObjects);
-		console.log(result)
-        res.json({ 
-			message: "Response saved locally",
-			finalScore: `Overall result ${result.finalScore}\n Asymmetry score ${result.asymmetryScore} \n Asymmetry ditrection ${result.asymmetryDirection}`, 
-		});
+
+
+		try {
+			await userModel.saveToDatabase(user_id, "figureGround", result.finalScore)
+			await userModel.saveToDatabase(user_id, "visualDescrimination", result.visualDiscriminationScore)
+
+
+			res.json({
+				message: "Final score calculated",
+				// finalScore: `${finalScore}`,
+				finalScore: `Overall result ${result.finalScore}\n Asymmetry score ${result.asymmetryScore} \n Asymmetry ditrection ${result.asymmetryDirection}`, 
+
+			});
+		} catch (error) {
+			console.error(error);
+			res.status(500).json({ error: "Database error" });
+		}
+		// console.log(result)
+        // res.json({ 
+		// 	message: "Response saved locally",
+		// 	finalScore: `Overall result ${result.finalScore}\n Asymmetry score ${result.asymmetryScore} \n Asymmetry ditrection ${result.asymmetryDirection}`, 
+		// });
 
     },
 
@@ -135,10 +151,10 @@ const bellsCancellationController = {
 		);
 	
 		return {
-			accuracyScore: accuracyScore.toFixed(2), //db
+			// accuracyScore: accuracyScore.toFixed(2), //db
 			asymmetryScore: asymmetryScore.toFixed(2), //to user //db
 			asymmetryDirection: direction, //to user // db
-			speedScore: speedScore.toFixed(2), //db
+			// speedScore: speedScore.toFixed(2), //db
 			finalScore: finalScore.toFixed(2) //to user
 		};
 
@@ -177,6 +193,11 @@ const bellsCancellationController = {
 		const fieldHeight = additionalData.screenHeight * 0.75;
 		const duration = (additionalData.endTime - additionalData.startTime)/1000;
 
+		let weightedErrors = 0; //to assess visualDescrimination by shape
+		const MAX_ERRORS_COUNT = 3;
+		let maxWeightedErrors = MAX_ERRORS_COUNT * 3; //калькість помилок яка свідчить про патологію, множитимо на максимаоьну вагц
+
+
 		let missedTargets = 0;
 		bellsObjects.forEach(obj => {
 			const zone = bellsCancellationController.getZone(obj.x , obj.y, fieldWidth, fieldHeight);
@@ -199,13 +220,24 @@ const bellsCancellationController = {
 		otherObjects.forEach(obj => {
 			const zone = bellsCancellationController.getZone(obj.x , obj.y, fieldWidth, fieldHeight);
 			if(!zone) return
-
 			zoneStats[zone].wrongClicks +=1;
+			//visual descrimination assessment
+			if ([ 6, 8, 10, 11].includes(obj.type)) { //similar forms
+				weightedErrors += 1;
+			} else if ([4, 7, 9, 12].includes(obj.type)) { //average
+				weightedErrors += 2;
+			} else if ([1, 2, 3, 5, 13].includes(obj.type)) { //completely different
+				weightedErrors += 3;
+			}
+
 		});
+
+		let visualDiscriminationScore = (1 - (weightedErrors / maxWeightedErrors)) * 100;
+		visualDiscriminationScore = Math.max(0, visualDiscriminationScore.toFixed(2));
 		
-		clickedSequence.sort((a, b) => a.time - b.time);
-		const zoneOrder = clickedSequence.map(item => item.zone);
-		const result = bellsCancellationController.analyzeStrategy(zoneOrder, zoneStats);
+		// clickedSequence.sort((a, b) => a.time - b.time);
+		// const zoneOrder = clickedSequence.map(item => item.zone);
+		// const result = bellsCancellationController.analyzeStrategy(zoneOrder, zoneStats);
 		const overallResult = bellsCancellationController.analyzeZones({
 				totalObjects: additionalData.allObjectsCount,
 				totalTargets: bellsObjects.length,
@@ -219,7 +251,8 @@ const bellsCancellationController = {
 		return {
 			asymmetryScore: overallResult.asymmetryScore,
 			asymmetryDirection: overallResult.asymmetryDirection,
-			finalScore: overallResult.finalScore
+			finalScore: overallResult.finalScore,
+			visualDiscriminationScore,
 		};
 
     }
