@@ -246,7 +246,7 @@ export default function TransferringPennies({route}) {
 // console.log('after normalize', JSON.stringify(additionalData.current, null, 2));
 
 
-		requestBody = {
+		const requestBody = {
 			// coinData : coinData,
 			coinData : normalizedData,
 

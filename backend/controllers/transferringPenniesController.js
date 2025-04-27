@@ -29,7 +29,7 @@ const transferringPenniesController ={
 		// transferringPenniesController.callModel(features, res);  //викликатимемо модель для кожного раунду окремо
 		// return;
 		try {
-			await userModel.saveToDatabase(user_id, "fineMotorCoordination", finalScore)
+			await userModel.saveToDatabase(user_id, "movementSpeed", finalScore)
 			await userModel.saveToDatabase(user_id, "bilateralCoordination", resultLeft)
 			res.json({
 				message: "Final score calculated",

@@ -2,13 +2,21 @@ import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { StyleSheet, View, Dimensions,Text, Modal, Button, UIManager, findNodeHandle } from 'react-native';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import {useSharedValue, runOnJS} from 'react-native-reanimated';
 import RulesModal from '../../shared/RulesModal.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
+// import { PathProperties } from 'svg-path-properties';
+import { svgPathProperties } from "svg-path-properties";
+
+import Animated from 'react-native-reanimated';
+import {
+	useSharedValue,useAnimatedStyle,withSpring,
+	withTiming,runOnJS,useAnimatedRef, measure, runOnUI, getRelativeCoords 
+  } from 'react-native-reanimated';
 
 export default function LineTracking() {
+	const LINE_WIDTH = 30;
 	const [modalVisible, setModalVisible] = useState(true);
 	const { width, height } = Dimensions.get('window');
 	const [path, setPath] = useState([]);
@@ -19,26 +27,59 @@ export default function LineTracking() {
 	const [currentRound, setCurrentRound] = useState(1);
 	const [round2Modal, setRound2Modal] = useState(false);
 
-	const [userLines, setUserLines] = useState([])
+	const [userLines, setUserLines] = useState([]); //round 1
+	const localRef = useRef(null); 
+	const [startMarkPos, setStartMarkPos] = useState({x: 0, y: 0});
 	
 	const viewRef = useRef(null);
 	const [templatePoints, setTemplatePoints] = useState([])
+	const [svgPathD, setSvgPathD] = useState('')
+	const [referencePoints, setReferencePoints] = useState({})
+	const [mistakesCount, setMistakesCount] = useState(0)
+
 	const navigation = useNavigation(); 
-    // const zigzagPoints = [
-	// 	 { x: 0.1, y: 0.1 },  // 10% ширини та 10% висоти
-    //     { x: 0.5, y: 0.1 },  // 80% ширини та 10% висоти
-    //     { x: 0.5, y: 0.5 },  // 80% ширини та 80% висоти
-    //     { x: 0.1, y: 0.5 },
-    // ];
 
-	// const zigzagPath = "M1,71 L50,100 L150,200 L50,300 L150,400";
-	// const spiralPath = `
-	// 	M200,600        
-	// 	Q200,400 250,600  
-	// 	Q200,800 50,600
-	// 	Q200,200 350,800
-	// `;
+	const start = useSharedValue({ x: 0, y: 0 });
+	const offset = useSharedValue({ x: 0, y: 0 });
 
+	const statusBarHeight = useRef(0)
+	// const properties = new PathProperties(svgPathD);
+	// const pathLength = properties.getTotalLength();
+	const additionalData = useRef( {
+		windowWidth: width, 
+		windowHeight: height,
+		completionRound1: 0,
+		completionRound2: 0,
+
+	});
+
+	const checkPointIndex = useRef(0);
+	const [checkPoints, setCheckPoints] = useState([
+		{ x: 0.2, y: 0.55 }, 
+		{ x: 0.16, y: 0.52 },
+		{ x: 0.2, y: 0.46 }, 
+		{ x: 0.26, y: 0.52 }, 
+		{ x: 0.2, y: 0.69 }, 
+		{ x: 0.08, y: 0.52 }, 
+		{ x: 0.2, y: 0.35 }, 
+		//hill
+		{ x: 0.35, y: 0.65 }, 
+		{ x: 0.425, y: 0.50 }, 
+		{ x: 0.5, y: 0.35 }, 
+		{ x: 0.575, y: 0.50 }, 
+		{ x: 0.65, y: 0.65 }, 
+		//stairs 
+		{ x: 0.65, y: 0.55 },
+		{ x: 0.75, y: 0.55 },  
+		{ x: 0.75, y: 0.45 },  
+		{ x: 0.85, y: 0.45 },  
+		{ x: 0.85, y: 0.35 },
+		{ x: 0.95, y: 0.35 },
+		{ x: 0.95, y: 0.55 },
+		{ x: 0.95, y: 0.70 },
+		{ x: 0.80, y: 0.70 },
+		
+	]);
 
 	const generateArchimedeanSpiral = ({
 		centerX = 0.2,
@@ -63,18 +104,43 @@ export default function LineTracking() {
 	useEffect(() => {
 		const template = generateTemplate();
 		setTemplatePoints(template);
+		const templateSvg = convertTemplatePointsToPath(template);
+		setSvgPathD(templateSvg)
+		const firstPoint = template[0] ;
+		const lastPoint = template[template.length - 1];	
+
+		console.log('starr', lastPoint.x, lastPoint.y)
+		setStartMarkPos({x: firstPoint.x*width, y: firstPoint.y*height})
+		// console.log('template last point', template[-1].value.x);
+
+
+		// const properties = new svgPathProperties(templateSvg);
+		const properties = new svgPathProperties(templateSvg);
+		const pathLength = properties.getTotalLength();
+		// console.log(templateSvg)
+		// Збираємо точки через певний інтервал
+		const numPoints = 1000;
+		const pathPoints = Array.from({ length: numPoints }, (_, i) => {
+			const lengthAtPoint = (i / (numPoints - 1)) * pathLength;
+			return properties.getPointAtLength(lengthAtPoint);
+		});
+		setReferencePoints(pathPoints)
+		// console.log('path points', pathPoints[3])
+		setCheckPoints(normalizePoints(checkPoints))
+
 	}, []);
+
 	
 
 	const generateTemplate = () => {
 		const spiral = generateArchimedeanSpiral();
 		const zigzag = [
-			{ x: 0.35, y: 0.65 },  // 10% ширини та 10% висоти
-			{ x: 0.5, y: 0.35 },  // 80% ширини та 10% висоти
-			{ x: 0.65, y: 0.65 },  // 80% ширини та 80% висоти
+			{ x: 0.35, y: 0.65 }, 
+			{ x: 0.5, y: 0.35 },  
+			{ x: 0.65, y: 0.65 },  
 			{ x: 0.65, y: 0.55 },
-			{ x: 0.75, y: 0.55 },  // 10% ширини та 10% висоти
-			{ x: 0.75, y: 0.45 },  // 80% ширини та 10% висоти
+			{ x: 0.75, y: 0.55 },  
+			{ x: 0.75, y: 0.45 },  
 			{ x: 0.85, y: 0.45 },  
 			{ x: 0.85, y: 0.35 },
 			{ x: 0.95, y: 0.35 },
@@ -83,109 +149,106 @@ export default function LineTracking() {
 			
 		];
 		const result = [...spiral, ...zigzag];
-		// setTemplatePoints(result)
-
 		return result;
-
-
 	};
-
-	
-
-	
-	// const zigzagPath = useMemo(() => {
-	// 	if (zigzagPoints.length === 0) return '';
-	// 	const [start, ...rest] = zigzagPoints;
-	// 	return `M${start.x} ${start.y} ` + rest.map(p => `L${p.x} ${p.y}`).join(' ');
-	// }, [zigzagPoints]);
-
-
 
 	useEffect(() => {
 		if (viewRef.current) {
 			viewRef.current.measure((x, y, width, height, pageX, pageY) => {
 				console.log('Measured:', { x: pageX, y: pageY, width, height });
 				containerOffset.current = { x: pageX, y: pageY };
+				statusBarHeight.current = pageY;
+
 			});
 		}
 
 	}, []);
 	
-
-
-
 	const handleEndRound = () => {
-		const newLine = normalizePath(path);
+		// const newLine = normalizePath(path);
 		if (currentRound === 1) {
-			setUserLines(newLine)
+			// setUserLines(newLine)
+			setUserLines(path)
 			setPath([])
 			// Завершився перший раунд, змінюємо на другий і показуємо модальне вікно з правилами
 			setCurrentRound(2);
 			setRound2Modal(true);  // Показуємо модальне вікно з правилами
+			additionalData.current.completionRound1 = checkPointIndex.current/checkPoints.length;
+			checkPointIndex.current = 0;
+
+			 // Повертаємо об'єкт на початкову позицію
+			if (templatePoints.length > 0) { //для дебагу щоб малювати оту лінію. можливо щалишу 
+				const startPoint = templatePoints[0];
+				start.value = { x: startPoint.x, y: startPoint.y };
+				offset.value = { x: startPoint.x, y: startPoint.y };
+			} else {
+				start.value = { x: 0, y: 0 };
+				offset.value = { x: 0, y: 0 };
+			}
 		} else if (currentRound === 2) {
 			console.log('got to if')
+			additionalData.current.completionRound2 = checkPointIndex.current/checkPoints.length;
 			// Завершився другий раунд, викликаємо функцію для відправки результатів на бекенд
-			sendDataToBackend(newLine);
+			sendDataToBackend(path);
 			// setCurrentRound(1);  // Повертаємось до першого раунду (або зупиняємо гру)
 		}
 	};
 
-	const normalizePath = (path) => {
+	const normalizePoints = (coords) => {
 		
-		return path.map(({ x, y }) => ({
-			x: x / width,
-			y: y / height,
+		return coords.map(({ x, y }) => ({
+			x: x * width,
+			y: y * height,
 		}));
 	};
-	
-	
 
 	const pathRef = useRef([]);
 
-	const handleUpdate = (x, y) => {
-		pathRef.current.push({ x, y });
-		setPath([...pathRef.current]);
-	};
+	const isNear = ( point1, point2, threshold = LINE_WIDTH) => {
+		const dx = point1.x - point2.x;
+		const dy = point1.y - point2.y;
+		return dx * dx + dy * dy <= threshold * threshold;
+	}
 	
-	const handleEnd = () => {
-		// allStrokes.value = [...allStrokes.value, [...pathRef.current]]; 
-		// console.log('Stroke:', pathRef.current);
-		// pathRef.current = [];
-		setDrawing(false);
-	};
 	
+
+	const animatedStyle = useAnimatedStyle(() => ({
+		transform: [
+			{ translateX: offset.value.x },
+			{ translateY: offset.value.y }
+		],
+	}));
 	const panGesture = Gesture.Pan()
 		.onBegin((e) => {
-			// pathRef.current = [];
-			// runOnJS(setPath)([]);
-			// runOnJS(setDrawing)(true);
-			// setPath([])
-			// const x = e.absoluteX - containerOffset.current.x;
-			// const y = e.absoluteY - containerOffset.current.y;
 			const{x,y} = e
-
-			// setPath((prevLines) => [
-			// 	...prevLines,
-			// 	[{ x, y }] 
-			// ]);
 			setPath([]);
 			setDrawing(true)
 		})
 		.onUpdate((e) => {
-			// const x = e.absoluteX - containerOffset.current.x;
-			// const y = e.absoluteY - containerOffset.current.y;
-			const{x,y} = e
-			// runOnJS(handleUpdate)(x, y);
-			// handleUpdate(x,y);
-			// 
-			console.log('🖊️ drawing:', x, y);
+			const x= e.absoluteX
+			const y= e.absoluteY-statusBarHeight.current
+
+			// console.log('🖊️ drawing:', x, y);
 			setPath((prevPoints) => [...prevPoints, { x, y }]); 
+			offset.value = {
+				x: e.translationX + start.value.x,
+				y: e.translationY + start.value.y,
+			};
+
+			if (checkPointIndex.current >= checkPoints.length) return; // Всі пройдені
+
+			const nextCheckpoint = checkPoints[checkPointIndex.current];
+			if (isNear({x, y}, nextCheckpoint)) {
+				// checkPoints[checkPointIndex.current].reached = true;
+				checkPointIndex.current++;
+				console.log('✅ Контрольна точка пройдена:', checkPointIndex.current);
+			}
 		})
 		.onEnd(() => {
-			// runOnJS(handleEnd)();
-			// handleEnd();
-			// setDrawing(false);
-			// console.log('path is : ',path)
+			start.value = {
+				x: offset.value.x,
+				y: offset.value.y,
+			};
 			handleEndRound()
 
 		})
@@ -193,18 +256,25 @@ export default function LineTracking() {
 
 		const sendDataToBackend = async (data) => {
 			console.log('got to send')
+			// const svgUserD = convertPointsToPath(data)
 
-			// console.log('check userlins', userLines)
-
-			// console.log('check data', data)
-			// console.log('userLines isArray:', Array.isArray(userLines)); 
-			// console.log('data isArray:', Array.isArray(data));
 			
-			requestBody = {
-				userLines: [userLines, data],
-				templateLines: templatePoints,
+			const requestBody = {
+				// userLines: [userLines, data],
+				// templateLines: templatePoints,
+				userLinesRound1: convertPointsToPath(userLines),
+				userLinesRound2:convertPointsToPath(data),
+				templateLines: svgPathD,
+				additionalData: additionalData.current,
+				// additionalData: {
+				// 	windowWidth: width, 
+				// 	windowHeight: height,
+				// 	pathCompletionRight: checkPointIndex.current/checkPoints.length,
+				// 	pathCompletionLeft: checkPointIndex.current/checkPoints.length,
+
+				// },
 			}
-			// console.log('request body', requestBody)
+			console.log('passed tehe request body ',additionalData.current);
 	
 			const token = await AsyncStorage.getItem('authToken'); //get authorization token
 			try {
@@ -252,19 +322,13 @@ export default function LineTracking() {
 		};
 		
 		const convertPointsToPath = (points) => {
-			// console.log('points are', points);
 			if (points.length === 0) return '';  // Якщо немає точок, повертаємо порожній шлях
-		
 			// Розпочинаємо з першої точки
 			const [start, ...rest] = points;
-		
 			// Створюємо команду M для початкової точки (перша точка)
 			let result = `M${start.x},${start.y} `;
-		
 			// Додаємо команду L для кожної наступної точки (лінія до точки)
 			result += rest.map(p => `L${p.x},${p.y}`).join(' ');
-		
-			// console.log('result', result);  // Перевіряємо, що шлях формується правильно
 			return result;
 		};
 		
@@ -275,10 +339,6 @@ export default function LineTracking() {
 				rules='Round 2 rules: lorem ipsum' 
 				onClose={() => {
 					setRound2Modal(false);
-
-					// additionalData.current.timeStartRound2 = Date.now();
-					// setTimerIsRunning(true);
-
 				}} 
 			/>
 
@@ -287,34 +347,59 @@ export default function LineTracking() {
 		<View
 			style={styles.container}
 			ref={viewRef}
-			// onLayout={measureView}
 		>
-            <GestureDetector gesture={panGesture}>
-				<View>
-                {/* <Svg style={[StyleSheet.absoluteFill, styles.template]}> */}
-				{/* <Svg style={[StyleSheet.absoluteFill, styles.template, { borderWidth: 1, borderColor: 'red' }]}> */}
-				<Svg
-					width={width}
-					height={height}
-					style={[styles.template, { borderWidth: 1, borderColor: 'red' }]}
-				>
+            
 
-					<Path
-						// d={convertTemplatePointsToPath(zigzagPoints)}
-						d={convertTemplatePointsToPath(generateTemplate())}
+			<View>
+			<Svg
+				width={width}
+				height={height}
+				style={[styles.template, { borderWidth: 1, borderColor: 'red' }]}
+			>
+				<Path
+					d={svgPathD}
+					stroke="lightgray"
+					strokeWidth={LINE_WIDTH}
+					fill="none"
+				/>
+				{path.length > 0 && <Path d={convertPointsToPath(path)} stroke="black" strokeWidth={2} fill="none" />} 
+			</Svg>
+			</View>
+			<GestureDetector gesture={panGesture}>
+			<Animated.View
+				ref={localRef}
+				style={[
+					{
+						width: LINE_WIDTH/2,
+						height: LINE_WIDTH/2,
+						borderRadius: LINE_WIDTH/4,
+						backgroundColor: 'red',
+						position: 'absolute', // обов'язково, інакше translate не буде працювати правильно
+						top: startMarkPos.y,
+						left: startMarkPos.x,
+						
+					},
+					animatedStyle, // підключаємо анімацію
+				]}
+			/>
+			</GestureDetector>
+			{checkPoints.map((point, index) => ( //debug
+				<View 
+					key={index}
+					style={{
+						width: 5,
+						height: 5,
+						backgroundColor: 'red',
+						borderRadius: 3, // щоб були круглі
+						position: 'absolute',
+						top: point.y,
+						left: point.x,
+						zIndex: 100,
+					}}
+				/>
+			))}
 
-						// d={spiralPath}
-						stroke="lightgray"
-						strokeWidth={20}
-						fill="none"
-					/>
-                    {path.length > 0 && <Path d={convertPointsToPath(path)} stroke="black" strokeWidth={2} fill="none" />}
-                </Svg>
-				{/* <Svg width="500" height="500" viewBox="0 0 500 500">
-					<Path d={ArchimedeanSpiral()} fill="none" stroke="black" strokeWidth="2" />
-				</Svg> */}
-				</View>
-            </GestureDetector>
+
         </View>
 	</>
 		
@@ -324,17 +409,7 @@ export default function LineTracking() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-		// backgroundColor: 'white',
-		// alignItems: 'center',
-		// justifyContent: 'center',
-
-
-
     },
-	// template:{
-	// 	position: 'absolute',
-
-	// },
     infoBox: {
         position: 'absolute',
         top: 40,

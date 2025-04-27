@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS test_results (
     'spatialRelations',
     'visualClosure',
     'visualConstancy',
-    'fineMotorCoordination',
+    'movementSpeed',
+	'movementAccuracy',
     'bilateralCoordination',
     'copyingObjects',
     'assemblingObjects'
