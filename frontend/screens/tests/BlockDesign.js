@@ -6,6 +6,7 @@ import { Gesture, GestureHandlerRootView, GestureDetector } from 'react-native-g
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused } from '@react-navigation/native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import CustomButton from '../../shared/CustomButton.js';
 
 import * as ScreenOrientation from 'expo-screen-orientation';
 
@@ -181,12 +182,7 @@ export default function BlockDesign() {
 
 			}} 
 		/>
-{/* 
-		<ResultsModal 
-			visible={resultsModal} 
-			results={results} 
-			onClose={() => setResultsModal(false)} 
-		/> */}
+
 		<Timer isRunning={timerIsRunning} startTime={roundStartTime}/>
 
 		<TouchableOpacity 
@@ -218,7 +214,7 @@ export default function BlockDesign() {
 			<Grid  cellSize={cellSize} dimention={gridDimention}/>
 		</View>
 		<View style={{ marginVertical: 10 }}>
-			<Button title="End test" onPress={goToNextRound} />
+			<CustomButton title="End test" onPress={goToNextRound} />
 		</View>
 
 

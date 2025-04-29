@@ -24,11 +24,13 @@ const transferringPenniesController ={
 		const {resultLeft, resultRight} = transferringPenniesController.assessCoordination(features);
 		// console.log(`left percentage is ${resultLeft}, and right is ${resultRight}`);
 		const {round1, round2} = transferringPenniesController.assessOverall(additionalData);
+		console.log('round 1 and 2', round1, round2)
 		const finalScore = (round1+round2)/2;
 		// console.trace("Trace: Execution reached 'end'");
 		// transferringPenniesController.callModel(features, res);  //викликатимемо модель для кожного раунду окремо
 		// return;
 		try {
+			console.log('final score', finalScore, 'resultLeft', resultLeft)
 			await userModel.saveToDatabase(user_id, "movementSpeed", finalScore)
 			await userModel.saveToDatabase(user_id, "bilateralCoordination", resultLeft)
 			res.json({
@@ -185,7 +187,7 @@ const transferringPenniesController ={
 		// Порівняння відсотків між лівою та правою рукою
 		let { percentage1, percentage2 } = transferringPenniesController.percentageRatio(scoreLeft, scoreRight);
 
-		return { resultLeft: percentage1.toFixed(2), resultRight: percentage2.toFixed(2) };
+		return { resultLeft: percentage1 , resultRight: percentage2  };
 	},
 
 	assessErrors: (dataArr) => {
@@ -224,7 +226,7 @@ const transferringPenniesController ={
 
 		console.log('results round 1 ', resultRound1, 'results round 2 ', resultRound2)
 		
-		return ({round1: resultRound1.toFixed(2), round2 : resultRound2.toFixed(2)})
+		return ({round1: resultRound1 , round2 : resultRound2 })
 
 		
 

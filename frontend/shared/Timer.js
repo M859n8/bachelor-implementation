@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import {  Text} from 'react-native';
-
+import { useEffect, useRef, useState,  } from 'react';
+import {  Text, StyleSheet, View} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons'; 
 export default function Timer({ isRunning, startTime}) {
     const [time, setTime] = useState(0);
     const intervalRef = useRef(null);
@@ -25,10 +25,26 @@ export default function Timer({ isRunning, startTime}) {
     }, [isRunning]);
 
     return (
-		<>
-        <Text style={{ fontSize: 20, fontWeight: 'bold', padding: 10 }}>
-            ⏱ {time.toFixed(1)} s
-        </Text>
-		</>
+       <View style={styles.container}>
+            <Icon name="timer" size={30} color="#4CAF50" style={styles.icon} />
+            <Text style={styles.timerText}>{time.toFixed(1)} s</Text>
+        </View>
     );
 }
+
+
+const styles = StyleSheet.create({
+    container: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 10,
+    },
+    icon: {
+        marginRight: 8, // відступ між іконкою та текстом
+    },
+    timerText: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#333', // темний колір для тексту
+    },
+});

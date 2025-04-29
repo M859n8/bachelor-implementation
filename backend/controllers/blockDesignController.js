@@ -35,9 +35,9 @@ const blockDesignController = {
 		const finalScore = (
 			(resultsPerRound[0].totalScore * 8 + resultsPerRound[1].totalScore * 9 + resultsPerRound[2].totalScore * 10) / 
 			(8 + 9 + 10)
-		 ).toFixed(2);
+		 ) ;
 
-
+		console.log('final score', finalScore)
 
 		try {
 			console.log(`User ${user_id} final score: ${finalScore}%`);

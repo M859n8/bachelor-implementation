@@ -11,15 +11,20 @@ import {
 	useSharedValue,useAnimatedStyle,withSpring,
 	withTiming,runOnJS,useAnimatedRef, measure, runOnUI, getRelativeCoords 
   } from 'react-native-reanimated';
-import ResultsModal from '../../shared/resultsModal.js';
+// import ResultsModal from '../../shared/resultsModal.js';
+import { useNavigation } from '@react-navigation/native';
+import CustomButton from '../../shared/CustomButton.js';
 
 
 const { width, height } = Dimensions.get('window');
 
 export default function ComplexFigure() {
+	const navigation = useNavigation(); 
+
   	const [modalVisible, setModalVisible] = useState(true);
 	const [resultsModal, setResultsModal] = useState(false);
 	const [results, setResults] = useState({ finalScore: 100 });
+	const [isLoading, setIsLoading] = useState(false);
 
 	// const [pathData, setPathData] = useState([]);
 	const [pathData, setPathData] = useState('');
@@ -143,7 +148,7 @@ export default function ComplexFigure() {
 		console.log('got to send to backend');
 		const svgString = generateSVGString();
 		console.log('generated string', svgString);
-
+		setIsLoading(true)
         const token = await AsyncStorage.getItem('authToken');
 		try{
 			const response = await fetch('http://192.168.0.12:5000/api/result/figure/saveResponse', {
@@ -162,8 +167,10 @@ export default function ComplexFigure() {
 			if (response.ok) {
 				// Alert.alert('Success', 'Your answers sent!');
 				// console.log('Server response:', data);
-				setResults(result); 
-				setResultsModal(true);
+				// setResults(result); 
+				// setResultsModal(true);
+				navigation.navigate('Results', { result });
+
 			}
 		} catch (error) {
 			Alert.alert('Failure', 'Can not send answers');
@@ -179,32 +186,7 @@ export default function ComplexFigure() {
   	return (  
 		
 	<GestureHandlerRootView style={styles.container}>
-		{/* <View style={styles.exampleContainer}>
-		<Image
-                source={require("../../assets/complex_figure/figure.svg")}
-                style={{width: 50,
-                    height: 50,
-                    position: "absolute",
-                    resizeMode: "contain"}}
-            />
-		</View> */}
-		{/* <RulesModal 
-			visible={rulesModal} 
-			rules='Complete a template using blocks.' 
-			onClose={() => {
-				setRulesModal(false);
-				// startTime.current = Date.now();
-				setTimerIsRunning(true);
-
-			}} 
-		/> */}
-
-		<ResultsModal 
-			visible={resultsModal} 
-			results={results} 
-			onClose={() => setResultsModal(false)} 
-		/>
-
+	
 		<View style={styles.buttonContainer}>
 			<TouchableOpacity
 				style={[styles.button, tool === 'pencil' && styles.activeButton]}
@@ -257,12 +239,17 @@ export default function ComplexFigure() {
 			</Svg>
 			</View>
 		</GestureDetector>
-		<TouchableOpacity
+		{/* <TouchableOpacity
 			style={styles.button}
 			onPress={() => sendToBackend()}
 		>
 			<Text style={{ color: '#550080', fontSize: 24 }}>Finish</Text>
-		</TouchableOpacity>
+		</TouchableOpacity> */}
+		<CustomButton
+			title="Send"
+			onPress={() => sendToBackend()}
+			isLoading={isLoading}
+		/>
 
 	</GestureHandlerRootView>
   	);
@@ -273,19 +260,27 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
-		
-		
 	},
 	buttonContainer: {
 		alignItems: 'space-between',
 		flexDirection: 'row',
+		gap: 20,
+		// marginVertical: 20,
 	},
 	button: {
-		backgroundColor: 'lightgray',
-		padding: 12,
-		margin: 12,
+		width: 50,
+		height: 50,
 		borderRadius: 25,
+		backgroundColor: 'white',
+		alignItems: 'center',
+		justifyContent: 'center',
+		elevation: 4, // Android тінь
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.2,
+		shadowRadius: 4,
 	},
+
 	activeButton: {
 		backgroundColor: '#550080',
 	},
@@ -299,24 +294,25 @@ const styles = StyleSheet.create({
 		borderRadius: 10, // Закруглені кути
 		borderWidth: 2,
 		borderColor: '#000',
+		margin: 20,
 		// overflow: 'hidden', // Щоб лінії не виходили за межі
 	},
-	screenText: {
-		fontSize: 24
-	},
-	modalContainer: {
-		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
-		backgroundColor: 'rgba(0, 0, 0, 0.5)'
-	},
-	modalText: {
-		fontSize: 20,
-		backgroundColor: 'white',
-		padding: 20,
-		borderRadius: 10,
-		textAlign: 'center'
-	},
+	// screenText: {
+	// 	fontSize: 24
+	// },
+	// modalContainer: {
+	// 	flex: 1,
+	// 	justifyContent: 'center',
+	// 	alignItems: 'center',
+	// 	backgroundColor: 'rgba(0, 0, 0, 0.5)'
+	// },
+	// modalText: {
+	// 	fontSize: 20,
+	// 	backgroundColor: 'white',
+	// 	padding: 20,
+	// 	borderRadius: 10,
+	// 	textAlign: 'center'
+	// },
 	imageContainer: {
 		// padding: 5,
 		backgroundColor: 'white',

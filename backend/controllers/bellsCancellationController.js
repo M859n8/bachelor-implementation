@@ -151,11 +151,11 @@ const bellsCancellationController = {
 		);
 	
 		return {
-			// accuracyScore: accuracyScore.toFixed(2), //db
-			asymmetryScore: asymmetryScore.toFixed(2), //to user //db
+			// accuracyScore: accuracyScore , //db
+			asymmetryScore: asymmetryScore , //to user //db
 			asymmetryDirection: direction, //to user // db
-			// speedScore: speedScore.toFixed(2), //db
-			finalScore: finalScore.toFixed(2) //to user
+			// speedScore: speedScore , //db
+			finalScore: finalScore  //to user
 		};
 
 	},
@@ -233,7 +233,7 @@ const bellsCancellationController = {
 		});
 
 		let visualDiscriminationScore = (1 - (weightedErrors / maxWeightedErrors)) * 100;
-		visualDiscriminationScore = Math.max(0, visualDiscriminationScore.toFixed(2));
+		visualDiscriminationScore = Math.max(0, visualDiscriminationScore );
 		
 		// clickedSequence.sort((a, b) => a.time - b.time);
 		// const zoneOrder = clickedSequence.map(item => item.zone);

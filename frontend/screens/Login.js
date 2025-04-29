@@ -1,46 +1,70 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, Alert } from 'react-native';
+import { View, TextInput, Pressable, StyleSheet, Text, Alert } from 'react-native';
+// import { Picker } from '@react-native-picker/picker';
+// import RNPickerSelect from 'react-native-picker-select';
+import SelectDropdown from 'react-native-select-dropdown';
+
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Home from "./Home";
+import CustomButton from '../shared/CustomButton.js';
 
 export default function Login({ setIsAuthenticated }) {
 	const navigation = useNavigation(); // Ініціалізація навігації
 
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
+	const [handOrientation, setHandOrientation] = useState('right');
+	const [isRegister , setIsRegister] = useState(false)
+	const [age, setAge] = useState('');
+	const hands = [
+        { label: 'Right Hand', value: 'right' },
+        { label: 'Left Hand', value: 'left' }
+    ];
+
 
 	const handleLogin = async () => {
 		try {
-		const response = await fetch('http://192.168.0.12:5000/api/auth/login', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ username, password })
-		});
-		const data = await response.json();
-		console.log("Received:", data);
-		if (response.ok) {
-			await AsyncStorage.setItem('authToken', data.token);  // зберігаємо токен
-			Alert.alert('Success', 'Logged in successfully');
-			console.log('Token:', data.token);
-			setIsAuthenticated(true);
-			// navigation.navigate('Home');
-		} else {
-			Alert.alert('Error', data.message || 'Login failed');
-		}
+			const response = await fetch('http://192.168.0.12:5000/api/auth/login', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ username, password })
+			});
+			const data = await response.json();
+			console.log("Received:", data);
+			if (response.ok) {
+				await AsyncStorage.setItem('authToken', data.token);  // зберігаємо токен
+				Alert.alert('Success', 'Logged in successfully');
+				console.log('Token:', data.token);
+				setIsAuthenticated(true);
+				// navigation.navigate('Home');
+			} else {
+				Alert.alert('Error', data.message || 'Login failed');
+				setIsRegister(true);
+			}
 		} catch (error) {
-		Alert.alert('Error', 'Something went wrong');
-		console.error(error);
+			setIsRegister(true);
+
+			Alert.alert('Error', 'Something went wrong');
+			console.error(error);
 		}
 	};
 
 	const handleRegister = async () => {
+		setIsRegister(true)
+
+		if (!username || !password || !age) {
+
+			alert('Please fill in all fields: username, password, and age.');
+			return; // Якщо одне з полів порожнє, не відправляємо запит
+		}
+
 		try {
 		const response = await fetch('http://192.168.0.12:5000/api/auth/register', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ username, password })
+			body: JSON.stringify({ username, password, age, handOrientation })
 		});
 		const data = await response.json();
 		if (response.ok) {
@@ -76,9 +100,50 @@ export default function Login({ setIsAuthenticated }) {
 			onChangeText={setPassword}
 			style={styles.input}
 			/>
+
+			{isRegister && (
+				<>
+					<TextInput
+						placeholder="Age"
+						value={age}
+						onChangeText={setAge}
+						keyboardType="numeric"
+						style={styles.input}
+					/>
+
+			
+			<View style={styles.handOrientation}>
+					{hands.map((hand) => (
+						<Pressable
+							key={hand.value}
+							onPress={() => setHandOrientation(hand.value)}
+							style={styles.checkboxContainer}
+						>
+							<View style={[
+								styles.checkbox,
+								handOrientation === hand.value && styles.checkboxSelected
+							]} />
+							<Text style={styles.label}>{hand.label}</Text>
+						</Pressable>
+					))}
+					</View>
+				</>
+			)}
+			
 			<View style={styles.buttonContainer}>
-				<Button title="Register" onPress={handleRegister} color='blue' />
-				<Button title="Login" onPress={handleLogin} color='blue' />
+				{/* <Button title="Register" onPress={handleRegister} color='blue' /> */}
+				<CustomButton
+					title="Register"
+					onPress={handleRegister}
+					buttonStyle={{ backgroundColor: 'green' }}
+					
+				/>
+				<CustomButton
+					title="Login"
+					onPress={handleLogin}
+					buttonStyle={{ backgroundColor: isRegister ? 'grey' : 'green' }} 	
+				/>
+				{/* <Button title="Login" onPress={handleLogin} color='blue' /> */}
 			</View>
 
 		</View>
@@ -107,5 +172,35 @@ export default function Login({ setIsAuthenticated }) {
 			width: '100%',
 			gap: 10,
 			// display: 'inline',
+		},
+
+		handOrientation: {
+			flexDirection: 'row', 
+			gap: 30, 
+			backgroundColor: 'white', 
+			padding: 12,
+			borderRadius: 5,
+
+
+		},
+
+		checkboxContainer: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			// marginBottom: 10,
+		},
+		checkbox: {
+			width: 20,
+			height: 20,
+			borderWidth: 2,
+			borderColor: '#4CAF50',
+			marginRight: 10,
+			borderRadius: 4,
+		},
+		checkboxSelected: {
+			backgroundColor: '#4CAF50',
+		},
+		label: {
+			fontSize: 16,
 		},
 	});

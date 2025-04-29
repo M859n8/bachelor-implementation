@@ -3,11 +3,11 @@ import bcrypt from 'bcryptjs';
 import db from '../db-config.js';
 
 const userModel = {
-	createUser: async (username, password) => {
+	createUser: async (username, password, age, handOrientation) => {
 		const hashedPassword = bcrypt.hashSync(password, 10);
 		const [result] = await db.execute(
-			'INSERT INTO users (username, password) VALUES (?, ?)',
-			[username, hashedPassword]
+			'INSERT INTO users (username, password, age, handOrientation) VALUES (?, ?, ?, ?)',
+			[username, hashedPassword, age, handOrientation]
 		);
 		return result.insertId;
 	},
@@ -22,7 +22,7 @@ const userModel = {
 	
     findById: async (id) => {
         const [rows] = await db.execute(
-            'SELECT id, username FROM users WHERE id = ?',
+            'SELECT id, username, age, handOrientation FROM users WHERE id = ?',
             [id]
         );
         return rows[0];

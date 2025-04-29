@@ -4,7 +4,6 @@ import connection from './../db-config.js';
 import userModel from '../models/user.js';
 
 import {spawn} from 'child_process';
-import path from 'path';
 
 const complexFigureController = {
 

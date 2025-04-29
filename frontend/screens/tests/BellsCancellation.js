@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, Modal, Button, Image, TouchableOpacity, Alert, 
 import { useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // import Orientation from 'react-native-orientation-locker';
+import CustomButton from '../../shared/CustomButton.js';
 
 import useTestObjects from '../../shared/GenerateBells.js';
 // import generateObjects from '../../shared/GenerateBells.js';
@@ -198,7 +199,7 @@ export default function BellsCancellation({route}) {
 				</TouchableOpacity>
 			))}
 		</View>
-		<Button onPress={endGame} 
+		<CustomButton onPress={endGame} 
 				title={isLoading ? 'Loading ...' : 'End Game'}
 				disabled={isLoading}
 		/>

@@ -1,7 +1,13 @@
 import { createCanvas, loadImage } from 'canvas';
 import sharp from 'sharp';
+import { PNG } from 'pngjs';
+import pixelmatch from 'pixelmatch';
+import {Jimp} from 'jimp';
+import fs from 'fs';
+// import * as Jimp from 'jimp';
+// const Jimp = require('jimp');
 
-import Jimp from 'jimp'
+
 
 import userModel from '../models/user.js';
 
@@ -30,19 +36,13 @@ const lineTrackingController = {
             return res.status(400).json({ error: "Missing required fields" });
         }
 
-		// console.log('userLines', userLines)
-		// console.log('templateLines', templateLines)
-
-		// const result = lineTrackingController.evaluateUserPath(userLines[0], templateLines, 10);
-		// console.log('Точок загалом:', result.totalPoints);
-		// console.log('У межах шаблону:', result.insideCount);
-		// console.log('Точність малювання:', result.percentInside + '%');
-		// console.log('Похибка:', result.percentOutside + '%');
+		let accuracyRound1, accuracyRound2;
 		try {
 
 			
-			const accuracyRound1 = await lineTrackingController.comparePaths(templateLines, userLinesRound1, additionalData)
-			const accuracyRound2 = await lineTrackingController.comparePaths(templateLines, userLinesRound2, additionalData)
+		accuracyRound1 = await lineTrackingController.comparePaths(templateLines, userLinesRound1, additionalData)
+		accuracyRound2 = await lineTrackingController.comparePaths(templateLines, userLinesRound2, additionalData)
+
 		} catch(error){
 			res.status(500).json({ error: "Image processing error" });
 		}
@@ -85,119 +85,99 @@ const lineTrackingController = {
 			<path d="${userPathD}" stroke="black" fill="none" stroke-width="${LINE_WIDTH/2}"/>
 		</svg>`;
 
+		// const bufferTemplate = await lineTrackingController.convertSvgToPng(templateSvg);
+    	// const bufferUser = await lineTrackingController.convertSvgToPng(userSvg);
+		const {accuracyPercentage, visualizationBuffer} = await lineTrackingController.checkOutOfBounds(templateSvg, userSvg)
 
-		// sharp(Buffer.from(templateSvg))
-		// .png()
-		// // .toFile(path.join(debugDir, 'path_debug1.png'))
-		// .toFile('./debug/path_debug.png')
-		// .then(() => {
-		// 	console.log('SVG перетворено в PNG!');
-		// })
-		// .catch(err => {
-		// 	console.error('Помилка:', err);
-		// });
+		// const accuracyPercentage = await lineTrackingController.compareImages(bufferTemplate, bufferUser);
+		console.log('accuracy ', accuracyPercentage)
+		return accuracyPercentage 
 
+	},
+	convertToPng: async (fileSvg) => {
+		const imageBuffer = await sharp(Buffer.from(fileSvg))
+			.png()
+			.ensureAlpha()
+			.toBuffer();
+		const imagePng = PNG.sync.read(imageBuffer);
+		return imagePng;
 
-		// sharp(Buffer.from(userSvg))
-		// .png()
-		// // .toFile(path.join(debugDir, 'path_debug1.png'))
-		// .toFile('./debug/path_debug2.png')
-		// .then(() => {
-		// 	console.log('SVG перетворено в PNG!');
-		// })
-		// .catch(err => {
-		// 	console.error('Помилка:', err);
-		// });
-		const bufferTemplate = await lineTrackingController.convertSvgToPng(templateSvg);
-    	const bufferUser = await lineTrackingController.convertSvgToPng(userSvg);
-		const accuracyPercentage = await lineTrackingController.compareImages(bufferTemplate, bufferUser);
+	},
 
-		// const diffCanvas = createCanvas(width, height);
-		// const diffCtx = diffCanvas.getContext('2d');
-    	// const diff = diffCtx.createImageData(width, height);
+	checkOutOfBounds: async (templateSvg, userSvg) => {
+		// const templatePngBuffer = await sharp(Buffer.from(templateSvg))
+		// 	.png()
+		// 	.ensureAlpha()
+		// 	.toBuffer();
+		// const userPngBuffer = await sharp(Buffer.from(userSvg))
+		// 	.png()
+		// 	.ensureAlpha()
+		// 	.toBuffer();
+		const templatePng = await lineTrackingController.convertToPng(templateSvg)
+		const userPng = await lineTrackingController.convertToPng(userSvg)
 
-		// const numDiffPixels = pixelmatch(
-		// 	templateData.data,
-		// 	userData.data,
-		// 	diff.data,
-		// 	width,
-		// 	height,
-		// 	{ threshold: 0.1 }
-		// );
 	
-		// const totalUserPixels = userData.data.reduce((count, value, index) => {
-		// 	if (index % 4 === 0 && value < 128) count++;
-		// 	return count;
-		// }, 0);
-		// const accuracy = 1 - (numDiffPixels / totalUserPixels);
+		// const templatePng = PNG.sync.read(templatePngBuffer);
+		// const userPng = PNG.sync.read(userPngBuffer);
+	
+		const { width, height } = templatePng;
+		const visualization = new PNG({ width, height });
+	
+		let outOfBoundsCount = 0;
+		let totalUserDrawn = 0;
+	
+		for (let y = 0; y < height; y++) {
+			for (let x = 0; x < width; x++) {
+				const idx = (width * y + x) << 2; // кожен піксель = 4 байти (RGBA)
+	
+				const templateAlpha = templatePng.data[idx + 3]; // прозорість шаблону
+				const userAlpha = userPng.data[idx + 3]; // прозорість малюнка користувача
+	
+				if (userAlpha > 0) { // Якщо користувач тут щось намалював
+					totalUserDrawn++;
+	
+					if (templateAlpha === 0) {
+						// Якщо в шаблоні тут нічого немає → вихід за межі
+						outOfBoundsCount++;
+						// Помилка → малюємо червоний піксель
+						visualization.data[idx] = 255; // Red
+						visualization.data[idx + 1] = 0; // Green
+						visualization.data[idx + 2] = 0; // Blue
+						visualization.data[idx + 3] = 255; // Alpha
+					} else {
+						// В межах шаблону → копіюємо користувацький піксель
+						visualization.data[idx] = userPng.data[idx];
+						visualization.data[idx + 1] = userPng.data[idx + 1];
+						visualization.data[idx + 2] = userPng.data[idx + 2];
+						visualization.data[idx + 3] = 255;
+					}
+				} else {
+					// Якщо користувач нічого не малював → залишаємо прозорий фон
+					visualization.data[idx] = 0;
+					visualization.data[idx + 1] = 0;
+					visualization.data[idx + 2] = 0;
+					visualization.data[idx + 3] = 0;
+				}
+			
+			}
+		}
+	
+		console.log('out of bounds', outOfBoundsCount, 'total user drawn', totalUserDrawn)
+		// const outOfBoundsPercentage = (outOfBoundsCount / totalUserDrawn) * 100;
+		const accuracyPercentage = Math.max(0, (1 - (outOfBoundsCount / totalUserDrawn)) * 100);
+		const visualizationBuffer = PNG.sync.write(visualization);
+		fs.writeFileSync('visualization.png', visualizationBuffer);
 
-		// console.log('accuracy ', accuracy)
-		return accuracyPercentage
-
+		return {accuracyPercentage, visualizationBuffer}
+		// return {
+		// 	outOfBoundsCount,
+		// 	totalUserDrawn,
+		// 	outOfBoundsPercentage,
+		// 	visualizationBuffer,
+		// };
 	},
  
-	
-	convertSvgToPng: async (svgString) => {
-		return sharp(Buffer.from(svgString))
-		  .png()
-		  .toBuffer(); // Повертаємо буфер замість запису в файл
-	},
-	
-	compareImages:async (templateBuffer, userBuffer) =>{
-		// Завантажуємо зображення в Jimp
-		const templateJimp = await Jimp.read(templateBuffer);
-		const userJimp = await Jimp.read(userBuffer);
-	
-		if (templateJimp.bitmap.width !== userJimp.bitmap.width || templateJimp.bitmap.height !== userJimp.bitmap.height) {
-			console.log('Зображення мають різний розмір!');
-			return;
-		}
-			
-		let outOfBoundsCount = 0;
-		let totalBlackPixels = 0;
-		let outOfBoundsPixels = [];
-		// Порівнюємо пікселі
-		userJimp.scan(0, 0, userJimp.bitmap.width, userJimp.bitmap.height, (x, y, idx) => {
-			const templatePixel = templateJimp.getPixelColor(x, y);
-			const userPixel = userJimp.getPixelColor(x, y);
-			if (userPixel === 255) {
-				totalBlackPixels++; // Чорний піксель у шаблоні
-			}
-		
-			if (templatePixel === 0 && userPixel === 255) {
-				// console.log('temolate color', templatePixel)
-				outOfBoundsCount++; // Якщо пікселі різні і на шаблоні не чорний, збільшуємо лічильник
-				outOfBoundsPixels.push({ x, y });
-			}
-		});
-		// console.log(`Чорних пікселів у шаблоні: ${totalBlackPixels}`);
-		const errorPercentage = (outOfBoundsCount / totalBlackPixels) * 100;
-		const accuracyPercentage = (1 - outOfBoundsCount / totalBlackPixels) * 100;
 
-		console.log('accuracy percentage', accuracyPercentage)
-		// console.log(`Помилкових пікселів: ${outOfBoundsCount}, відсоток помилок ${errorPercentage}`);
-
-		// Можна порівняти їх, щоб оцінити результат
-
-		// Створюємо нове зображення для відображення помилкових пікселів
-		const outputImage = new Jimp(templateJimp.bitmap.width, templateJimp.bitmap.height, 0xFFFFFFFF); // Білий фон
-
-		// Позначаємо помилкові пікселі червоним кольором
-		outOfBoundsPixels.forEach(pixel => {
-			outputImage.setPixelColor(0xFF0000FF, pixel.x, pixel.y); // Червоний колір (RGBA)
-		});
-
-		// Зберігаємо нове зображення з помилковими пікселями
-		outputImage.write('./debug/outOfBoundsImage.png', (err) => {
-			if (err) {
-				console.error('Помилка при збереженні зображення:', err);
-			} else {
-				console.log('Зображення з помилковими пікселями збережено в файл: ./debug/outOfBoundsImage.png');
-			}
-		});
-
-		return accuracyPercentage
-	},
 	
 	
 

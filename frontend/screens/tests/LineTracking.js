@@ -26,6 +26,8 @@ export default function LineTracking() {
 
 	const [currentRound, setCurrentRound] = useState(1);
 	const [round2Modal, setRound2Modal] = useState(false);
+	const [round1Modal, setRound1Modal] = useState(true);
+
 
 	const [userLines, setUserLines] = useState([]); //round 1
 	const localRef = useRef(null); 
@@ -101,6 +103,14 @@ export default function LineTracking() {
 		return points;
 	};
 
+	// useEffect(()=>{
+	// 	if (currentRound === 2) {
+	// 		setRound2Modal(true)
+	// 	}
+
+
+	// }, [currentRound])
+
 	useEffect(() => {
 		const template = generateTemplate();
 		setTemplatePoints(template);
@@ -172,6 +182,7 @@ export default function LineTracking() {
 			setPath([])
 			// Завершився перший раунд, змінюємо на другий і показуємо модальне вікно з правилами
 			setCurrentRound(2);
+			console.log('SET ROUND 2 MODAL TRUE')
 			setRound2Modal(true);  // Показуємо модальне вікно з правилами
 			additionalData.current.completionRound1 = checkPointIndex.current/checkPoints.length;
 			checkPointIndex.current = 0;
@@ -334,13 +345,23 @@ export default function LineTracking() {
 		
 	return (
 		<>
-			<RulesModal 
+			{/* {round1Modal && (
+				<RulesModal 
+				visible={round1Modal} 
+				rules='Round 1 rules: lorem ipsum' 
+				onClose={() => {
+					setRound1Modal(false);
+				}} 
+			/>
+			)} */}
+				<RulesModal 
 				visible={round2Modal} 
 				rules='Round 2 rules: lorem ipsum' 
 				onClose={() => {
 					setRound2Modal(false);
-				}} 
-			/>
+				}}/>
+			
+			
 
 	
 

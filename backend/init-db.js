@@ -6,7 +6,9 @@ const createUserTableQuery = `
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(255) NOT NULL,
-  password VARCHAR(255) NOT NULL
+  password VARCHAR(255) NOT NULL,
+  age INT NOT NULL,
+  handOrientation ENUM( 'left', 'right') NOT NULL
 );
 `;
 // SQL для вибору бази даних
@@ -33,27 +35,22 @@ CREATE TABLE IF NOT EXISTS test_results (
 `;
 
 // Функція для створення бази даних і таблиць
-const createDatabaseAndTable = () => {
+const createDatabaseAndTable = async () => {
   // Створення бази даних
-  connection.query(createUserTableQuery, (err) => {
-    if (err) {
-      console.error('Error creating user table:', err);
-      return;
-    }
+	try {
+		// Створення таблиці users
+		await connection.query(createUserTableQuery);
+		console.log('User table created or already exists');
 
+		// Створення таблиці tests
+		await connection.query(createTestTableQuery);
+		console.log('Test table created or already exists');
 
-    connection.query(createTestTableQuery, (err) => {
-      if (err) {
-        console.error('Error creating test table:', err);
-        return;
-      }
-
-	  console.log('Database created or already exists');
-
-
-      connection.end();
-    });
-  });
+	} catch (err) {
+		console.error('Error:', err);
+	} finally {
+		await connection.end(); // Закриваємо з'єднання
+	}
 };
 
 // Виконання створення бази даних і таблиці
