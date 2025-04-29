@@ -73,7 +73,7 @@ export default function BellsCancellation({route}) {
 
 
     const handleImageClick = (clickedImg) => {
-		// console.log('entered');
+		console.log('entered');
       
         setObjects((prevObjects) =>
 			prevObjects.map((img) => {
@@ -124,7 +124,9 @@ export default function BellsCancellation({route}) {
 
         const token = await AsyncStorage.getItem('authToken');
         // console.log("Coin data being sent: ", coinData);
-      
+        console.log('bells objects', requestBody.bellsObjects)
+        console.log('other objects', requestBody.otherObjects)
+
 
         //  треба буде десь якось дані про час мвж вибором монеток протягом раунду брати. можна це навіть на бекенді робити
         try {
@@ -186,16 +188,17 @@ export default function BellsCancellation({route}) {
 				<TouchableOpacity
 				key={img.id}
 				onPress={() => handleImageClick(img)} // Обробка натискання
+				style={[styles.bellImg, { left: img.x, top: img.y }]}
 				>
 
-					<View key={img.id} style={[styles.bellImg, { left: img.x, top: img.y }]}>
+					{/* <View key={img.id} style={[styles.bellImg, { left: img.x, top: img.y }]}> */}
 						<Image 
 							source={imageMap[img.type] || require("../../assets/bells/processed_0.png")} 
 							style={[styles.image, (img.touched && img.type === 0) ? { opacity: 0.1 } : {}]}
 
 							// Закреслюємо зображення} 
 						/>
-					</View>
+					{/* </View> */}
 				</TouchableOpacity>
 			))}
 		</View>

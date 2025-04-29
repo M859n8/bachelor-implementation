@@ -12,13 +12,13 @@ const bellsCancellationController = {
             return res.status(400).json({ error: "Missing required fields" });
         }
 
-
+		const user = await userModel.findById(user_id);
         // console.log("clicked obj", bellsObjects);
         // console.log("additional data", additionalData);
         // console.log("other objects", otherObjects);
 		// console.log("test time duration", (additionalData.endTime-additionalData.startTime)/1000)
 
-		const result = bellsCancellationController.calculateResults(bellsObjects, additionalData, otherObjects);
+		const result = bellsCancellationController.calculateResults(bellsObjects, additionalData, otherObjects, user.age);
 
 
 		try {
@@ -55,71 +55,45 @@ const bellsCancellationController = {
 		if (x >= midWidth ) return 2;
 	},
 
-	//треба придумати що робити зі шляхом, бо поки не ясно взагалі
-	analyzeStrategy: (zoneOrder, zoneStats) => {
-		const result = {
-			ignoredZones: [],
-			dominantDirection: null,
-			isChaotic: false,
-			transitionCount: 0,
-		};
-	
-		// --- 1. Ігноровані зони ---
-		for (const zone in zoneStats) {
-			const { clickedBells, missedBells } = zoneStats[zone];
-			const total = clickedBells + missedBells;
-			if (total !== 0 && clickedBells === 0) {
-				result.ignoredZones.push(parseInt(zone));
-			}
-		}
-	
-		// --- 2. Кількість переходів ---
-		let transitions = 0;
-		for (let i = 1; i < zoneOrder.length; i++) {
-			if (zoneOrder[i] !== zoneOrder[i - 1]) transitions++;
-		}
-		result.transitionCount = transitions;
-	
-		// --- 3. Хаотичність (умовно: багато змін між зонами при малій кількості дзвіночків) ---
-		const zoneSwitchRatio = transitions / zoneOrder.length;
-		result.isChaotic = zoneSwitchRatio > 0.6;
-	
-		// --- 4. Напрямок (приблизно) ---
-		// Можна спробувати визначити переважаючі переходи
-		const directions = {
-			"1→2": 0, "2→3": 0, "3→4": 0,
-			"4→3": 0, "3→2": 0, "2→1": 0
-		};
-		for (let i = 1; i < zoneOrder.length; i++) {
-			const from = zoneOrder[i - 1];
-			const to = zoneOrder[i];
-			const key = `${from}→${to}`;
-			if (directions.hasOwnProperty(key)) {
-				directions[key]++;
-			}
-		}
-	
-		const forward = directions["1→2"] + directions["2→3"] + directions["3→4"];
-		const backward = directions["4→3"] + directions["3→2"] + directions["2→1"];
-	
-		if (forward > backward * 1.5) result.dominantDirection = "зліва направо";
-		else if (backward > forward * 1.5) result.dominantDirection = "справа наліво";
-		else result.dominantDirection = "нечіткий/хаотичний";
-	
-		return result;
+	getTimeByAge: (age) => {
+		const timeByAge = [
+			{ age: 20, refTime: 105 },
+			{ age: 25, refTime: 108 },
+			{ age: 30, refTime: 111 },
+			{ age: 35, refTime: 114 },
+			{ age: 40, refTime: 116 },
+			{ age: 45, refTime: 119 },
+			{ age: 50, refTime: 122 },
+			{ age: 55, refTime: 125 },
+			{ age: 60, refTime: 128 },
+			{ age: 65, refTime: 130 },
+			{ age: 70, refTime: 133 },
+			{ age: 75, refTime: 136 },
+			{ age: 80, refTime: 139 }
+		]
+		// Знаходимо найбільший запис, вік якого не перевищує age
+		const closest = [...timeByAge]
+			.reverse()
+			.find(entry => age >= entry.age);
+
+		return closest ? closest.refTime : 105;
+
 	},
 
-	analyzeZones: ({totalObjects, totalTargets, missedTargets, totalTimeSeconds, zoneStats}) =>{
-		const REF_TIME = 105; // in future get time by age
+	
+
+	analyzeZones: ({totalObjects, totalTargets, missedTargets, totalTimeSeconds, zoneStats, age}) =>{
+		const REF_TIME = bellsCancellationController.getTimeByAge(age); // in future get time by age
 		const REF_TARGETS_COUNT = 35;
 		const REF_OBJECTS_COUNT = 315
 		const REF_ERRORS_COUNT = 3;
 
 
 		// --- Accuracy Score ---
-		const pathologyThreshold = (REF_ERRORS_COUNT / REF_TARGETS_COUNT) * totalTargets;
+		const pathologyThreshold = Math.ceil((REF_ERRORS_COUNT / REF_TARGETS_COUNT) * totalTargets);
 		const accuracyScore = Math.max(0, (1 - (missedTargets / pathologyThreshold)) * 100);
-	
+		// console.log('mossed targets', missedTargets, 'accuracy score', accuracyScore, 'pathology ', pathologyThreshold)
+
 		// --- Asymmetry Score ---
 		const {missedBells: leftMissed, clickedBells: leftClicked } = zoneStats[1];
 		const {missedBells: rightMissed, clickedBells: rightClicked } = zoneStats[2];
@@ -160,7 +134,7 @@ const bellsCancellationController = {
 
 	},
 
-    calculateResults: (bellsObjects, additionalData, otherObjects) => {
+    calculateResults: (bellsObjects, additionalData, otherObjects, age) => {
 		//можна розділити екран на кілька зон, визначити в яких зонах знаходяться елементи 
 		// і визначити відсоток неглекту. це може бути осноаним показгиком тесту 
 		/*  помилково натиснуті елементи покажуть здатністть розрізняти об'єкти за формами 
@@ -243,7 +217,8 @@ const bellsCancellationController = {
 				totalTargets: bellsObjects.length,
 				missedTargets,
 				totalTimeSeconds: duration,
-				zoneStats
+				zoneStats,
+				age
 		})
 		// console.log('strategy analize', result)
 		// console.log('overall result', overallResult)
