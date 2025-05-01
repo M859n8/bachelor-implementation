@@ -21,7 +21,6 @@ CREATE TABLE IF NOT EXISTS test_results (
     'figureGround',
     'spatialRelations',
     'visualClosure',
-    'visualConstancy',
     'movementSpeed',
 	'movementAccuracy',
     'bilateralCoordination',

@@ -92,7 +92,7 @@ const bellsCancellationController = {
 		// --- Accuracy Score ---
 		const pathologyThreshold = Math.ceil((REF_ERRORS_COUNT / REF_TARGETS_COUNT) * totalTargets);
 		const accuracyScore = Math.max(0, (1 - (missedTargets / pathologyThreshold)) * 100);
-		// console.log('mossed targets', missedTargets, 'accuracy score', accuracyScore, 'pathology ', pathologyThreshold)
+		console.log('mіssed targets', missedTargets, 'accuracy score', accuracyScore, 'pathology ', pathologyThreshold)
 
 		// --- Asymmetry Score ---
 		const {missedBells: leftMissed, clickedBells: leftClicked } = zoneStats[1];
@@ -116,6 +116,7 @@ const bellsCancellationController = {
 		// const totalObjects = totalTargets; // або totalTargets + distractors якщо хочеш
 		const actualTimePerObject = totalTimeSeconds / totalObjects;
 		const standardTimePerObject = REF_TIME / REF_OBJECTS_COUNT;
+		console.log('standart time per object', standardTimePerObject, 'actual', actualTimePerObject)
 		const speedScore = Math.min(100, Math.max(0, (standardTimePerObject / actualTimePerObject) * 100));
 	
 		// --- Final Weighted Score ---

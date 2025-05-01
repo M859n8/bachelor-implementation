@@ -67,7 +67,9 @@ export default function StackNavigator() {
   }, []);
 
   return (
-    <Stack.Navigator screenOptions={{headersShown: false}}>
+    <Stack.Navigator screenOptions={{headersShown: false, cardStyle: {
+		flex: 1
+	  }}}>
         {isAuthenticated ? (
         // {/* //  Захищені екрани (тільки для авторизованих) */}
         <Stack.Group> 

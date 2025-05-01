@@ -35,6 +35,7 @@ def predict_similarity_test(num=1):
 	graph = load_data_from_json(f"./trainingData/generated/graph{num}.json", False)
 	# graph = load_data_from_json(f"./trainingData/graph{num}.json", False)
 
+
 	with torch.no_grad():
 		similarity = model(graph).item()
 
@@ -43,6 +44,6 @@ def predict_similarity_test(num=1):
 	return similarity
 
 # дебаг
-# if len(sys.argv) > 1:
-#     predict_similarity_test(int(sys.argv[1]))
+if len(sys.argv) > 1:
+    predict_similarity_test(int(sys.argv[1]))
 

@@ -67,7 +67,7 @@ def create_graph(data_json, train):
 	# 	y = torch.tensor([data_json["similarity"]], dtype=torch.float).unsqueeze(0)
 	# else:
 	# 	y = None
-	# 	print('given similarity ', data_json["similarity"]) #debug only
+		# print('given similarity ', data_json["similarity"]) #debug only
 		y = torch.tensor([data_json["similarity"]], dtype=torch.float).unsqueeze(0) #ЯКЩО ПРОБЛЕМИ ПРИ ТРЕНУВАННІ ПРОСТО ВИНЕСИ ЦЕ З ІФУ
 	else:
 		y=None

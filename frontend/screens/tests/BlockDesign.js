@@ -31,9 +31,9 @@ export default function BlockDesign() {
 	// const [sendingData, setSendingData] = useState(false);
 
 	const templates = { //templates array
-		0: require('../../assets/blockdesign.png'),
-		1: require('../../assets/visual_organiz/2.png'),
-		2: require('../../assets/visual_organiz/3.png'),
+		0: require('../../assets/blockDesign/block1.png'),
+		1: require('../../assets/blockDesign/block2.png'),
+		2: require('../../assets/blockDesign/block3.png'),
 	};
 
 	const [cellSize, setCellSize] = useState(0); //cell size, adaptive to orientation

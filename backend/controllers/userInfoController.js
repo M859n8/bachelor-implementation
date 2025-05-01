@@ -3,7 +3,7 @@ import userModel from '../models/user.js';
 
 const subdomains = {
 	motorFunctions: ["movementSpeed", "movementAccuracy", "bilateralCoordination"],
-	visualPerception: ["visualDescrimination", "figureGround", "spatialRelations", "visualClosure", "visualConstancy"],
+	visualPerception: ["visualDescrimination", "figureGround", "spatialRelations", "visualClosure"],
 	visuoconstructionalReasoning: ["copyingObjects", "assemblingObjects"]
   };
 

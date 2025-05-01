@@ -1,4 +1,4 @@
-import { StatusBar } from 'expo-status-bar';
+import { SafeAreaView, StatusBar } from 'react-native';
 import { NavigationContainer } from "@react-navigation/native"
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -7,13 +7,11 @@ import StackNavigator from "./StackNavigator";
 
 function App() {
     return (
-        // <GestureHandlerRootView style={{ flex: 1 }}>
-		
+		<SafeAreaView style={{ flex: 1 }}>
             <NavigationContainer>
                 <StackNavigator />
             </NavigationContainer>
-        // {/* </GestureHandlerRootView> */}
-	
+		</SafeAreaView>
     );
 }
 

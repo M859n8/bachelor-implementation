@@ -110,7 +110,6 @@ export default function Home({ setIsAuthenticated }) {
         <View style={styles.container}>
 			{/* <LockOrientation/> */}
             <CustomButton title="Logout" onPress={handleLogout} />
-			<View style={{ height: '100%' }}>
             <FlatList
                 data={tests}
                 key={numColumns}
@@ -118,6 +117,8 @@ export default function Home({ setIsAuthenticated }) {
 				style={{ flex: 1 }}
                 keyExtractor={(item) => item}
 				
+			// <View style={{justifyContent: 'center', alignItems: 'center' }}>
+				contentContainerStyle={styles.testListContainer}
 				ListHeaderComponent={
 					<>
 						{userInfo && (
@@ -141,7 +142,9 @@ export default function Home({ setIsAuthenticated }) {
 						<Text style={styles.testHeader}>Available Tests</Text>
 					</>
 				}
-				// contentContainerStyle={styles.testListContainer}
+				// </View>
+
+				
 				renderItem={({ item }) => (
 					<TouchableOpacity
 						style={[
@@ -162,10 +165,8 @@ export default function Home({ setIsAuthenticated }) {
 
 				}
 			/>
-			</View>
 
 			
-
 
         </View>
     );
@@ -177,8 +178,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         paddingHorizontal: 16,
         paddingTop: 20,
-		justifyContent: 'center',
-        alignItems: 'center'
+		// justifyContent: 'center',
+        // alignItems: 'center'
     },
     profileCard: {
         backgroundColor: '#f2f2f2',
@@ -218,11 +219,11 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: '#333',
     },
-    // testListContainer: {
-    //     alignItems: 'center',
-    //     justifyContent: 'center',
-    //     paddingBottom: 60,
-    // },
+    testListContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingBottom: 60,
+    },
     testCircle: {
         backgroundColor: '#4CAF50',
         justifyContent: 'center',

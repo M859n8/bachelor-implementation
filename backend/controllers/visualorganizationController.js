@@ -3,7 +3,6 @@ import connection from './../db-config.js';
 import stringSimilarity from "string-similarity";
 import userModel from '../models/user.js';
 
-const userResponses = {}; // Тимчасове сховище відповідей користувачі
 const correctAnswers = {
 	0: ["fish"],
 	1: ["saw"],
