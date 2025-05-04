@@ -133,11 +133,10 @@ export default function Home({ setIsAuthenticated }) {
 	
     
     return (
-		<SafeAreaView style={styles.container} onLayout={(event) => {
+		<View style={styles.container} onLayout={(event) => {
 			const { width } = event.nativeEvent.layout;
 			setWidth(width);
 		  }}>
-		{/* <LockOrientation/> */}
 		<CustomButton title="Logout" onPress={handleLogout} />
 		{width > 0 && (
 		<FlatList
@@ -145,7 +144,6 @@ export default function Home({ setIsAuthenticated }) {
 			numColumns={3}
 			keyExtractor={(item) => item}
 		
-		// <View style={{justifyContent: 'center', alignItems: 'center' }}>
 			contentContainerStyle={styles.testListContainer}
 			ListHeaderComponent={
 			<>
@@ -171,7 +169,6 @@ export default function Home({ setIsAuthenticated }) {
 			  <Text style={styles.profileTitle}>Available Tests</Text>
 			</>
 		  }
-		  // </View>
   
 		  
 		  renderItem={({ item }) => (
@@ -180,7 +177,7 @@ export default function Home({ setIsAuthenticated }) {
 				style={[
 					styles.testCircle,
 					{
-					width: (width - 20 * (3 + 1)) / 3,
+					width: 200,
 					aspectRatio: 1,
 					borderRadius: radius,
 					},
@@ -198,7 +195,7 @@ export default function Home({ setIsAuthenticated }) {
   
 		  }
 		/>)}
-	   </SafeAreaView>
+	   </View>
 
     );
 }

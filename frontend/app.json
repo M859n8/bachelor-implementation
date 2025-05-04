@@ -27,11 +27,8 @@
     },
 	"plugins": [
       "expo-screen-orientation"
-    ],
-	"jsEngine": "hermes",
-    "experimental": {
-      "newArchitecture": false
-    }
+    ]
+	
 
   }
 }
