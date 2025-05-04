@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, FlatList, TouchableOpacity, StyleSheet,ScrollView, Dimensions, Alert } from 'react-native';
+import { View, Text, Button, FlatList, TouchableOpacity, StyleSheet,ScrollView, Dimensions, Alert, useWindowDimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Login from './Login';
@@ -14,22 +14,35 @@ const tests = ["BellsCancellation","BlockDesign",
 export default function Home({ setIsAuthenticated }) {
 
     const navigation = useNavigation();
+	const [width, setWidth] = useState(0);
 
-	const [testCircleWidth, setTestCircleWidth] = useState(0);
-	const [numColumns, setNumColumns] = useState(0);
+	// const { width } = useWindowDimensions();
 
-	useEffect(() => {
-		const { width, height } = Dimensions.get('window');
+    // const testCircleWidth = 120;
+    // const numColumns = Math.max(1, Math.floor(width / testCircleWidth));
+	const [radius, setRadius] = useState(0);
 
-		console.log('width', width)
-		if (width > 0) {
-		const numColumns = width < 600 ? 2 : width < 900 ? 3 : 4;
-		setTestCircleWidth((width * 0.7) / numColumns);
-		setNumColumns(numColumns);
-		console.log('width', width, 'num colums', numColumns)
+    const handleLayout = (event) => {
+        const { width } = event.nativeEvent.layout;
+		
+        setRadius(width / 2);
+    };
 
-		}
-	}, []);
+	// const [testCircleWidth, setTestCircleWidth] = useState(0);
+	// const [numColumns, setNumColumns] = useState(0);
+
+	// useEffect(() => {
+	// 	const { width, height } = Dimensions.get('window');
+
+	// 	console.log('width', width)
+	// 	if (width > 0) {
+	// 	const numColumns = width < 600 ? 2 : width < 900 ? 3 : 4;
+	// 	setTestCircleWidth((width * 0.7) / numColumns);
+	// 	setNumColumns(numColumns);
+	// 	console.log('width', width, 'num colums', numColumns)
+
+	// 	}
+	// }, []);
 	const [userInfo, setUserInfo] = useState(null);
 	const [testResults, setTestResults] = useState([]);
 	const [chartData, setChartData] = useState([])
@@ -120,20 +133,21 @@ export default function Home({ setIsAuthenticated }) {
 	
     
     return (
-		<SafeAreaView style={styles.container}>
+		<SafeAreaView style={styles.container} onLayout={(event) => {
+			const { width } = event.nativeEvent.layout;
+			setWidth(width);
+		  }}>
 		{/* <LockOrientation/> */}
 		<CustomButton title="Logout" onPress={handleLogout} />
-  
-			  <FlatList
-				  data={tests}
-				  key={numColumns}
-				  numColumns={numColumns}
-		  style={{ flex: 1 }}
-				  keyExtractor={(item) => item}
-		  
+		{width > 0 && (
+		<FlatList
+			data={tests}
+			numColumns={3}
+			keyExtractor={(item) => item}
+		
 		// <View style={{justifyContent: 'center', alignItems: 'center' }}>
-		  contentContainerStyle={styles.testListContainer}
-		  ListHeaderComponent={
+			contentContainerStyle={styles.testListContainer}
+			ListHeaderComponent={
 			<>
   
 			  {userInfo && (
@@ -162,15 +176,16 @@ export default function Home({ setIsAuthenticated }) {
 		  
 		  renderItem={({ item }) => (
 			<TouchableOpacity
-			  style={[
-				styles.testCircle,
-				{
-				  width: testCircleWidth,
-				  height: testCircleWidth,
-				  borderRadius: testCircleWidth / 2,
-				},
-			  ]}
-			  onPress={() => navigation.navigate(item)}
+				onLayout={handleLayout}
+				style={[
+					styles.testCircle,
+					{
+					width: (width - 20 * (3 + 1)) / 3,
+					aspectRatio: 1,
+					borderRadius: radius,
+					},
+				]}
+			  	onPress={() => navigation.navigate(item)}
 			>
 			  <Text style={styles.testText}>{item}</Text>
 			</TouchableOpacity>
@@ -182,7 +197,7 @@ export default function Home({ setIsAuthenticated }) {
 			</View>
   
 		  }
-		/>
+		/>)}
 	   </SafeAreaView>
 
     );
@@ -239,7 +254,7 @@ const styles = StyleSheet.create({
     testListContainer: {
         alignItems: 'center',
         paddingBottom: 60,
-
+		width: '100%'
     },
     testCircle: {
         backgroundColor: '#4CAF50',

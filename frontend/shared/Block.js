@@ -18,14 +18,16 @@ export default function Block({ blockId, gridPosition, updateBlockValue, blockSi
 	const colorIndex = useSharedValue(0);
 	const rotation = useSharedValue(0);
 
-	const localRef = useRef(null); //ref to the block , for position measurement
+	// const localRef = useRef(null); //ref to the block , for position measurement
 
+	const localRef = useAnimatedRef();
 
 	//calculate row and col at the end of the movement
 	const checkBlockPosition = (relativeX, relativeY) =>{
 		const col = Math.round(relativeX / cellSize);
 		const row = Math.round(relativeY / cellSize);
 				
+		console.log('position is', row, col)
 		updateBlockValue({ row: row, col: col }, 'position', blockId);
 	}
 
@@ -102,22 +104,36 @@ export default function Block({ blockId, gridPosition, updateBlockValue, blockSi
 			};
 			let blockLayout;
 
-			if (localRef.current) {
-				localRef.current.measure((x, y, width, height, pageX, pageY) => {
-					blockLayout = { //get block actual pos on screen
-						x: pageX,
-						y: pageY,
-					};
+			// if (localRef.current) {
+			// 	localRef.current.measure((x, y, width, height, pageX, pageY) => {
+			// 		blockLayout = { //get block actual pos on screen
+			// 			x: pageX,
+			// 			y: pageY,
+			// 		};
+			// 		console.log('measured block', pageX, pageY)
+			// 		//calculate pos relative to grid
+			// 		const relativeX =  blockLayout.x-gridPosition.value.x;
+			// 		const relativeY = blockLayout.y-gridPosition.value.y
+			// 		// console.log('block layout', blockLayout.x, blockLayout.y, 'grif position', gridPosition.value.x, gridPosition.value.y)
 
-				});
-			}
+			// 		checkBlockPosition(relativeX, relativeY) //calculate cell and row
 
-			//calculate pos relative to grid
-			const relativeX =  blockLayout.x-gridPosition.value.x;
-			const relativeY = blockLayout.y-gridPosition.value.y
-			// console.log('block layout', blockLayout.x, blockLayout.y, 'grif position', gridPosition.value.x, gridPosition.value.y)
+			// 	});
+			// 	// console.log('left measure')
+			// }
+			// console.log('block layout', blockLayout)
+			runOnUI(() => {
+				const layout = measure(localRef);
+				if (layout) {
+					const relativeX = layout.pageX - gridPosition.value.x;
+					const relativeY = layout.pageY - gridPosition.value.y;
+		
+					// Викликаємо функцію на JS через runOnJS
+					runOnJS(checkBlockPosition)(relativeX, relativeY);
+				}
+			})();
 
-			checkBlockPosition(relativeX, relativeY) //calculate cell and row
+			
 			debouncedActionEnd();
 
 		})

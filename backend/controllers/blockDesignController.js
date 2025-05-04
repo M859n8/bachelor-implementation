@@ -106,7 +106,7 @@ const blockDesignController = {
 			);
 			
 			if (!userBlock) {
-				// console.log('error pos', row, col);
+				console.log('error pos', row, col);
 				errorsCount += 1;
 				return;
 			}
