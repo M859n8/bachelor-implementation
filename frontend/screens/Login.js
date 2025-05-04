@@ -1,9 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import { View, TextInput, Pressable, StyleSheet, Text, Alert } from 'react-native';
-// import { Picker } from '@react-native-picker/picker';
-// import RNPickerSelect from 'react-native-picker-select';
-import SelectDropdown from 'react-native-select-dropdown';
 
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';

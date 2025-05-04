@@ -6,57 +6,60 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
 
 
-export default function Penny({index, setElements, round, setCoinData, targetZonePos, coinSize}) {
+export default function Penny({index, setElements, round, setCoinData, targetZonePos , coinSize}) {
+	// const orientation = useOrientation();
 
-    const startCoords = useRef({ x: 0, y: 0 });
-	// const screenWidth = Dimensions.get("window").width;
-	// const coinSize = screenWidth * 0.05; // Розмір монетки (~15% ширини екрану)
+	// const { width, height } = Dimensions.get('window');
+	// const [coinSize, setCoinSize] = useState(height * 0.06);
+	// const [useHeight, setUseHeight] = useState(true);
 
-    const lastSpeed = useRef(0); //for hand change points detection
+	// useEffect(() => {
+		
+	// 	if (useHeight) {
+	// 		setCoinSize(width * 0.06);  // Зміна на ширину
+	// 	} else {
+	// 		setCoinSize(height * 0.06); // Зміна на висоту
+	// 	}
+
+	// 	setUseHeight(!useHeight); // Перемикаємо логіку на наступний раз
+	// 	console.log('orientation change: using', useHeight ? 'width' : 'height');
+	// }, [orientation]);
+
+    const startCoords = useRef({ x: 0, y: 0 });//start coords that will be send to the backend
+    const startTime = useRef(0); //start time that will be send to the backend
+
+	const [gotToBox, setGotToBox] = useState(false);
+	//for hand change points detection
+    const lastSpeed = useRef(0); 
     const angleHistory=useRef([]);
     const handChangePoints = useRef([]);
 
-	const offset = useSharedValue({ x: 0, y: 0 });
-	const start = useSharedValue({ x: 0, y: 0 });
-
-
-	// const localRef = useRef(null);
-	// useEffect(() => {
-	// 	if (refCallback) {
-	// 		refCallback(localRef.current);
-	// 	}
-	// }, [refCallback]);
+	const offset = useSharedValue({ x: 0, y: 0 });//current coin position
+	const start = useSharedValue({ x: 0, y: 0 });//start coords before each move
     
-    const startTime = useRef(0); //щоб оновлювалося одразу і не чекало рендерингу як у юзстейт
-    // const endTimeBackup = useRef(0);
-
-
-    const droppedCoin = useRef(false);
-    const droppedCoinPoints = useRef([]);
-    // Додаємо точку error
-    const registerDroppedCoin = (x, y, time) => { 
-		const tolerance = coinSize;
-        const existingIndex = droppedCoinPoints.current.findIndex(
-            (coin) => Math.abs(coin.x - x) < tolerance && Math.abs(coin.y - y) < tolerance
-        )
-        if(existingIndex === -1){
-            droppedCoinPoints.current.push({ x, y, timeStart: time, timeEnd: null, time: null});
-
-        }else{
-			droppedCoinPoints.current[existingIndex].timeEnd = time ;
-            droppedCoinPoints.current[existingIndex].time = 
-            time - droppedCoinPoints.current[existingIndex].timeStart;
-
-        }
-        
-        console.log("Error points:", droppedCoinPoints.current);
-
-    };
+    const droppedCoin = useRef(false); //dropped coin identifier
+    const droppedCoinPoints = useRef([]); //array of dropped coins
+    
+	//function for drop processing
+	const registerDroppedCoin = (x, y, time) => {
+		droppedCoinPoints.current.push({ x, y, timeStart: time, timeEnd: null, time: null });
+	};
+	//function for processing coin lifting
+	const registerLiftedCoin = (x, y, time) => {
+		const coin = droppedCoinPoints.current.find(c => c.timeEnd === null);
+	
+		if (coin) {
+			coin.timeEnd = time;
+			coin.time = time - coin.timeStart;
+		} else {
+			console.warn("No active dropped coin found to mark as lifted.");
+		}
+		// console.log('dropped coins', droppedCoinPoints.current);
+	};
 
 	//change coin status left/fight
 	const moveCoin = (id, newStatus) => {
 		setElements((prevElements) => {
-			
 			const updatedElements = prevElements.map((el) =>
 				el.id === id ? { ...el, status: newStatus } : el
 			);
@@ -65,40 +68,46 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 	};
     
 
+	//group all data about coin that will be send to the backend
     const collectCoinData = (coinId, startCoords, endCoords) => {
-        const endTime = Date.now();
-
-		console.log("end time before fill", endTime);
-        // const timeTaken = (endTime - startTime.current) / 1000;
-      
-        const coinData = {
-            id: coinId,
-            start_coordinates: {x: startCoords.x, y: startCoords.y},
-            end_coordinates: {x: endCoords.x , y: endCoords.y},
-            // time: timeTaken,
-            time_start: startTime.current,
-            time_end: endTime,
-            errors: droppedCoinPoints.current,
-            // change_hand_moment: changeHandMoment,
-            hand_change_points: handChangePoints.current,
-            round: round
-        };
-    
-		// handChangePoints.current.length = 0;
-        // droppedCoinPoints.current.length = 0;
-		// console.log('check if array is empty', droppedCoinPoints.current );
-        // setCoinData((prevData) => [...prevData, coinData]); 
-        updateOrAddCoin(coinData)
-		// console.log('hand change points', coinData.hand_change_points)
-		// console.log('COIN DATA', coinData)
-
-        // console.log("Hand change points:", handChangePoints);
-        // console.log("Error points:", droppedCoinPoints.current);
-
-
-        // endTimeBackup.current = endTime;
-    };
-
+		const endTime = Date.now();
+	
+		const coinData = {
+			id: coinId,
+			start_coordinates: { x: startCoords.x, y: startCoords.y },
+			end_coordinates: { x: endCoords.x, y: endCoords.y },
+			time_start: startTime.current,
+			time_end: endTime,
+			errors: droppedCoinPoints.current,
+			hand_change_points: handChangePoints.current,
+			round: round
+		};
+	
+		setCoinData((prevCoinData) => {
+			const existingIndex = prevCoinData.findIndex(
+				(coin) => coin.id === coinData.id && coin.round === coinData.round
+			);
+	
+			if (existingIndex === -1) {
+				return [...prevCoinData, coinData];
+			}
+	
+			const updatedCoin = {
+				...prevCoinData[existingIndex],
+				end_coordinates: coinData.end_coordinates,
+				time_end: coinData.time_end,
+				errors: coinData.errors,
+				hand_change_points: coinData.hand_change_points
+			};
+	
+			return [
+				...prevCoinData.slice(0, existingIndex),
+				updatedCoin,
+				...prevCoinData.slice(existingIndex + 1)
+			];
+		});
+	};
+	
 
     //I DO NOT NEED THIS. WE UPDATING COINS ON THE VERY END
     function updateOrAddCoin(newCoinData) {
@@ -112,10 +121,6 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
             // Якщо запису не знайдено — додаємо новий
             if (existingIndex === -1) {
                 console.log("Round is", newCoinData.round);
-                // handChangePoints.current.length = 0;
-                // droppedCoinPoints.current.length = 0;
-                // console.log('check if array is empty', handChangePoints.current );
-
                 return [...prevCoinData, newCoinData];
             }
         
@@ -140,20 +145,18 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
                 ...prevCoinData.slice(existingIndex + 1)
             ];
         });
-        // handChangePoints.current.length = 0;
-        // droppedCoinPoints.current.length = 0;
 
       }
     
 
 
-    // const toDegrees = (radians) => (radians * 180) / Math.PI;
+    //identify possible hand change points based on speed and ange changes
     const getChangeHand = (event) => {
-		const speed = Math.sqrt(event.velocityX ** 2 + event.velocityY ** 2); // Загальна швидкість
-		const directionRadians = Math.atan2(event.translationY, event.translationX); // Кут руху
-		// console.log('hande change params', speed, directionRadians)
+		const speed = Math.sqrt(event.velocityX ** 2 + event.velocityY ** 2); 
+		const directionRadians = Math.atan2(event.translationY, event.translationX);
 		const directionDegrees = directionRadians * (180 / Math.PI);
 	
+		//save angles to array , so average angle will be calculated
 		angleHistory.current.push(directionDegrees);
 		if (angleHistory.current.length > 13) {
 			angleHistory.current.shift();
@@ -164,36 +167,25 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 			angleHistory.current[0]
 		);
 	
+		//check if speed and angle chenge are significant
 		if (lastSpeed.current < 500 && speed > 500 && avgAngleChange > 0.05) {
-			// console.log(`🔄 Можлива зміна руки! Speed ${speed}, coords ${event.absoluteX}, ${event.absoluteY}`);
-			console.log(`	Можлива зміна руки! Speed ${speed}, coords ${event.absoluteX}, ${event.absoluteY}`);
-
-			// registerHandChange(event.absoluteX, event.absoluteY, Date.now());
+			// console.log(`	Можлива зміна руки! Speed ${speed}, coords ${event.absoluteX}, ${event.absoluteY}`);
+			//add hand change point
 			handChangePoints.current.push({
 				x: event.absoluteX,
 				y: event.absoluteY,
 				time: Date.now()
 			});
 		}
-		else{
-			// if(lastSpeed.current < 0.2 && speed > 0.2){
-			// 	console.log('speed problem');
-			// }
-			// if(avgAngleChange > 0.05){
-			// 	console.log('angle problem', avgAngleChange, 'where speed is', lastSpeed.current,'and', speed)
-
-			// }
-		}
-	
+		//save last speed for future processing
 		lastSpeed.current = speed;
 	};
 	
-
+	//function for drop zone identification
     const getDropZone = (coinLayout) => {
 		const {x , y} = coinLayout;
 
-		console.log('coin layout ', x, y ,'and target zone',targetZonePos.x, targetZonePos.y, '+width',  )
-
+		// console.log('coin layout ', x, y ,'and target zone',targetZonePos.x, targetZonePos.y, '+width',  )
 		return (
 			x >= targetZonePos.x &&
 			x <= targetZonePos.x + targetZonePos.width &&
@@ -203,82 +195,54 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 
       };
 
-
-	  const animatedStyle = useAnimatedStyle(() => {
-		return {
-		  transform: [
-			{ translateX: offset.value.x },
-			{ translateY: offset.value.y },
-		  ],
-		};
-	  });
-	  const measureAsync = (ref) => {
-		return new Promise((resolve, reject) => {
-			if (ref?.current) {
-				ref.current.measure((x, y, width, height, pageX, pageY) => {
-					resolve({ x: pageX, y: pageY, width, height });
-				});
-			} else {
-				reject("Ref not available");
-			}
-		});
+	//animated style for movement visualization
+	const animatedStyle = useAnimatedStyle(() => {
+	return {
+		transform: [
+		{ translateX: offset.value.x },
+		{ translateY: offset.value.y },
+		],
 	};
+	});
 
+
+	//function to handle end of the coin movement
 	const handleDrop = async (e) => {
-		// try {
-			// const coinLayout = await measureAsync(localRef);
-	
-			// const relativeX = coinLayout.x - targetZonePos.x;
-			// const relativeY = coinLayout.y - targetZonePos.y;
-			// console.log('Relative xy', relativeX, relativeY, 'layount', coinLayout.x, coinLayout.y)
-			const pos = {x:e.absoluteX, y:e.absoluteY}
-			const dropZone = getDropZone(pos);
-			// const dropZone = getDropZone(coinLayout);
-			console.log('drop zone is', dropZone);
-			if (dropZone) {
-				
-				round === 1 ? moveCoin(index, 'right') : moveCoin(index, 'left');
-				// console.log("after move Hand change points:", handChangePoints.current);
-			} else {
-				// console.log('diff between measure ', coinLayout, 'and event', e.absoluteX, e.absoluteY)
-				console.log('diff between event', e.absoluteX, e.absoluteY)
+		const pos = {x:e.absoluteX, y:e.absoluteY}
+		//check if coin is in drop zone
+		const dropZone = getDropZone(pos); 
+		if (dropZone) {
+			
+			round === 1 ? moveCoin(index, 'right') : moveCoin(index, 'left');
+			setGotToBox(true);
 
-				registerDroppedCoin(e.absoluteX, e.absoluteY, Date.now());
-				droppedCoin.current = true;
-			}
-			// console.log('elements', elements)
-		// } catch (err) {
-		// 	console.error("Failed to measure coin layout:", err);
-		// }
+		} else {
+			// console.log('diff between event', e.absoluteX, e.absoluteY)
+			//fi coin not in drop zone - register error
+			registerDroppedCoin(e.absoluteX, e.absoluteY, Date.now());
+			droppedCoin.current = true;
+		}
+			
 	};
 	
-	
-	  
-
-
 	const panGesture = Gesture.Pan()
 		.onBegin((e) => {
-			// setActiveCoin(index); // Записуємо, яку монету взяли
-			startTime.current = Date.now(); // Оновлюється без виклику ререндеру
-			// console.log('start time is ', startTime.current);
+			startTime.current = Date.now(); //start time for coin movement
+			console.log('start time is ', startTime.current);
 
 			if(droppedCoin.current){
 				console.log("#########Помилка!", droppedCoin.current);
 				//coin is picked
 				// registerDroppedCoin(position.x._value, position.y._value, Date.now());
-				registerDroppedCoin(e.absoluteX, e.absoluteY, Date.now());
+				// registerDroppedCoin(e.absoluteX, e.absoluteY, Date.now());
+				registerLiftedCoin(e.absoluteX, e.absoluteY, Date.now());
 
 				// console.log(`error points detail ${position.x._value}`);
 			}else{
 				startCoords.current = {x: e.absoluteX, y: e.absoluteY}
-				console.log('set start', startCoords.current)
+				// console.log('set start', startCoords.current)
 			}
 			droppedCoin.current = false;
-
-
-			// console.log(`active index is : ${index}`);
-			// position.setOffset({ x: position.x._value, y: position.y._value }); //save current pos
-			// position.setValue({ x: 0, y: 0 }); // Скидаємо dx/dy, щоб рух був відносно нової точки
  
 		})
 		.onUpdate((event) => {
@@ -294,13 +258,15 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 			
 			// setActiveCoin(null);
 			const endCoords = { x: e.absoluteX, y: e.absoluteY };
-            collectCoinData(index, startCoords.current, endCoords);
+            // collectCoinData(index, startCoords.current, endCoords);
 
 			start.value = {
 				x: offset.value.x,
 				y: offset.value.y,
 			};
 			handleDrop(e);
+            collectCoinData(index, startCoords.current, endCoords);
+
 
 		})
 		.runOnJS(true);
@@ -328,53 +294,16 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 		>
             <Image
                 source={require("../assets/pennies/frontCoin.png")}
-                style={{width: coinSize,
+                style={[{width: coinSize,
                     height: coinSize,
                     position: "absolute",
                     zIndex: 2,
-                    resizeMode: "contain"}}
+                    resizeMode: "contain"},
+					 gotToBox ? { opacity: 0.5 } : {}]}
             />
         </Animated.View>
 		</GestureDetector>
-            <View style={{ position: "absolute", top: 0, left: 0, backgroundColor: 'blue' }}>
-
-            {handChangePoints.current.map((point, index) => (
-
-                <View
-                    key={index}
-                    style={{
-                        position: "absolute",
-                        width: 10,
-                        height: 10,
-                        borderRadius: 5,
-                        backgroundColor: "red",
-                        left: point.x,
-                        top: point.y,
-						zIndex: 100,
-                    }}
-                />
-            ))}
-
-			{/* <View style={{ position: "absolute", top: 0, left: 0 }}>
-
-			{handChangePointsTest.current.map((point, index) => (
-
-				<View
-					key={index}
-					style={{
-						position: "absolute",
-						width: 10,
-						height: 10,
-						borderRadius: 5,
-						backgroundColor: "green",
-						left: point.x,
-						top: point.y,
-					}}
-				/>
-			))}
-			</View> */}
-        </View>
-
+           
         </>
     );
 }

@@ -5,7 +5,6 @@ import CustomButton from '../shared/CustomButton.js';
 
 export default function RulesModal({ visible, rules, onClose }) {
     const navigation = useNavigation();
-	console.log('got here rules modal')
 
     return (
 		<>

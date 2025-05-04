@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // import Orientation from 'react-native-orientation-locker';
 import CustomButton from '../../shared/CustomButton.js';
 
-import useTestObjects from '../../shared/GenerateBells.js';
+import generateObjects from '../../shared/GenerateBells.js';
 // import generateObjects from '../../shared/GenerateBells.js';
 import ResultsModal from '../../shared/resultsModal.js';
 import RulesModal from '../../shared/RulesModal.js';
@@ -20,7 +20,7 @@ export default function BellsCancellation({route}) {
 	const [timerIsRunning, setTimerIsRunning] = useState(false); 
 
 
-    const [objects, setObjects] = useState(useTestObjects()); //array with objects 
+    const [objects, setObjects] = useState(()=> generateObjects()); //array with objects 
     const [isLoading, setIsLoading] = useState(false); 
     // const [additionalData, setAdditionalData] = useState({
     //     startTime: null,
@@ -110,8 +110,8 @@ export default function BellsCancellation({route}) {
         const additionalData = {
             startTime: startTime.current,
             endTime: Date.now(),  // Оновлюємо тільки endTime
-            screenWidth: Dimensions.get('window').width,
-            screenHeight:  Dimensions.get('window').height,
+            fieldWidth: Dimensions.get('window').width * 0.9,
+            fieldHeight:  Dimensions.get('window').height * 0.75,
 			allObjectsCount: objects.length,
         };
 

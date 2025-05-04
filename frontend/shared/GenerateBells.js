@@ -101,4 +101,4 @@ const useTestObjects = () => {
     return objects;
 };
 
-export default useTestObjects;
+export default generateObjects;

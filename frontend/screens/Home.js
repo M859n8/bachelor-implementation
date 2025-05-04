@@ -1,11 +1,12 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, FlatList, TouchableOpacity, StyleSheet,ScrollView, useWindowDimensions, Alert } from 'react-native';
+import { View, Text, Button, FlatList, TouchableOpacity, StyleSheet,ScrollView, Dimensions, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Login from './Login';
 import Chart from '../shared/Chart.js';
 import CustomButton from '../shared/CustomButton.js';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const tests = ["BellsCancellation","BlockDesign",
     "ComplexFigure","TransferringPennies", "VisualOrganization", "LineTracking"];
@@ -13,10 +14,22 @@ const tests = ["BellsCancellation","BlockDesign",
 export default function Home({ setIsAuthenticated }) {
 
     const navigation = useNavigation();
-    const { width } = useWindowDimensions();
-    const numColumns = width < 600 ? 2 : width < 900 ? 3 : 4;
-	const testSircleWidth = width* 0.7 / numColumns
 
+	const [testCircleWidth, setTestCircleWidth] = useState(0);
+	const [numColumns, setNumColumns] = useState(0);
+
+	useEffect(() => {
+		const { width, height } = Dimensions.get('window');
+
+		console.log('width', width)
+		if (width > 0) {
+		const numColumns = width < 600 ? 2 : width < 900 ? 3 : 4;
+		setTestCircleWidth((width * 0.7) / numColumns);
+		setNumColumns(numColumns);
+		console.log('width', width, 'num colums', numColumns)
+
+		}
+	}, []);
 	const [userInfo, setUserInfo] = useState(null);
 	const [testResults, setTestResults] = useState([]);
 	const [chartData, setChartData] = useState([])
@@ -41,7 +54,7 @@ export default function Home({ setIsAuthenticated }) {
 			try {
 				console.log('got to fetch')
 				const token = await AsyncStorage.getItem('authToken');
-				console.log('token', token)
+				// console.log('token', token)
 				const response = await fetch('http://192.168.0.12:5000/api/auth/user-info', {
 				method: 'POST',
 				headers: {
@@ -54,7 +67,7 @@ export default function Home({ setIsAuthenticated }) {
 				const data = await response.json();
 				// console.log(await response.text())
 				if (response.ok) {
-					console.log('data is', data)
+					// console.log('data is', data)
 					setUserInfo(data.user);
 					setTestResults(data.groupedResults);
 					setSubdomainsResults(data.subdomainsResults);
@@ -66,7 +79,7 @@ export default function Home({ setIsAuthenticated }) {
 			}
 		};
 
-		console.log('fetch')
+		// console.log('fetch')
 		fetchUserData();
 	}, []);
 
@@ -88,7 +101,7 @@ export default function Home({ setIsAuthenticated }) {
 				};
 			});
 		});
-		console.log('chart data', testData)
+		// console.log('chart data', testData)
 
 		
 		
@@ -107,68 +120,71 @@ export default function Home({ setIsAuthenticated }) {
 	
     
     return (
-        <View style={styles.container}>
-			{/* <LockOrientation/> */}
-            <CustomButton title="Logout" onPress={handleLogout} />
-            <FlatList
-                data={tests}
-                key={numColumns}
-                numColumns={numColumns}
-				style={{ flex: 1 }}
-                keyExtractor={(item) => item}
-				
-			// <View style={{justifyContent: 'center', alignItems: 'center' }}>
-				contentContainerStyle={styles.testListContainer}
-				ListHeaderComponent={
-					<>
-						{userInfo && (
-							<View style={styles.profileCard}>
-								<Text style={styles.profileTitle}>User Profile</Text>
-								<View style={styles.profileRow}>
-									<Text style={styles.profileLabel}>Username:</Text>
-									<Text style={styles.profileValue}>{userInfo.username}</Text>
-								</View>
-								<View style={styles.profileRow}>
-									<Text style={styles.profileLabel}>Age:</Text>
-									<Text style={styles.profileValue}>{userInfo.age}</Text>
-								</View>
-								<View style={styles.profileRow}>
-									<Text style={styles.profileLabel}>Hand Orientation:</Text>
-									<Text style={styles.profileValue}>{userInfo.handOrientation}</Text>
-								</View>
-							</View>
-						)}
-		
-						<Text style={styles.testHeader}>Available Tests</Text>
-					</>
-				}
-				// </View>
+		<SafeAreaView style={styles.container}>
+		{/* <LockOrientation/> */}
+		<CustomButton title="Logout" onPress={handleLogout} />
+  
+			  <FlatList
+				  data={tests}
+				  key={numColumns}
+				  numColumns={numColumns}
+		  style={{ flex: 1 }}
+				  keyExtractor={(item) => item}
+		  
+		// <View style={{justifyContent: 'center', alignItems: 'center' }}>
+		  contentContainerStyle={styles.testListContainer}
+		  ListHeaderComponent={
+			<>
+  
+			  {userInfo && (
+				<View style={styles.profileCard}>
+				  <Text style={styles.profileTitle}>User Profile</Text>
+				  <View style={styles.profileRow}>
+					<Text style={styles.profileLabel}>Username:</Text>
+					<Text style={styles.profileValue}>{userInfo.username}</Text>
+				  </View>
+				  <View style={styles.profileRow}>
+					<Text style={styles.profileLabel}>Age:</Text>
+					<Text style={styles.profileValue}>{userInfo.age}</Text>
+				  </View>
+				  <View style={styles.profileRow}>
+					<Text style={styles.profileLabel}>Hand Orientation:</Text>
+					<Text style={styles.profileValue}>{userInfo.handOrientation}</Text>
+				  </View>
+				</View>
+			  )}
+	  
+			  <Text style={styles.profileTitle}>Available Tests</Text>
+			</>
+		  }
+		  // </View>
+  
+		  
+		  renderItem={({ item }) => (
+			<TouchableOpacity
+			  style={[
+				styles.testCircle,
+				{
+				  width: testCircleWidth,
+				  height: testCircleWidth,
+				  borderRadius: testCircleWidth / 2,
+				},
+			  ]}
+			  onPress={() => navigation.navigate(item)}
+			>
+			  <Text style={styles.testText}>{item}</Text>
+			</TouchableOpacity>
+		  )}
+		  ListFooterComponent={
+			<View style={styles.resultsPart}>
+			  <Text style={styles.profileTitle}>Results charts</Text>
+			  <Chart testResults={chartData}/>
+			</View>
+  
+		  }
+		/>
+	   </SafeAreaView>
 
-				
-				renderItem={({ item }) => (
-					<TouchableOpacity
-						style={[
-							styles.testCircle,
-							{
-								width: testSircleWidth,
-								height: testSircleWidth,
-								borderRadius: testSircleWidth / 2,
-							},
-						]}
-						onPress={() => navigation.navigate(item)}
-					>
-						<Text style={styles.testText}>{item}</Text>
-					</TouchableOpacity>
-				)}
-				ListFooterComponent={
-					<Chart testResults={chartData}/>
-
-				}
-			/>
-
-			
-
-        </View>
     );
 }
 
@@ -177,13 +193,13 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
         paddingHorizontal: 16,
-        paddingTop: 20,
+        // paddingTop: 20,
 		// justifyContent: 'center',
         // alignItems: 'center'
     },
     profileCard: {
         backgroundColor: '#f2f2f2',
-		// width: '50%',
+		// width: '80%',
         borderRadius: 12,
         padding: '5%',
         marginBottom: '10%',
@@ -202,6 +218,7 @@ const styles = StyleSheet.create({
     profileRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+		// gap: '30%',
         marginBottom: 8,
     },
     profileLabel: {
@@ -221,8 +238,8 @@ const styles = StyleSheet.create({
     },
     testListContainer: {
         alignItems: 'center',
-        justifyContent: 'center',
         paddingBottom: 60,
+
     },
     testCircle: {
         backgroundColor: '#4CAF50',
@@ -234,5 +251,9 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: 'bold',
     },
+	resultsPart: {
+		marginTop: '10%',
+
+	}
 });
   

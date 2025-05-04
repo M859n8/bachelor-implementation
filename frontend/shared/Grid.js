@@ -10,11 +10,11 @@ import { StyleSheet, Text, View, Modal, Button,  TouchableOpacity, Image, Alert 
 
 
 
-export default function Grid({ currentRound , cellSize, dimention}){
+export default function Grid({cellSize, dimention}){
 
-	console.log(cellSize, 'and', dimention)
+	// console.log(cellSize, 'and', dimention)
 	const gridWidth= cellSize*dimention
-	// Створення сітки 3x3
+
 	return (
 	  <View style={[styles.grid, {width: gridWidth, aspectRatio: 1}]}>
 		{Array.from({ length: dimention }).map((_, rowIndex) => (

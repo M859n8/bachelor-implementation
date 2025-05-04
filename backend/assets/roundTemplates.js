@@ -4,7 +4,6 @@ const roundTemplates = [
         duration: 210, // у секундах 
         gridSize: 3, // 3x3
 		expectedActions: 9,
-		maxActions: 19,
 
         correctBlocks: [
             { row: 0, col: 0, color: 'mixed', rotation: 180 },
@@ -24,7 +23,6 @@ const roundTemplates = [
         duration: 120, // 2 хв
         gridSize: 4,
 		expectedActions: 17,
-		maxActions: 32,
 
         correctBlocks: [
             { row: 0, col: 0, color: 'red', rotation: 0 },
@@ -54,7 +52,6 @@ const roundTemplates = [
         duration: 180, // 3 хв
         gridSize: 4,
 		expectedActions: 17,
-		maxActions: 32,
 
         correctBlocks: [
 			{ row: 0, col: 0, color: 'mixed', rotation: 180 },

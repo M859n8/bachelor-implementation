@@ -29,7 +29,7 @@ const bellsCancellationController = {
 			res.json({
 				message: "Final score calculated",
 				// finalScore: `${finalScore}`,
-				finalScore: `Overall result ${result.finalScore}\n Asymmetry score ${result.asymmetryScore} \n Asymmetry ditrection ${result.asymmetryDirection}`, 
+				finalScore: `Overall result ${result.finalScore}\n Symmetry score ${result.symmetryScore} \n Asymmetry ditrection ${result.asymmetryDirection}`, 
 
 			});
 		} catch (error) {
@@ -44,7 +44,7 @@ const bellsCancellationController = {
 
     },
 
-	getZone: (x, y, fieldWidth, fieldHeight) =>{
+	getZone: (x, y, fieldWidth) =>{
 		const midWidth = fieldWidth * 0.5;
 	
 		if (x < 0 ) {
@@ -94,7 +94,7 @@ const bellsCancellationController = {
 		const accuracyScore = Math.max(0, (1 - (missedTargets / pathologyThreshold)) * 100);
 		console.log('mіssed targets', missedTargets, 'accuracy score', accuracyScore, 'pathology ', pathologyThreshold)
 
-		// --- Asymmetry Score ---
+		// --- Symmetry Score ---
 		const {missedBells: leftMissed, clickedBells: leftClicked } = zoneStats[1];
 		const {missedBells: rightMissed, clickedBells: rightClicked } = zoneStats[2];
 
@@ -103,12 +103,16 @@ const bellsCancellationController = {
 
 		const leftRatio = leftTotal > 0 ? leftMissed / leftTotal : 0;
 		const rightRatio = rightTotal > 0 ? rightMissed / rightTotal : 0;
+		console.log("left ratio", leftRatio, 'right ratio', rightRatio)
 
+		const pathologyAsymThreshold = REF_ERRORS_COUNT / (REF_TARGETS_COUNT /2);
 		const asymmetryDiff = leftRatio - rightRatio; //біьше нуля -- більше помилок зліва-- неглект зліва 
-		const asymmetryScore = Math.max(0, (1 - (Math.abs(asymmetryDiff) / 3)) * 100);
+		const symmetryScore = Math.max(0, (1 - (Math.abs(asymmetryDiff) / pathologyAsymThreshold)) * 100);
 
+		// console.log('asymmetry diff', asymmetryDiff, 'symetry score', symmetryScore, 'pathology', pathologyAsymThreshold) 
+		// console.log('left missed', leftMissed, 'left clicked',leftClicked, 'left ratio', leftRatio)
+		// console.log('right missed', rightMissed, 'right clicked',rightClicked, 'right ratio', rightRatio)
 		let direction = "balanced";
-		console.log('asymmetry diff', asymmetryDiff, 'left', leftMissed, 'right',leftClicked)
 		if (asymmetryDiff > 0.1) direction = "left-side neglect";
 		else if (asymmetryDiff < -0.1) direction = "right-side neglect";
 
@@ -117,8 +121,9 @@ const bellsCancellationController = {
 		const actualTimePerObject = totalTimeSeconds / totalObjects;
 		const standardTimePerObject = REF_TIME / REF_OBJECTS_COUNT;
 		console.log('standart time per object', standardTimePerObject, 'actual', actualTimePerObject)
-		const speedScore = Math.min(100, Math.max(0, (standardTimePerObject / actualTimePerObject) * 100));
+		const speedScore = Math.min(100, Math.max(0, (standardTimePerObject / actualTimePerObject ) * 100));
 	
+		console.log('speed score', speedScore)
 		// --- Final Weighted Score ---
 		const finalScore = (
 			0.75 * accuracyScore +
@@ -127,7 +132,7 @@ const bellsCancellationController = {
 	
 		return {
 			// accuracyScore: accuracyScore , //db
-			asymmetryScore: asymmetryScore , //to user //db
+			symmetryScore: symmetryScore , //to user //db
 			asymmetryDirection: direction, //to user // db
 			// speedScore: speedScore , //db
 			finalScore: finalScore  //to user
@@ -163,27 +168,21 @@ const bellsCancellationController = {
 			1: { clickedBells: 0, missedBells: 0, wrongClicks: 0 },
 			2: { clickedBells: 0, missedBells: 0, wrongClicks: 0 }
 		};
-		const clickedSequence = [];
-		const fieldWidth = additionalData.screenWidth * 0.9;
-		const fieldHeight = additionalData.screenHeight * 0.75;
 		const duration = (additionalData.endTime - additionalData.startTime)/1000;
 
 		let weightedErrors = 0; //to assess visualDescrimination by shape
-		const MAX_ERRORS_COUNT = 3;
-		let maxWeightedErrors = MAX_ERRORS_COUNT * 3; //калькість помилок яка свідчить про патологію, множитимо на максимаоьну вагц
+		const REF_ERRORS_COUNT = 3;
+		let maxWeightedErrors = REF_ERRORS_COUNT * 3; //калькість помилок яка свідчить про патологію, множитимо на максимаоьну вагц
 
 
 		let missedTargets = 0;
 		bellsObjects.forEach(obj => {
-			const zone = bellsCancellationController.getZone(obj.x , obj.y, fieldWidth, fieldHeight);
+			const zone = bellsCancellationController.getZone(obj.x , obj.y, additionalData.fieldWidth);
 			if(!zone) return
 
 			if(obj.touched){
 				zoneStats[zone].clickedBells +=1;
-				clickedSequence.push({
-					zone,
-					time: obj.time
-				});
+				
 			}else{
 				zoneStats[zone].missedBells +=1;
 				missedTargets +=1;
@@ -193,7 +192,7 @@ const bellsCancellationController = {
 		});
 
 		otherObjects.forEach(obj => {
-			const zone = bellsCancellationController.getZone(obj.x , obj.y, fieldWidth, fieldHeight);
+			const zone = bellsCancellationController.getZone(obj.x , obj.y, additionalData.fieldWidth);
 			if(!zone) return
 			zoneStats[zone].wrongClicks +=1;
 			//visual descrimination assessment
@@ -210,9 +209,6 @@ const bellsCancellationController = {
 		let visualDiscriminationScore = (1 - (weightedErrors / maxWeightedErrors)) * 100;
 		visualDiscriminationScore = Math.max(0, visualDiscriminationScore );
 		
-		// clickedSequence.sort((a, b) => a.time - b.time);
-		// const zoneOrder = clickedSequence.map(item => item.zone);
-		// const result = bellsCancellationController.analyzeStrategy(zoneOrder, zoneStats);
 		const overallResult = bellsCancellationController.analyzeZones({
 				totalObjects: additionalData.allObjectsCount,
 				totalTargets: bellsObjects.length,
@@ -225,7 +221,7 @@ const bellsCancellationController = {
 		// console.log('overall result', overallResult)
 
 		return {
-			asymmetryScore: overallResult.asymmetryScore,
+			symmetryScore: overallResult.symmetryScore,
 			asymmetryDirection: overallResult.asymmetryDirection,
 			finalScore: overallResult.finalScore,
 			visualDiscriminationScore,

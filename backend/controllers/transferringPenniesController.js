@@ -2,8 +2,8 @@
 import userModel from '../models/user.js';
 
 
-const COINS_PER_ROUND = 5; //will be 10 in final variant
-const REFERENCE_SPEED = 4; //18*10/30 (замінила 15 секунд на 45 а монетки на 10) 
+const COINS_PER_ROUND = 6; //will be 9 in final variant
+const REFERENCE_SPEED = 4; //18*10/30 (замінила 15 секунд на 30 а монетки на 10) 
 const REFERENCE_WIDTH = 18; //inches
 
 
@@ -19,7 +19,7 @@ const transferringPenniesController ={
 			return res.status(400).json({ error: "Missing required fields" });
 		}
 		// console.log("Data : ", coinData);
-		// console.log("Received Data: ", JSON.stringify(coinData, null, 2));
+		console.log("Received Data: ", JSON.stringify(coinData, null, 2));
 		const features = transferringPenniesController.extractFeatures(coinData);
 		const {resultLeft, resultRight} = transferringPenniesController.assessCoordination(features);
 		// console.log(`left percentage is ${resultLeft}, and right is ${resultRight}`);
@@ -60,10 +60,10 @@ const transferringPenniesController ={
 		// Обчислення для кожного елементу
 		data.forEach(entry => {
 			const handChange = entry.hand_change_points;
-			console.log('hand change obj', handChange, entry);
+			// console.log('hand change obj', handChange, entry);
 			//processing only data where hand change point is detected
 			if (!handChange) return; // Пропускаємо, якщо немає зміни руки 
-			console.log('return check')
+			// console.log('return check')
 			/*може якщо не було зміни руки, але була помилка, записати це як момент зміни руки
 				потім в обрахувнках до якої області належиться помилка, робити варіант, що якщо помилка 
 				мменше або дірівнює координатам зміни руки, то вона належить до тієї то області
@@ -124,32 +124,7 @@ const transferringPenniesController ={
 		return { speed, part, errNum, errTime  }; 
 	},
 
-	callModel : (coinData, res)=> {
-		// const inputData = JSON.stringify(req.body); 
-		// Викликаємо Python скрипт, передаючи шлях до SVG файлу
-		const coin_data = JSON.stringify(coinData);
-		const child = spawn('python3', ['../backend/MLmodels/transferringPennies/training.py', coin_data]);
-
-		child.stdout.on('data', (data) => {
-			const clusters = JSON.parse(data.toString());
-			console.log('Clustered Data:', clusters);
-		});
-		
-		child.stderr.on('data', (error) => {
-			console.error('Error:', error.toString());
-		});
 	
-		// Перевірка завершення процесу
-		child.on('close', (code) => {
-		if (code === 0) {
-			// Якщо Python скрипт успішно завершився, надсилаємо відповідь користувачу
-			res.json({ message: 'Results calculated' });
-		} else {
-			// Якщо процес завершився з помилкою
-			res.status(500).json({ error: 'Error calculating results' });
-		}
-		});
-	},
 
 	assessCoordination: (dataArr) => {
 		//speed, part, errors, errorsTime

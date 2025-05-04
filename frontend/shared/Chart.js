@@ -4,7 +4,7 @@ import { View, Text, ScrollView } from 'react-native';
 import { BarChart } from "react-native-gifted-charts";
 
 export default function Chart({ testResults}) {
-	console.log('got into chart with data', testResults)
+	// console.log('got into chart with data', testResults)
 
 	return (
 	<ScrollView contentContainerStyle={{ padding: 16 }}>

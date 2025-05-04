@@ -10,7 +10,7 @@ import { StyleSheet, Dimensions, View } from 'react-native';
 import debounce from 'lodash.debounce';
 import { useCallback } from 'react';
 
-export default function Block({ blockId, gridPosition, refCallback, setBlocks, updateBlockValue, blockSize, cellSize }) {
+export default function Block({ blockId, gridPosition, updateBlockValue, blockSize, cellSize }) {
 	const isPressed = useSharedValue(false); //я його не використовую, воно типу само створилося 
 	const offset = useSharedValue({ x: 0, y: 0 }); //current block position during drag
 
@@ -20,11 +20,6 @@ export default function Block({ blockId, gridPosition, refCallback, setBlocks, u
 
 	const localRef = useRef(null); //ref to the block , for position measurement
 
-	useEffect(() => {
-		if (refCallback) {
-			refCallback(localRef.current);
-		}
-	}, [refCallback]);
 
 	//calculate row and col at the end of the movement
 	const checkBlockPosition = (relativeX, relativeY) =>{
@@ -37,9 +32,9 @@ export default function Block({ blockId, gridPosition, refCallback, setBlocks, u
 	//debounce function for identificating series of gestures
 	const debouncedActionEnd = useCallback(
 		debounce(() => {
-			// console.log('Серія жестів завершена');
+			// console.log('Серія жестів завершена', blockId);
 			updateBlockValue(0, 'changesCount', blockId);
-		}, 1500),
+		}, 1700),
 		[] // дуже важливо: залежності порожні, щоб debounce не створювався заново
 	);
 
@@ -120,6 +115,7 @@ export default function Block({ blockId, gridPosition, refCallback, setBlocks, u
 			//calculate pos relative to grid
 			const relativeX =  blockLayout.x-gridPosition.value.x;
 			const relativeY = blockLayout.y-gridPosition.value.y
+			// console.log('block layout', blockLayout.x, blockLayout.y, 'grif position', gridPosition.value.x, gridPosition.value.y)
 
 			checkBlockPosition(relativeX, relativeY) //calculate cell and row
 			debouncedActionEnd();

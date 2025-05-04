@@ -17,18 +17,12 @@ import Timer from '../../shared/Timer.js';
 
 export default function BlockDesign() {
 	const [rulesModal, setRulesModal] = useState(true);
-	// const [resultsModal, setResultsModal] = useState(false);
-	// const [results, setResults] = useState({ finalScore: 100 });
 	const [timerIsRunning, setTimerIsRunning] = useState(false); //state for timer
-	// const [currentImageIndex, setCurrentImageIndex] = useState(1); //current template index
 	
 	const [blocks, setBlocks] = useState([]); //blocks array
 	const gridLayout = useSharedValue({ x: 0, y: 0 }); //grid position
 	const blockRefs= useRef([]); // array for blocks refs
 	const gridRef = useRef(null); //grid fer
-	// const isFocused = useIsFocused(); //returns true when animation ended
-
-	// const [sendingData, setSendingData] = useState(false);
 
 	const templates = { //templates array
 		0: require('../../assets/blockDesign/block1.png'),
@@ -55,7 +49,7 @@ export default function BlockDesign() {
 
 	useEffect(() => {
 		
-		if (!rulesModal) { //measure grid position after closiing rules
+		if (!rulesModal) { //measure grid position after closing rules modal
 			  gridRef.current?.measure((x, y, width, height, pageX, pageY) => {
 				// console.log('Grid coords after navigation:', { pageX, pageY });
 				gridLayout.value = { x: pageX, y: pageY }; 
@@ -63,14 +57,6 @@ export default function BlockDesign() {
 		  }
 	}, [rulesModal]);
 
-	// useEffect(() => { //debug
-	// 	const unsubscribe = Dimensions.addEventListener('change', ({ window }) => {
-	// 		console.log('📐 Orientation changed:', window.width, window.height);
-	// 		// Тут можеш перевиміряти layout
-	// 	});
-	
-	// 	return () => unsubscribe?.remove?.(); // безпечне видалення
-	// }, []);
 
 	useEffect(() => { //for each round calculate grid, cell and block size
 		
@@ -197,20 +183,7 @@ export default function BlockDesign() {
 
 		</TouchableOpacity>
 		
-		<View
-			// style={{ width: gridSize, aspectRatio: 1}}
-
-			// onLayout={(event) => {
-			// 	const { x, y, width, height } = event.nativeEvent.layout;
-			// 	console.log('Grid layout:', x, y, width, height);
-			// 	gridLayout.value = { x, y };
-			// 	// console.log('Value grid layout:', gridLayout.value);
-
-			// }}
-			
-			ref={gridRef}
-			
-		>
+		<View ref={gridRef}>
 			<Grid  cellSize={cellSize} dimention={gridDimention}/>
 		</View>
 		<View style={{ marginVertical: 10 }}>
@@ -231,7 +204,6 @@ export default function BlockDesign() {
 					key={block.id + '_' + currentRound}  //враховуємо також раунд, щоб реакт повністю перемалював весь блок 
 					blockId={block.id} 
 					gridPosition={gridLayout} 
-					refCallback={(ref) => (blockRefs.current[index] = ref)}
 					setBlocks={setBlocks}
 					updateBlockValue={updateBlockValue}
 					blockSize={blockSize}
@@ -270,7 +242,7 @@ const styles = StyleSheet.create({
 		borderWidth: 2,
 	  },
 	  zoomedImage: {
-		width: 500, // Збільшений розмір
+		width: 500, 
 		height: 500,
 		
 		borderRadius: 5,
