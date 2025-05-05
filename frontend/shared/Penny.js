@@ -7,24 +7,6 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
 
 export default function Penny({index, setElements, round, setCoinData, targetZonePos , coinSize}) {
-	// const orientation = useOrientation();
-
-	// const { width, height } = Dimensions.get('window');
-	// const [coinSize, setCoinSize] = useState(height * 0.06);
-	// const [useHeight, setUseHeight] = useState(true);
-
-	// useEffect(() => {
-		
-	// 	if (useHeight) {
-	// 		setCoinSize(width * 0.06);  // Зміна на ширину
-	// 	} else {
-	// 		setCoinSize(height * 0.06); // Зміна на висоту
-	// 	}
-
-	// 	setUseHeight(!useHeight); // Перемикаємо логіку на наступний раз
-	// 	console.log('orientation change: using', useHeight ? 'width' : 'height');
-	// }, [orientation]);
-
     const startCoords = useRef({ x: 0, y: 0 });//start coords that will be send to the backend
     const startTime = useRef(0); //start time that will be send to the backend
 
@@ -108,48 +90,6 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 		});
 	};
 	
-
-    //I DO NOT NEED THIS. WE UPDATING COINS ON THE VERY END
-    function updateOrAddCoin(newCoinData) {
-        setCoinData((prevCoinData) => {
-          // Шукаємо запис, який відповідає id монетки і раунду
-            const existingIndex = prevCoinData.findIndex(
-                (coin) => coin.id === newCoinData.id && coin.round === newCoinData.round
-            );
-
-        
-            // Якщо запису не знайдено — додаємо новий
-            if (existingIndex === -1) {
-                console.log("Round is", newCoinData.round);
-                return [...prevCoinData, newCoinData];
-            }
-        
-            // Якщо запис знайдено — створюємо новий об'єкт із оновленими даними
-            const updatedCoin = {
-                ...prevCoinData[existingIndex],
-                // Оновлюємо лише потрібні поля
-                end_coordinates: newCoinData.end_coordinates,
-                time_end: newCoinData.time_end,
-                // errors: [
-
-
-                errors: newCoinData.errors,
-                hand_change_points: newCoinData.hand_change_points
-            };
-           
-          
-          // Повертаємо новий масив з оновленим записом
-            return [
-                ...prevCoinData.slice(0, existingIndex),
-                updatedCoin,
-                ...prevCoinData.slice(existingIndex + 1)
-            ];
-        });
-
-      }
-    
-
-
     //identify possible hand change points based on speed and ange changes
     const getChangeHand = (event) => {
 		const speed = Math.sqrt(event.velocityX ** 2 + event.velocityY ** 2); 
@@ -195,15 +135,7 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 
       };
 
-	//animated style for movement visualization
-	const animatedStyle = useAnimatedStyle(() => {
-	return {
-		transform: [
-		{ translateX: offset.value.x },
-		{ translateY: offset.value.y },
-		],
-	};
-	});
+
 
 
 	//function to handle end of the coin movement
@@ -224,6 +156,15 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 		}
 			
 	};
+	//animated style for movement visualization
+	const animatedStyle = useAnimatedStyle(() => {
+		return {
+			transform: [
+			{ translateX: offset.value.x },
+			{ translateY: offset.value.y },
+			],
+		};
+		});
 	
 	const panGesture = Gesture.Pan()
 		.onBegin((e) => {
@@ -294,12 +235,13 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 		>
             <Image
                 source={require("../assets/pennies/frontCoin.png")}
-                style={[{width: coinSize,
+                style={[{
+					width: coinSize,
                     height: coinSize,
                     position: "absolute",
                     zIndex: 2,
                     resizeMode: "contain"},
-					 gotToBox ? { opacity: 0.5 } : {}]}
+					gotToBox ? { opacity: 0.5 } : {}]}
             />
         </Animated.View>
 		</GestureDetector>
@@ -308,14 +250,14 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
     );
 }
 
-const styles = StyleSheet.create({
-    coinContainer: {
-        // position: "absolute",
-    },
+// const styles = StyleSheet.create({
+//     coinContainer: {
+//         // position: "absolute",
+//     },
 
-    // coinImage: {
-    //     width: coinSize,
-    //     height: coinSize,
-    //     resizeMode: "contain",
-    // },
-});
+//     // coinImage: {
+//     //     width: coinSize,
+//     //     height: coinSize,
+//     //     resizeMode: "contain",
+//     // },
+// });

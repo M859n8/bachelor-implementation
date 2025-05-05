@@ -4,8 +4,6 @@ import { useState, useEffect , useRef} from 'react';
 import Penny from '../../shared/Penny.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ScreenOrientation from "expo-screen-orientation";
-import LockOrientation from '../../shared/LockOrientation.js';
-import ResultsModal from '../../shared/resultsModal.js';
 import RulesModal from '../../shared/RulesModal.js';
 import Timer from '../../shared/Timer.js';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -23,6 +21,7 @@ export default function TransferringPennies({route}) {
 
 
 	const { width, height } = Dimensions.get('window');
+	// console.log('wisth heigth', width, height)
 	const minDimension = Math.min(width, height);
 	const maxDimension = Math.max(width, height);
 
@@ -36,9 +35,9 @@ export default function TransferringPennies({route}) {
         { id: 4, status: 'left' },
 		{ id: 5, status: 'left' },
 		{ id: 6, status: 'left' },
-        // { id: 7, status: 'left' },
-		// { id: 8, status: 'left' },
-		// { id: 9, status: 'left' },
+        { id: 7, status: 'left' },
+		{ id: 8, status: 'left' },
+		{ id: 9, status: 'left' },
 	 
   	]);
 

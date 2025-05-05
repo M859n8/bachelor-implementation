@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, Dimensions, Button, Modal, TouchableOpacity, Image, Alert } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, Button, Modal, TouchableOpacity, Image, Alert, useWindowDimensions } from 'react-native';
 import { useState, useRef, useEffect } from 'react';
 import {useSharedValue, useAnimatedRef} from 'react-native-reanimated';
 import { Gesture, GestureHandlerRootView, GestureDetector } from 'react-native-gesture-handler';
@@ -16,6 +16,11 @@ import Grid from '../../shared/Grid.js';
 import Timer from '../../shared/Timer.js';
 
 export default function BlockDesign() {
+	// const [width, setWidth ] = useState(0);
+	// const [height, setHeight] = useState(0);
+	const { width, height } = Dimensions.get('window');
+
+	
 	const [rulesModal, setRulesModal] = useState(true);
 	const [timerIsRunning, setTimerIsRunning] = useState(false); //state for timer
 	
@@ -59,29 +64,31 @@ export default function BlockDesign() {
 
 
 	useEffect(() => { //for each round calculate grid, cell and block size
+		// if(width>0 && height>0){
 		
-		const { width, height } = Dimensions.get('window');
-		const minDimension = Math.min(width, height);
+			// console.log('blocks', width, height);
+			const minDimension = Math.min(width, height);
 
-		const dimention = currentRound === 0 ? 3 : 4; //3 cells only on zero round
-		setGridDimention(dimention)
-		const currentCellSize = minDimension * 0.45 / dimention;
-		setCellSize(currentCellSize);
-		setBlockSize(currentCellSize);
-	
-		//initialise blocks
-		const totalBlocks = dimention * dimention;
-		const newBlocks = Array.from({ length: totalBlocks }, (_, i) => ({
-			id: i,
-			position: { row: 0, col: 0},
-			color: "white",
-			rotation: 0,
-			changesCount: 0,
-		}));
+			const dimention = currentRound === 0 ? 3 : 4; //3 cells only on zero round
+			setGridDimention(dimention)
+			const currentCellSize = minDimension * 0.45 / dimention;
+			setCellSize(currentCellSize);
+			setBlockSize(currentCellSize);
+		
+			//initialise blocks
+			const totalBlocks = dimention * dimention;
+			const newBlocks = Array.from({ length: totalBlocks }, (_, i) => ({
+				id: i,
+				position: { row: 0, col: 0},
+				color: "white",
+				rotation: 0,
+				changesCount: 0,
+			}));
 
-		setBlocks(newBlocks);
+			setBlocks(newBlocks);
+		// }
 	
-	}, [currentRound]);
+	}, [currentRound]); //[width, height]
 
 	
 	const goToNextRound = () => {
@@ -157,7 +164,15 @@ export default function BlockDesign() {
 
 
   return (
-    <View style={styles.container}>
+    <View 
+		style={styles.container} 
+		// onLayout={(event) => {
+		// 	const { width, height } = event.nativeEvent.layout;
+		// 	console.log('Measured from layout:', width, height);
+		// 	setWidth(width);
+		// 	setHeight(height);
+		// }}
+	>
 		<RulesModal 
 			visible={rulesModal} 
 			rules='Complete a template using blocks.' 

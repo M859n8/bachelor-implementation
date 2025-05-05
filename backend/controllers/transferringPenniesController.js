@@ -2,8 +2,8 @@
 import userModel from '../models/user.js';
 
 
-const COINS_PER_ROUND = 6; //will be 9 in final variant
-const REFERENCE_SPEED = 4; //18*10/30 (замінила 15 секунд на 30 а монетки на 10) 
+const COINS_PER_ROUND = 9; //will be 9 in final variant
+const REFERENCE_SPEED = 24; //18*20/15 
 const REFERENCE_WIDTH = 18; //inches
 
 
@@ -11,26 +11,25 @@ const transferringPenniesController ={
 	
 		// Збереження відповіді в локальний масив
 	saveResponse: async (req, res) => {
-		console.log("got here");
-		// console.log("Request body: ", req.body);
+
 		const {coinData, additionalData} = req.body;
 		const user_id = req.user.id;
-		if (!user_id || !coinData) {
+		if (!user_id || !coinData || !additionalData) {
 			return res.status(400).json({ error: "Missing required fields" });
 		}
-		// console.log("Data : ", coinData);
-		console.log("Received Data: ", JSON.stringify(coinData, null, 2));
+		//--- assess speed ---
+		const {round1, round2} = transferringPenniesController.assessOverall(additionalData);
+		// console.log('round 1 and 2', round1, round2)
+		const finalScore = (round1+round2)/2;
+		// console.log("Received Data: ", JSON.stringify(coinData, null, 2));
+		//--- assess bilateral coordination ---
 		const features = transferringPenniesController.extractFeatures(coinData);
 		const {resultLeft, resultRight} = transferringPenniesController.assessCoordination(features);
 		// console.log(`left percentage is ${resultLeft}, and right is ${resultRight}`);
-		const {round1, round2} = transferringPenniesController.assessOverall(additionalData);
-		console.log('round 1 and 2', round1, round2)
-		const finalScore = (round1+round2)/2;
-		// console.trace("Trace: Execution reached 'end'");
-		// transferringPenniesController.callModel(features, res);  //викликатимемо модель для кожного раунду окремо
-		// return;
+		
+		
 		try {
-			console.log('final score', finalScore, 'resultLeft', resultLeft)
+			// console.log('final score', finalScore, 'resultLeft', resultLeft)
 			await userModel.saveToDatabase(user_id, "movementSpeed", finalScore)
 			await userModel.saveToDatabase(user_id, "bilateralCoordination", resultLeft)
 			res.json({
@@ -41,11 +40,7 @@ const transferringPenniesController ={
 			console.error(error);
 			res.status(500).json({ error: "Database error" });
 		}
-		// res.json({ 
-		// 	message: "Response saved locally",
-		// 	finalScore: `Left to right hand \n ${resultLeft}% : ${resultRight}% \n Overallresult 
-		// 	\n ${round1}% \n and round 2 ${round2}%`, 
-		// });
+		
 	},
 
 	// Функція для обчислення відстані між точками
@@ -62,17 +57,11 @@ const transferringPenniesController ={
 			const handChange = entry.hand_change_points;
 			// console.log('hand change obj', handChange, entry);
 			//processing only data where hand change point is detected
-			if (!handChange) return; // Пропускаємо, якщо немає зміни руки 
-			// console.log('return check')
-			/*може якщо не було зміни руки, але була помилка, записати це як момент зміни руки
-				потім в обрахувнках до якої області належиться помилка, робити варіант, що якщо помилка 
-				мменше або дірівнює координатам зміни руки, то вона належить до тієї то області
-				
-				також час помилки варто записувати по іншому. варто окремо записувати чам падіння і час підняття
-				потім коли ми переводитимемо в масив хенд чендж, варто знайти середнє арифметичне
-				
-				але, може треба це робити не тут а на фронтенді? на фронтенді ми відсіюємо хенд чендж, 
-				щоб вони були приблизно в центрі і все таке */
+			if (!handChange){
+				// console.log('no hand change')
+				return; // Пропускаємо, якщо немає зміни руки
+			}  
+		
 			const coordStart = entry.start_coordinates;
 			const coordEnd = entry.end_coordinates;
 			const handChangeCoord = handChange;
@@ -84,13 +73,13 @@ const transferringPenniesController ={
 			// const timeErr = entry.errors.reduce((sum, err) => sum + err.time, 0);
 			let paramsL, paramsR;
 			if(entry.round == 1){
-				paramsL = transferringPenniesController.calculateMLParams(coordStart, handChangeCoord, timeStart, timeHandChange, errors, wholeDistance);
-				paramsR = transferringPenniesController.calculateMLParams(handChangeCoord,coordEnd, timeHandChange, timeEnd, errors, wholeDistance);	
+				paramsL = transferringPenniesController.calculateParams(coordStart, handChangeCoord, timeStart, timeHandChange, errors, wholeDistance);
+				paramsR = transferringPenniesController.calculateParams(handChangeCoord,coordEnd, timeHandChange, timeEnd, errors, wholeDistance);	
 			}else{
-				// transferringPenniesController.calculateMLParams(speedRight, partRight, errNumRight, errTimeRight);
-				// transferringPenniesController.calculateMLParams(handChangeCoord,coordEnd, timeHandChange, timeEnd, errors, wholeDistance);
-				paramsR = transferringPenniesController.calculateMLParams(coordStart, handChangeCoord, timeStart, timeHandChange, errors, wholeDistance);
-				paramsL = transferringPenniesController.calculateMLParams(handChangeCoord,coordEnd, timeHandChange, timeEnd, errors, wholeDistance);
+				// transferringPenniesController.calculateParams(speedRight, partRight, errNumRight, errTimeRight);
+				// transferringPenniesController.calculateParams(handChangeCoord,coordEnd, timeHandChange, timeEnd, errors, wholeDistance);
+				paramsR = transferringPenniesController.calculateParams(coordStart, handChangeCoord, timeStart, timeHandChange, errors, wholeDistance);
+				paramsL = transferringPenniesController.calculateParams(handChangeCoord,coordEnd, timeHandChange, timeEnd, errors, wholeDistance);
 			
 			}
 			const {speed: speedLeft, part: partLeft, errNum: errNumLeft,errTime: errTimeLeft} = paramsL;
@@ -111,7 +100,7 @@ const transferringPenniesController ={
 		return results;
 	},
 
-	calculateMLParams : (coordStart, coordEnd, timeStart, timeEnd, errors, wholeDistance) => {
+	calculateParams : (coordStart, coordEnd, timeStart, timeEnd, errors, wholeDistance) => {
 
 		const errInZone = errors.filter(err => 
 			Math.abs(err.x) > Math.abs(coordStart.x) && Math.abs(err.x) <= Math.abs(coordEnd.x));
@@ -165,25 +154,8 @@ const transferringPenniesController ={
 		return { resultLeft: percentage1 , resultRight: percentage2  };
 	},
 
-	assessErrors: (dataArr) => {
-		/*кількість монеток з помилками до загальної кількості монеток -  
-		
-		left to right
-		coin1PercentL = (numLeft/numLeft+right)*100, coin1PercentRight = ...
-		coinAllErrorL = coin1PercentL + 2 + 3 .../ numCoinsWithErr
-		*/
-	},
+
 	assessOverall: (data) => {
-		// let numberCoinsRound1 = 0;
-		// let numberCoinsRound2 = 0;
-
-
-		// data.forEach( (entry) => {	
-		// 	(entry.round === 1) ? numberCoinsRound1++ : numberCoinsRound2++;
-		// })
-		// const resultRound1 = numberCoinsRound1 * 100 / COINS_PER_ROUND;
-		// const resultRound2 = numberCoinsRound2 * 100 / COINS_PER_ROUND;
-		// return (resultRound1+resultRound2)/ 2
 		const round1Duration = (data.timeEndRound1 - data.timeStartRound1)/1000;
 		const round2Duration = (data.timeEndRound2 - data.timeStartRound2)/1000;
 

@@ -17,46 +17,56 @@ import {
 
 export default function LineTracking() {
 	const LINE_WIDTH = 30;
-	const [modalVisible, setModalVisible] = useState(true);
-	const { width, height } = Dimensions.get('window');
+	const navigation = useNavigation(); 
+
 	const [path, setPath] = useState([]);
-    const [drawing, setDrawing] = useState(false);
-    const allStrokes = useSharedValue([]);
-    const containerOffset = useRef({ x: 0, y: 0 });
 
 	const [currentRound, setCurrentRound] = useState(1);
 	const [round2Modal, setRound2Modal] = useState(false);
 	const [round1Modal, setRound1Modal] = useState(true);
 
-
-	const [userLines, setUserLines] = useState([]); //round 1
+	const linesRound1 = useRef([]);
 	const localRef = useRef(null); 
 	const [startMarkPos, setStartMarkPos] = useState({x: 0, y: 0});
 	
 	const viewRef = useRef(null);
-	const [templatePoints, setTemplatePoints] = useState([])
 	const [svgPathD, setSvgPathD] = useState('')
-	const [referencePoints, setReferencePoints] = useState({})
-	const [mistakesCount, setMistakesCount] = useState(0)
-
-	const navigation = useNavigation(); 
 
 	const start = useSharedValue({ x: 0, y: 0 });
 	const offset = useSharedValue({ x: 0, y: 0 });
 
-	const statusBarHeight = useRef(0)
-	// const properties = new PathProperties(svgPathD);
-	// const pathLength = properties.getTotalLength();
+	// const { width, height } = Dimensions.get('window');
+	// const [windowSize, setWindowSize] = useState(Dimensions.get("window"));
+	const [width, setWidth ] = useState(0);
+	const [height, setHeight] = useState(0);
+
+
+
 	const additionalData = useRef( {
-		windowWidth: width, 
-		windowHeight: height,
+		windowWidth: 0, 
+		windowHeight: 0,
 		completionRound1: 0,
 		completionRound2: 0,
 
 	});
 
-	const checkPointIndex = useRef(0);
+	//measure status bar height
+	const statusBarHeight = useRef(0)
+	useEffect(() => { 
+		if (viewRef.current) {
+			viewRef.current.measure((x, y, width, height, pageX, pageY) => {
+				statusBarHeight.current = pageY;
+				setWidth(width);
+				setHeight(height);
+
+			});
+		}
+
+	}, []);
+
+	const checkPointIndex = useRef(0); //check points to track path copletion
 	const [checkPoints, setCheckPoints] = useState([
+		//spiral
 		{ x: 0.2, y: 0.55 }, 
 		{ x: 0.16, y: 0.52 },
 		{ x: 0.2, y: 0.46 }, 
@@ -83,12 +93,13 @@ export default function LineTracking() {
 		
 	]);
 
+	//function that generates first part of a template  - Archimedean Spiral
 	const generateArchimedeanSpiral = ({
 		centerX = 0.2,
 		centerY = 0.6,
 		turns = 2,
 		pointsCount = 200,
-		maxRadius = 0.15 // в координатах 0–1
+		maxRadius = 0.15 
 	} = {}) => {
 		const points = [];
 	
@@ -102,45 +113,6 @@ export default function LineTracking() {
 	
 		return points;
 	};
-
-	// useEffect(()=>{
-	// 	if (currentRound === 2) {
-	// 		setRound2Modal(true)
-	// 	}
-
-
-	// }, [currentRound])
-
-	useEffect(() => {
-		const template = generateTemplate();
-		setTemplatePoints(template);
-		const templateSvg = convertTemplatePointsToPath(template);
-		setSvgPathD(templateSvg)
-		const firstPoint = template[0] ;
-		const lastPoint = template[template.length - 1];	
-
-		console.log('starr', lastPoint.x, lastPoint.y)
-		setStartMarkPos({x: firstPoint.x*width, y: firstPoint.y*height})
-		// console.log('template last point', template[-1].value.x);
-
-
-		// const properties = new svgPathProperties(templateSvg);
-		const properties = new svgPathProperties(templateSvg);
-		const pathLength = properties.getTotalLength();
-		// console.log(templateSvg)
-		// Збираємо точки через певний інтервал
-		const numPoints = 1000;
-		const pathPoints = Array.from({ length: numPoints }, (_, i) => {
-			const lengthAtPoint = (i / (numPoints - 1)) * pathLength;
-			return properties.getPointAtLength(lengthAtPoint);
-		});
-		setReferencePoints(pathPoints)
-		// console.log('path points', pathPoints[3])
-		setCheckPoints(normalizePoints(checkPoints))
-
-	}, []);
-
-	
 
 	const generateTemplate = () => {
 		const spiral = generateArchimedeanSpiral();
@@ -163,248 +135,225 @@ export default function LineTracking() {
 	};
 
 	useEffect(() => {
-		if (viewRef.current) {
-			viewRef.current.measure((x, y, width, height, pageX, pageY) => {
-				console.log('Measured:', { x: pageX, y: pageY, width, height });
-				containerOffset.current = { x: pageX, y: pageY };
-				statusBarHeight.current = pageY;
+		if(width>0 && height>0){
+			//update additional data
+			additionalData.current.windowHeight = height;
+			additionalData.current.windowWidth = width;
+			//generate template string
+			const template = normalizePoints(generateTemplate());
+			console.log('width and height', width, height)
+			const templateSvg = convertPointsToPath(template);
+			setSvgPathD(templateSvg)
 
-			});
+			//save the first point to set the mark position
+			const firstPoint = template[0] ;
+			console.log('stert point', firstPoint)
+			setStartMarkPos({x: firstPoint.x, y: firstPoint.y})
+			//normalise check points coords
+			setCheckPoints(normalizePoints(checkPoints))
+
+
 		}
-
-	}, []);
+		
+	}, [width, height]);
 	
 	const handleEndRound = () => {
-		// const newLine = normalizePath(path);
+		//check current round
 		if (currentRound === 1) {
-			// setUserLines(newLine)
-			setUserLines(path)
-			setPath([])
+			linesRound1.current = path; //save round one path
+			setPath([]); //clear the path for round 2
 			// Завершився перший раунд, змінюємо на другий і показуємо модальне вікно з правилами
 			setCurrentRound(2);
-			console.log('SET ROUND 2 MODAL TRUE')
-			setRound2Modal(true);  // Показуємо модальне вікно з правилами
+			setRound2Modal(true);  //show modal with the rules
 			additionalData.current.completionRound1 = checkPointIndex.current/checkPoints.length;
-			checkPointIndex.current = 0;
+			checkPointIndex.current = 0; //update check point index
 
-			 // Повертаємо об'єкт на початкову позицію
-			if (templatePoints.length > 0) { //для дебагу щоб малювати оту лінію. можливо щалишу 
-				const startPoint = templatePoints[0];
-				start.value = { x: startPoint.x, y: startPoint.y };
-				offset.value = { x: startPoint.x, y: startPoint.y };
-			} else {
-				start.value = { x: 0, y: 0 };
-				offset.value = { x: 0, y: 0 };
-			}
+			//return object on start position 
+			start.value = { x: 0, y: 0 };
+			offset.value = { x: 0, y: 0 };
 		} else if (currentRound === 2) {
-			console.log('got to if')
+			//after round 2 send data to backend
 			additionalData.current.completionRound2 = checkPointIndex.current/checkPoints.length;
-			// Завершився другий раунд, викликаємо функцію для відправки результатів на бекенд
 			sendDataToBackend(path);
-			// setCurrentRound(1);  // Повертаємось до першого раунду (або зупиняємо гру)
 		}
 	};
 
+	//function to adjust coordinates of the points according to the screen width and height
 	const normalizePoints = (coords) => {
-		
+		// console.log('width', width, height)
+		console.log('start position', startMarkPos.x, startMarkPos.y)
+
 		return coords.map(({ x, y }) => ({
 			x: x * width,
 			y: y * height,
 		}));
 	};
 
-	const pathRef = useRef([]);
-
+	//function to check approaching to the checkpoint
 	const isNear = ( point1, point2, threshold = LINE_WIDTH) => {
 		const dx = point1.x - point2.x;
 		const dy = point1.y - point2.y;
 		return dx * dx + dy * dy <= threshold * threshold;
 	}
 	
-	
-
+	//animated styles to display object movement
 	const animatedStyle = useAnimatedStyle(() => ({
 		transform: [
 			{ translateX: offset.value.x },
 			{ translateY: offset.value.y }
 		],
 	}));
+	//gesture that implements touch processing
 	const panGesture = Gesture.Pan()
 		.onBegin((e) => {
-			const{x,y} = e
-			setPath([]);
-			setDrawing(true)
+			const x = e.absoluteX;
+			const y = e.absoluteY - statusBarHeight.current;//normalize position to statusBar height
+			setPath([{ x, y }]); //add start point
 		})
 		.onUpdate((e) => {
-			const x= e.absoluteX
-			const y= e.absoluteY-statusBarHeight.current
+			const x= e.absoluteX;
+			const y= e.absoluteY-statusBarHeight.current; 
 
-			// console.log('🖊️ drawing:', x, y);
-			setPath((prevPoints) => [...prevPoints, { x, y }]); 
+			setPath((prevPoints) => [...prevPoints, { x, y }]); //update points in user path
 			offset.value = {
 				x: e.translationX + start.value.x,
 				y: e.translationY + start.value.y,
 			};
 
-			if (checkPointIndex.current >= checkPoints.length) return; // Всі пройдені
+			if (checkPointIndex.current >= checkPoints.length) return; //all check points are passed
 
-			const nextCheckpoint = checkPoints[checkPointIndex.current];
-			if (isNear({x, y}, nextCheckpoint)) {
-				// checkPoints[checkPointIndex.current].reached = true;
-				checkPointIndex.current++;
-				console.log('✅ Контрольна точка пройдена:', checkPointIndex.current);
+			const nextCheckpoint = checkPoints[checkPointIndex.current]; //otherwise get next check point
+			if (isNear({x, y}, nextCheckpoint)) { //check if this point is near
+				checkPointIndex.current++; //then set next checkPoint index
 			}
 		})
 		.onEnd(() => {
-			start.value = {
+			start.value = { //update start value
 				x: offset.value.x,
 				y: offset.value.y,
 			};
-			handleEndRound()
+			handleEndRound(); //after each gesture end process end round
 
 		})
 		.runOnJS(true);
 
-		const sendDataToBackend = async (data) => {
-			console.log('got to send')
-			// const svgUserD = convertPointsToPath(data)
+	//convert points to svg path 
+	const convertPointsToPath = (points) => {
+		if (points.length === 0) return ''; //check if there is points in array
+		//set the first point in svg string
+		const [start, ...rest] = points;
+		let result = `M${start.x},${start.y} `;
+		//add rest of points
+		result += rest.map(p => `L${p.x},${p.y}`).join(' ');
+		return result;
+	};
 
-			
-			const requestBody = {
-				// userLines: [userLines, data],
-				// templateLines: templatePoints,
-				userLinesRound1: convertPointsToPath(userLines),
-				userLinesRound2:convertPointsToPath(data),
-				templateLines: svgPathD,
-				additionalData: additionalData.current,
-				// additionalData: {
-				// 	windowWidth: width, 
-				// 	windowHeight: height,
-				// 	pathCompletionRight: checkPointIndex.current/checkPoints.length,
-				// 	pathCompletionLeft: checkPointIndex.current/checkPoints.length,
 
-				// },
-			}
-			console.log('passed tehe request body ',additionalData.current);
-	
-			const token = await AsyncStorage.getItem('authToken'); //get authorization token
-			try {
-				const response = await fetch('http://192.168.0.12:5000/api/result/line/saveResponse', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'Authorization': `Bearer ${token}`
-					},
-					body: JSON.stringify(requestBody),  //transform object into json string
-				})
-				const result = await response.json();
-				if (response.ok) {
-					console.log('got to results')
-					//go to result page
-					navigation.navigate('Results', { result });
-				}
-			} catch (error) {
-				Alert.alert('Failure', 'Can not send answers');
-			}		
+	const sendDataToBackend = async (data) => {
+		const requestBody = {
+			userLinesRound1: convertPointsToPath(linesRound1.current),
+			userLinesRound2: convertPointsToPath(data),
+			templateLines: svgPathD,
+			additionalData: additionalData.current,
 		}
+		// console.log('passed tehe request body ',additionalData.current);
 
-		const convertTemplatePointsToPath = (points) => {
-			if (!points || points.length === 0) return '';
-
-			let path = '';
-			let started = false;
-
-			for (let i = 0; i < points.length; i++) {
-				const point = points[i];
-				if (!point) continue;
-
-				const x = point.x * width;
-				const y = point.y * height;
-
-				if (!started) {
-					path += `M${x},${y} `;
-					started = true;
-				} else {
-					path += `L${x},${y} `;
-				}
+		const token = await AsyncStorage.getItem('authToken'); //get authorization token
+		try {
+			const response = await fetch('http://192.168.0.12:5000/api/result/line/saveResponse', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${token}`
+				},
+				body: JSON.stringify(requestBody),  //transform object into json string
+			})
+			const result = await response.json();
+			if (response.ok) {
+				// console.log('got to results')
+				//go to result page
+				navigation.navigate('Results', { result });
 			}
-
-			return path.trim();
-		};
-		
-		const convertPointsToPath = (points) => {
-			if (points.length === 0) return '';  // Якщо немає точок, повертаємо порожній шлях
-			// Розпочинаємо з першої точки
-			const [start, ...rest] = points;
-			// Створюємо команду M для початкової точки (перша точка)
-			let result = `M${start.x},${start.y} `;
-			// Додаємо команду L для кожної наступної точки (лінія до точки)
-			result += rest.map(p => `L${p.x},${p.y}`).join(' ');
-			return result;
-		};
+		} catch (error) {
+			Alert.alert('Failure', 'Can not send answers');
+		}		
+	};
 		
 	return (
-		<>
-			{/* {round1Modal && (
-				<RulesModal 
-				visible={round1Modal} 
-				rules='Round 1 rules: lorem ipsum' 
-				onClose={() => {
-					setRound1Modal(false);
-				}} 
-			/>
-			)} */}
-				<RulesModal 
-				visible={round2Modal} 
-				rules='Round 2 rules: lorem ipsum' 
-				onClose={() => {
-					setRound2Modal(false);
-				}}/>
-			
-			
-
-	
-
-		<View
-			style={styles.container}
+		<View 
+			style={styles.container} 
+			// onLayout={(event) => {
+			// 	const { width, height , pageX, pageY} = event.nativeEvent.layout;
+			// 	console.log('Measured from layout:', width, height);
+			// 	setWidth(width);
+			// 	setHeight(height);
+			// 	statusBarHeight.current = pageY;
+			// 	console.log('y is' , pageY)
+			// }}
 			ref={viewRef}
 		>
-            
 
+		<RulesModal 
+			visible={round1Modal} 
+			rules='Round 1 rules: lorem ipsum' 
+			onClose={() => {
+				setRound1Modal(false);
+				
+
+			}} 
+		/>
+		
+		<RulesModal 
+			visible={round2Modal} 
+			rules='Round 2 rules: lorem ipsum' 
+			onClose={() => {
+				setRound2Modal(false);
+			}}
+		/>
+		<>
 			<View>
 			<Svg
 				width={width}
 				height={height}
-				style={[styles.template, { borderWidth: 1, borderColor: 'red' }]}
+				style={[styles.template]}
 			>
-				<Path
+				<Path //template path
 					d={svgPathD}
 					stroke="lightgray"
 					strokeWidth={LINE_WIDTH}
 					fill="none"
 				/>
-				{path.length > 0 && <Path d={convertPointsToPath(path)} stroke="black" strokeWidth={2} fill="none" />} 
+				{path.length > 0 &&  //user path
+					<Path 
+						d={convertPointsToPath(path)} 
+						stroke="black" 
+						strokeWidth={2} 
+						fill="none" 
+					/>
+				} 
 			</Svg>
 			</View>
 			<GestureDetector gesture={panGesture}>
-			<Animated.View
-				ref={localRef}
-				style={[
-					{
+				
+				<Animated.View
+					ref={localRef}
+					style={[{
 						width: LINE_WIDTH/2,
 						height: LINE_WIDTH/2,
 						borderRadius: LINE_WIDTH/4,
-						backgroundColor: 'red',
 						position: 'absolute', // обов'язково, інакше translate не буде працювати правильно
 						top: startMarkPos.y,
 						left: startMarkPos.x,
-						
+						backgroundColor: 'red'
 					},
-					animatedStyle, // підключаємо анімацію
-				]}
-			/>
+					animatedStyle, //connect animation
+					]}
+				/>
+			
 			</GestureDetector>
-			{checkPoints.map((point, index) => ( //debug
+			<Text>{startMarkPos.y}  {startMarkPos.x} </Text>
+
+			{checkPoints.map((point, index) => ( //check points 
 				<View 
 					key={index}
 					style={{
@@ -419,10 +368,8 @@ export default function LineTracking() {
 					}}
 				/>
 			))}
-
-
-        </View>
-	</>
+        </>
+	</View>
 		
 	);
 }

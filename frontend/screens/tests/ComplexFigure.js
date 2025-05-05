@@ -7,91 +7,53 @@ import Svg, { Path } from 'react-native-svg';
 import { Dimensions } from "react-native";
 import Icon from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-	useSharedValue,useAnimatedStyle,withSpring,
-	withTiming,runOnJS,useAnimatedRef, measure, runOnUI, getRelativeCoords 
-  } from 'react-native-reanimated';
-// import ResultsModal from '../../shared/resultsModal.js';
 import { useNavigation } from '@react-navigation/native';
 import CustomButton from '../../shared/CustomButton.js';
 
 
-const { width, height } = Dimensions.get('window');
+// const { width, height } = Dimensions.get('window');
 
 export default function ComplexFigure() {
 	const navigation = useNavigation(); 
 
-  	const [modalVisible, setModalVisible] = useState(true);
-	const [resultsModal, setResultsModal] = useState(false);
-	const [results, setResults] = useState({ finalScore: 100 });
 	const [isLoading, setIsLoading] = useState(false);
 
-	// const [pathData, setPathData] = useState([]);
-	const [pathData, setPathData] = useState('');
-	const [newLine, setNewLine] = useState(true);
 	const [lines, setLines] = useState([]); // Масив для зберігання ліній
-	const currentPoints = useSharedValue([]);
-	const recordedLine = useRef([]);
-	const [check , setCheck] = useState(true);
 
-	// const [eraser, setEraser ] = useState(false);
 	const [tool, setTool] = useState('pencil'); // 'pencil' або 'eraser'
 
 	const [backgroundZoomed, setBackgroundZoomed] = useState(false); // Стан для контролю масштабу
 
-	useEffect(() => {
-		console.log('	Component mounted');
-	}, []);
 
-	const updateLines = (x, y) => {
-		console.log('Updating lines with new point:', { x, y }); // Логування перед оновленням ліній
-		setLines((prevLines) => {
-			const updatedLines = [...prevLines];
-			const lastLine = updatedLines[updatedLines.length - 1];
-			lastLine.push({ x, y }); // Додаємо нову точку до останньої лінії
-			console.log('Updated lines:', updatedLines); // Логування оновлених ліній
-			return updatedLines;
-		});
-	};
+
+	// const updateLines = (x, y) => {
+	// 	console.log('Updating lines with new point:', { x, y }); // Логування перед оновленням ліній
+	// 	setLines((prevLines) => {
+	// 		const updatedLines = [...prevLines];
+	// 		const lastLine = updatedLines[updatedLines.length - 1];
+	// 		lastLine.push({ x, y }); // Додаємо нову точку до останньої лінії
+	// 		console.log('Updated lines:', updatedLines); // Логування оновлених ліній
+	// 		return updatedLines;
+	// 	});
+	// };
 	
 	const paintGesture = Gesture.Pan()
 		.onBegin((event) => {
 			const { x, y } = event;
-			console.log('Gesture started at:', { x, y }); // Логування початкової точки
+			// console.log('Gesture started at:', { x, y }); // Логування початкової точки
 			setLines((prevLines) => [
 				...prevLines,
 				[{ x, y }] // Початкова точка для нової лінії
 			]);
-			// runOnJS(setLines)((prevLines) => {
-			// 	console.log('in run on js')
-			// 	if (!prevLines) {
-			// 		console.log('prevLines is undefined or null at onBegin. Initializing with an empty array.');
-			// 		prevLines = [];
-			// 	}
-			// 	const newLines = [...prevLines, [{ x, y }]]; // Початкова точка для нової лінії
-			// 	console.log('New line started. Lines:', newLines);
-			// 	return newLines;
-			// });
-			console.log('New line started. Lines:', lines); // Логування після початку малювання
+	
+			// console.log('New line started. Lines:', lines); // Логування після початку малювання
 			
 		})
 		.onUpdate((event) => {
 			const { x, y } = event;
-			console.log('Gesture updated to:', { x, y }); // Логування кожного оновлення жесту
+			// console.log('Gesture updated to:', { x, y }); // Логування кожного оновлення жесту
 			
-			// Передаємо координати в функцію через runOnJS
-			// runOnJS(updateLines)(x, y);
-			// runOnJS(setLines)((prevLines) => {
-			// 	const updatedLines = [...prevLines];
-			// 	const lastLine = updatedLines[updatedLines.length - 1];
-			// 	if (!lastLine) {
-			// 		updatedLines.push([{ x, y }]);
-			// 	} else {
-			// 		lastLine.push({ x, y });
-			// 	}
-			// 	console.log('Updated lines:', updatedLines);
-			// 	return updatedLines;
-			// });
+
 			setLines((prevLines) => {
 				const updatedLines = [...prevLines];
 				const lastLine = updatedLines[updatedLines.length - 1];
@@ -100,13 +62,12 @@ export default function ComplexFigure() {
 			});
 		})
 		.onEnd(() => {
-			console.log('Gesture ended'); // Логування при завершенні жесту
-			console.log('Current lines:', lines);
+			// console.log('Gesture ended'); // Логування при завершенні жесту
+			// console.log('Current lines:', lines);
 
 		})
 		.runOnJS(true);
 	
-		// console.log('Array', pathData);
 	const eraseGesture = Gesture.Pan()
 		.onUpdate((event) => {
 			const { x , y } = event;
@@ -163,12 +124,7 @@ export default function ComplexFigure() {
 
 			const result = await response.json();
 			
-			console.log('send to the backend');
 			if (response.ok) {
-				// Alert.alert('Success', 'Your answers sent!');
-				// console.log('Server response:', data);
-				// setResults(result); 
-				// setResultsModal(true);
 				navigation.navigate('Results', { result });
 
 			}
@@ -195,7 +151,6 @@ export default function ComplexFigure() {
 				<Icon name="edit-2" size={24} color={tool === 'pencil' ? 'white' : '#550080'} />
 			</TouchableOpacity>
 
-			{/* Кнопка гумки */}
 			<TouchableOpacity
 				style={[styles.button, tool === 'eraser' && styles.activeButton]}
 				onPress={() => setTool('eraser')}
@@ -203,7 +158,6 @@ export default function ComplexFigure() {
 				<Icon name="trash-2" size={24} color={tool === 'eraser' ? 'white' : '#550080'} />
 			</TouchableOpacity>
 		</View>
-		{/* Зображення у правому верхньому куті */}
 		<TouchableOpacity 
 			style={[styles.imageContainer, { position: 'absolute', top: 10, right: 10 }]} 
 			onPress={handleImagePress}
@@ -297,22 +251,6 @@ const styles = StyleSheet.create({
 		margin: 20,
 		// overflow: 'hidden', // Щоб лінії не виходили за межі
 	},
-	// screenText: {
-	// 	fontSize: 24
-	// },
-	// modalContainer: {
-	// 	flex: 1,
-	// 	justifyContent: 'center',
-	// 	alignItems: 'center',
-	// 	backgroundColor: 'rgba(0, 0, 0, 0.5)'
-	// },
-	// modalText: {
-	// 	fontSize: 20,
-	// 	backgroundColor: 'white',
-	// 	padding: 20,
-	// 	borderRadius: 10,
-	// 	textAlign: 'center'
-	// },
 	imageContainer: {
 		// padding: 5,
 		backgroundColor: 'white',
