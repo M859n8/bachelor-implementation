@@ -12,18 +12,16 @@ const complexFigureController = {
 		console.log('got here 12');
         // const {bellsObjects, additionalData }= req.body;
         const user_id = req.user.id;
-        if (!user_id) {
+        const { svg } = req.body;
+
+        if (!user_id || !svg) {
 
             return res.status(400).json({ error: "Missing required fields" });
         }
 
-        const { svg } = req.body;
-		// console.log('request body', svg);
 		fs.writeFileSync('./assets/originalDrawing.svg', svg, 'utf-8');
-		// console.log('success');
 
-
-		 // Викликаємо Python скрипт, передаючи шлях до SVG файлу
+		// Викликаємо Python скрипт, передаючи шлях до SVG файлу
 		const child = spawn('python3', ['../backend/MLmodels/complexFigure/main.py', './assets/originalDrawing.svg']);
 
 		let output = '';
@@ -68,26 +66,7 @@ const complexFigureController = {
 			}
 		});
 
-		// res.json({ message: 'SVG saved successfully' });
     },
-
-	// saveToDatabase: async(user_id, finalScore, res)=>{
-	// 	console.log('got into save', finalScore)
-
-
-	// 	try {
-	// 		connection.execute(`
-	// 		  INSERT INTO test_results (user_id, test_type, score)
-	// 		  VALUES (?, ?, ?)
-	// 		`, [user_id, "copyingObjects", finalScore]);
-		
-	// 		console.log(`Saved result (${finalScore}) for user ${user_id}`);
-	// 	} catch (err) {
-	// 		console.error("Error saving result:", err);
-    // 		res.status(500).json({ error: 'Error saving result' });
-	// 	}
-
-	// },
 
 }
 

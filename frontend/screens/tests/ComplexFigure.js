@@ -24,36 +24,18 @@ export default function ComplexFigure() {
 
 	const [backgroundZoomed, setBackgroundZoomed] = useState(false); // Стан для контролю масштабу
 
-
-
-	// const updateLines = (x, y) => {
-	// 	console.log('Updating lines with new point:', { x, y }); // Логування перед оновленням ліній
-	// 	setLines((prevLines) => {
-	// 		const updatedLines = [...prevLines];
-	// 		const lastLine = updatedLines[updatedLines.length - 1];
-	// 		lastLine.push({ x, y }); // Додаємо нову точку до останньої лінії
-	// 		console.log('Updated lines:', updatedLines); // Логування оновлених ліній
-	// 		return updatedLines;
-	// 	});
-	// };
 	
 	const paintGesture = Gesture.Pan()
 		.onBegin((event) => {
 			const { x, y } = event;
-			// console.log('Gesture started at:', { x, y }); // Логування початкової точки
 			setLines((prevLines) => [
 				...prevLines,
 				[{ x, y }] // Початкова точка для нової лінії
 			]);
-	
-			// console.log('New line started. Lines:', lines); // Логування після початку малювання
 			
 		})
 		.onUpdate((event) => {
 			const { x, y } = event;
-			// console.log('Gesture updated to:', { x, y }); // Логування кожного оновлення жесту
-			
-
 			setLines((prevLines) => {
 				const updatedLines = [...prevLines];
 				const lastLine = updatedLines[updatedLines.length - 1];
@@ -62,9 +44,7 @@ export default function ComplexFigure() {
 			});
 		})
 		.onEnd(() => {
-			// console.log('Gesture ended'); // Логування при завершенні жесту
-			// console.log('Current lines:', lines);
-
+			
 		})
 		.runOnJS(true);
 	
@@ -72,15 +52,10 @@ export default function ComplexFigure() {
 		.onUpdate((event) => {
 			const { x , y } = event;
 			setLines((prevLines) =>
-				prevLines.filter((line) => {
-				// Перевіряємо кожну точку лінії на відстань до гумки
-				return line.every(
-					//тут повертаютсья всі точки крім видаленої з радіусом 10, 
-					//але нам цей варіант не підходить, бо видаляючи крапку ми 
-					// створюємо пробіл, але не додаємо початок нової лінії, який позначається М
+				prevLines.filter((line) => { //проходить по кожній лінії та залишає тільки ті, які не торкається гумка.
 
-					//на даний момент ця штука працює так, що видаляє цілу лінію і воно в принципі ок
-					//але я не розумію чого воно так. розібратися з цим
+				// Перевіряємо кожну точку лінії на відстань до гумки
+				return line.every( //Якщо усі точки лінії знаходяться далі ніж 10px від гумки (x, y), ця лінія залишається.
 					(point) => Math.sqrt((point.x - x) ** 2 + (point.y - y) ** 2) > 10 //
 				);
 				})
@@ -91,7 +66,6 @@ export default function ComplexFigure() {
 
 
 	function generateSVGString() {
-		console.log('got to generate string');
 		
 		return `
 			<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" >
@@ -106,9 +80,7 @@ export default function ComplexFigure() {
 	}
 
 	async function sendToBackend() {
-		console.log('got to send to backend');
 		const svgString = generateSVGString();
-		console.log('generated string', svgString);
 		setIsLoading(true)
         const token = await AsyncStorage.getItem('authToken');
 		try{
@@ -144,21 +116,21 @@ export default function ComplexFigure() {
 	<GestureHandlerRootView style={styles.container}>
 	
 		<View style={styles.buttonContainer}>
-			<TouchableOpacity
+			<TouchableOpacity //pencil button
 				style={[styles.button, tool === 'pencil' && styles.activeButton]}
 				onPress={() => setTool('pencil')}
 			>
 				<Icon name="edit-2" size={24} color={tool === 'pencil' ? 'white' : '#550080'} />
 			</TouchableOpacity>
 
-			<TouchableOpacity
+			<TouchableOpacity //eraser button
 				style={[styles.button, tool === 'eraser' && styles.activeButton]}
 				onPress={() => setTool('eraser')}
 			>
 				<Icon name="trash-2" size={24} color={tool === 'eraser' ? 'white' : '#550080'} />
 			</TouchableOpacity>
 		</View>
-		<TouchableOpacity 
+		<TouchableOpacity  //template
 			style={[styles.imageContainer, { position: 'absolute', top: 10, right: 10 }]} 
 			onPress={handleImagePress}
 		>
@@ -193,12 +165,7 @@ export default function ComplexFigure() {
 			</Svg>
 			</View>
 		</GestureDetector>
-		{/* <TouchableOpacity
-			style={styles.button}
-			onPress={() => sendToBackend()}
-		>
-			<Text style={{ color: '#550080', fontSize: 24 }}>Finish</Text>
-		</TouchableOpacity> */}
+	
 		<CustomButton
 			title="Send"
 			onPress={() => sendToBackend()}
