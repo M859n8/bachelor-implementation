@@ -32,7 +32,7 @@ def extract_lines(svg_path):
         extracted_lines.append(path_points)
     return extracted_lines  
 
-# debug // example lines processing does not require a normalization
+# (required for generation)debug // example lines processing does not require a normalization
 def extract_example_lines(svg_path):
     # get all paths from svg
     paths, _ = svgpathtools.svg2paths(svg_path)

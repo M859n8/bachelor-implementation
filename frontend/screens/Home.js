@@ -16,10 +16,6 @@ export default function Home({ setIsAuthenticated }) {
     const navigation = useNavigation();
 	const [width, setWidth] = useState(0);
 
-	// const { width } = useWindowDimensions();
-
-    // const testCircleWidth = 120;
-    // const numColumns = Math.max(1, Math.floor(width / testCircleWidth));
 	const [radius, setRadius] = useState(0);
 
     const handleLayout = (event) => {
@@ -53,13 +49,20 @@ export default function Home({ setIsAuthenticated }) {
     const handleLogout = async () => {
 		try {
 			await AsyncStorage.removeItem('authToken'); // Видаляємо токен
-			Alert.alert('Logged out', 'You have been logged out successfully.');
+			Toast.show({
+				type: 'success',
+				text1: 'Logged out',
+				text2: 'You have been logged out successfully.',
+			});
 		
 			setIsAuthenticated(false);  // Оновлюємо стан авторизації
 			//   navigation.navigate('Login');
 		} catch (error) {
-			console.error('Logout error:', error);
-			Alert.alert('Error', 'Something went wrong while logging out.');
+			Toast.show({
+				type: 'error',
+				text1: 'Log out error',
+				text2: 'Something went wrong while logging out.',
+			});
 		}
 	};
 	useEffect(() => {
@@ -211,9 +214,9 @@ const styles = StyleSheet.create({
     },
     profileCard: {
         backgroundColor: '#f2f2f2',
-		// width: '80%',
         borderRadius: 12,
         padding: '5%',
+		// width: 'auto',
         marginBottom: '10%',
         shadowColor: '#000',
         shadowOpacity: 0.1,
@@ -230,7 +233,7 @@ const styles = StyleSheet.create({
     profileRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-		// gap: '30%',
+		gap: '30%',
         marginBottom: 8,
     },
     profileLabel: {

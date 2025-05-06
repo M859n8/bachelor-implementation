@@ -8,9 +8,6 @@ import Home from "./screens/Home";
 import Login from './screens/Login';
 import ResultsScreen from './screens/ResultsScreen';
 
-
-// import Second from "./screens/Second";
-
 import Balance from "./screens/tests/Balance";
 import BellsCancellation from "./screens/tests/BellsCancellation";
 import BlockDesign from "./screens/tests/BlockDesign";
@@ -28,40 +25,30 @@ export default function StackNavigator() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = await AsyncStorage.getItem('authToken');
-      
-      if (!token) {
-        setIsAuthenticated(false);
-        // navigation.replace("Login"); // Якщо токен невалідний — перенаправлення на логін
+		const token = await AsyncStorage.getItem('authToken');
+		
+		if (!token) {
+			setIsAuthenticated(false);
+			return;
+		}
+	
+		try {
+			const response = await fetch('http://192.168.0.12:5000/api/auth/check', {
+				method: 'POST',
+				headers: { Authorization: `Bearer ${token}` },
+			});
+	
+			if (response.status === 200) {
+				setIsAuthenticated(true);
 
-        return;
-      }
-  
-      try {
-        const response = await fetch('http://192.168.0.12:5000/api/auth/check', {
-        // const response = await fetch('http://192.168.0.12:5000/api/auth/verify', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-        });
-  
-        if (response.status === 200) {
-          // navigation.replace("Home"); // Якщо токен валідний — відкриваємо головну сторінку
-        setIsAuthenticated(true);
+			} else {
+				setIsAuthenticated(false);
 
-        } else {
-			console.log('auth check failed')
-          // navigation.replace("Login"); // Якщо токен невалідний — перенаправлення на логін
-        setIsAuthenticated(false);
-
-        }
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        console.log("catched error ");
-        // navigation.replace("Login"); // Якщо токен невалідний — перенаправлення на логін
-
-        setIsAuthenticated(false);
-      }
-    };
+			}
+		} catch (error) {
+			setIsAuthenticated(false);
+		}
+	};
   
     checkAuth();
   }, []);
@@ -71,9 +58,7 @@ export default function StackNavigator() {
                 flex: 1
               }}}>
         {isAuthenticated ? (
-        // {/* //  Захищені екрани (тільки для авторизованих) */}
         <Stack.Group> 
-          {/* <Stack.Screen name="Home" component={Home} /> */}
           <Stack.Screen name="Home" >
             {props => <Home {...props} setIsAuthenticated={setIsAuthenticated} />} 
 			</Stack.Screen>
@@ -87,7 +72,7 @@ export default function StackNavigator() {
 				component={TransferringPennies}
 				options={{
 					gestureEnabled: false,
-					animation: 'none', // <-- це вимикає slide-перехід
+					animation: 'none', //turn off the slide effect so that doesn't interfere with testing prosess
 				}}
 			/>
 
@@ -99,9 +84,6 @@ export default function StackNavigator() {
           <Stack.Screen name="Login">
             {props => <Login {...props} setIsAuthenticated={setIsAuthenticated} />}
           </Stack.Screen> 
-          {/* <Stack.Screen name="Login" component={Login} /> */}
-
-          {/* <Stack.Screen name="Register" component={Register} />  */}
         </Stack.Group>
       )} 
 

@@ -55,7 +55,6 @@ def process_files(template_features,output_dir, max_sim,file_name_iterator, step
 	total_lines = len(template_features)
 	max_iterations = total_lines // step_lines # each step delete last two lines
 
-	# print('total lines', total_lines)
 	step_percent = (max_sim-min_sim)/max_iterations #calculate percentage reduction per step
 
 	for i in range(max_iterations):

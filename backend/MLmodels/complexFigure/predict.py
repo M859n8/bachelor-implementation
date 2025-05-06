@@ -1,5 +1,5 @@
 import torch
-from train import GCN, create_graph, load_data_from_json  # Імпортуємо модель 
+from train import GCN, create_graph, load_data_from_json  
 import json
 import sys
 
@@ -20,30 +20,11 @@ def predict_similarity(graph_json):
 	graph = load_data_json_string(graph_json)
 
 	# calculate the similarity of the graph to a reference or other sample.
-	# torch.no_grad() disables gradient computation to speed up and reduce memory usage.
+	# torch.no_grad() disables saving of calculation history to speed up and reduce memory usage.
 	with torch.no_grad():
 		similarity = model(graph).item()
 
 	return similarity
 
-# def predict_similarity_test(num=1): #debug
-# 	model = GCN(input_dim=2, hidden_dim=36)  # Ініціалізуємо архітектуру
-# 	model.load_state_dict(torch.load("gcn_model.pth"))  # Завантажуємо збережені ваги
-# 	model.eval()  # Переводимо в режим передбачення
 
-# 	# graph = load_data_from_json(graph_json)
-# 	graph = load_data_from_json(f"./trainingData/generated/graph{num}.json", False)
-# 	# graph = load_data_from_json(f"./trainingData/graph{num}.json", False)
-
-
-# 	with torch.no_grad():
-# 		similarity = model(graph).item()
-
-# 	print(f'Similarity: {similarity:.2f}')
-
-# 	return similarity
-
-# дебаг
-# if len(sys.argv) > 1:
-#     predict_similarity_test(int(sys.argv[1]))
 

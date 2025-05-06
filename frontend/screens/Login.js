@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
-import { View, TextInput, Pressable, StyleSheet, Text, Alert } from 'react-native';
-
+import { View, TextInput, Pressable, StyleSheet, Text } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Home from "./Home";
@@ -32,19 +32,24 @@ export default function Login({ setIsAuthenticated }) {
 			console.log("Received:", data);
 			if (response.ok) {
 				await AsyncStorage.setItem('authToken', data.token);  // зберігаємо токен
-				Alert.alert('Success', 'Logged in successfully');
-				console.log('Token:', data.token);
+				Toast.show({
+					type: 'success',
+					text1: 'Logged in',
+					text2: 'You have been logged in successfully.',
+				});
+				// console.log('Token:', data.token);
 				setIsAuthenticated(true);
 				// navigation.navigate('Home');
-			} else {
-				Alert.alert('Error', data.message || 'Login failed');
-				setIsRegister(true);
-			}
+			} 
 		} catch (error) {
 			setIsRegister(true);
 
-			Alert.alert('Error', 'Something went wrong');
-			console.error(error);
+			Toast.show({
+				type: 'error',
+				text1: 'Log in error',
+				text2:'Something went wrong',
+			});
+			// console.error(error);
 		}
 	};
 
@@ -52,31 +57,47 @@ export default function Login({ setIsAuthenticated }) {
 		setIsRegister(true)
 
 		if (!username || !password || !age) {
-
-			alert('Please fill in all fields: username, password, and age.');
+			Toast.show({
+				type: 'error',
+				text1: 'Empty fields',
+				text2: 'Please fill in all fields: username, password, and age.',
+			});
 			return; // Якщо одне з полів порожнє, не відправляємо запит
+		}
+		if (isNaN(age) || Number(age) <= 0) {
+			Toast.show({
+				type: 'error',
+				text1: 'Invalid age',
+				text2: 'Age must be a number greater than zero.',
+			});
+			return;
 		}
 
 		try {
-		const response = await fetch('http://192.168.0.12:5000/api/auth/register', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ username, password, age, handOrientation })
-		});
-		const data = await response.json();
-		if (response.ok) {
-			await AsyncStorage.setItem('authToken', data.token);  // зберігаємо токен
+			const response = await fetch('http://192.168.0.12:5000/api/auth/register', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ username, password, age, handOrientation })
+			});
+			const data = await response.json();
+			if (response.ok) {
+				await AsyncStorage.setItem('authToken', data.token);  // зберігаємо токен
 
-			Alert.alert('Success', 'Logged in successfully');
-			console.log('Token:', data.token);
-			setIsAuthenticated(true);
-			// navigation.navigate('Home');
-		} else {
-			Alert.alert('Error', data.message || 'Login failed');
-		}
+				Toast.show({
+					type: 'success',
+					text1: 'Register',
+					text2: 'You have been registered successfully.',
+				});
+				console.log('Token:', data.token);
+				setIsAuthenticated(true);
+				// navigation.navigate('Home');
+			} 
 		} catch (error) {
-		Alert.alert('Error', 'Something went wrong');
-		console.error(error);
+			Toast.show({
+				type: 'error',
+				text1: 'Register error',
+				text2:'Something went wrong',
+			});
 		}
 	};
 
@@ -132,13 +153,13 @@ export default function Login({ setIsAuthenticated }) {
 				<CustomButton
 					title="Register"
 					onPress={handleRegister}
-					buttonStyle={{ backgroundColor: 'green' }}
+					buttonStyle={{ backgroundColor: 'green', width: '80%' }}
 					
 				/>
 				<CustomButton
 					title="Login"
 					onPress={handleLogin}
-					buttonStyle={{ backgroundColor: isRegister ? 'grey' : 'green' }} 	
+					buttonStyle={{ backgroundColor: isRegister ? 'grey' : 'green' ,  width: '80%'}} 	
 				/>
 				{/* <Button title="Login" onPress={handleLogin} color='blue' /> */}
 			</View>
@@ -166,24 +187,29 @@ export default function Login({ setIsAuthenticated }) {
 			backgroundColor: '#fff',
 		},
 		buttonContainer: {
-			width: '100%',
-			gap: 10,
-			// display: 'inline',
+			// width: '100%',
+			flexDirection: 'row',
+			justifyContent: 'center', // або 'center'
+			alignItems: 'center',
+			// gap: 10,
 		},
 
 		handOrientation: {
 			flexDirection: 'row', 
 			gap: 30, 
-			backgroundColor: 'white', 
 			padding: 12,
 			borderRadius: 5,
-
+			borderWidth: 1,
+			borderColor: '#ccc',
+			borderRadius: 5,
+			backgroundColor: '#fff',
 
 		},
 
 		checkboxContainer: {
 			flexDirection: 'row',
 			alignItems: 'center',
+			
 			// marginBottom: 10,
 		},
 		checkbox: {
