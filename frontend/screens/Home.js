@@ -20,43 +20,27 @@ export default function Home({ setIsAuthenticated }) {
 
     const handleLayout = (event) => {
         const { width } = event.nativeEvent.layout;
-		
         setRadius(width / 2);
     };
 
-	// const [testCircleWidth, setTestCircleWidth] = useState(0);
-	// const [numColumns, setNumColumns] = useState(0);
-
-	// useEffect(() => {
-	// 	const { width, height } = Dimensions.get('window');
-
-	// 	console.log('width', width)
-	// 	if (width > 0) {
-	// 	const numColumns = width < 600 ? 2 : width < 900 ? 3 : 4;
-	// 	setTestCircleWidth((width * 0.7) / numColumns);
-	// 	setNumColumns(numColumns);
-	// 	console.log('width', width, 'num colums', numColumns)
-
-	// 	}
-	// }, []);
+	//states that will be filled with user data from database
 	const [userInfo, setUserInfo] = useState(null);
 	const [testResults, setTestResults] = useState([]);
-	const [chartData, setChartData] = useState([])
-	const [chartData2, setChartData2] = useState([])
+	const [subdomainsResults, setSubdomainsResults] = useState([]);
 
-	const [subdomainsResults, setSubdomainsResults] = useState([])
+	const [chartData, setChartData] = useState([]);
+	// const [chartData2, setChartData2] = useState([])
 
     const handleLogout = async () => {
 		try {
-			await AsyncStorage.removeItem('authToken'); // Видаляємо токен
+			await AsyncStorage.removeItem('authToken'); //delete token after logout
 			Toast.show({
 				type: 'success',
 				text1: 'Logged out',
 				text2: 'You have been logged out successfully.',
 			});
 		
-			setIsAuthenticated(false);  // Оновлюємо стан авторизації
-			//   navigation.navigate('Login');
+			setIsAuthenticated(false);  // update authorisation state
 		} catch (error) {
 			Toast.show({
 				type: 'error',
@@ -66,47 +50,48 @@ export default function Home({ setIsAuthenticated }) {
 		}
 	};
 	useEffect(() => {
-		const fetchUserData = async () => {
+		//get user results from previous assessments
+		const fetchUserData = async () => { 
 			try {
-				console.log('got to fetch')
 				const token = await AsyncStorage.getItem('authToken');
-				// console.log('token', token)
 				const response = await fetch('http://192.168.0.12:5000/api/auth/user-info', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${token}`
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${token}`
 
-				},
-				body: JSON.stringify([]),
+					},
+					body: JSON.stringify([]),
 				});
 				const data = await response.json();
-				// console.log(await response.text())
 				if (response.ok) {
-					// console.log('data is', data)
+					//set user results and user info
 					setUserInfo(data.user);
 					setTestResults(data.groupedResults);
 					setSubdomainsResults(data.subdomainsResults);
-				}else{
-					console.log('response is not ok')
 				}
 			} catch (error) {
-				console.error('Failed to fetch user data:', error);
+				Toast.show({
+					type: 'error',
+					text1:'Failed to fetch user data',
+				});
 			}
 		};
 
-		// console.log('fetch')
 		fetchUserData();
 	}, []);
 
+	//prepare backend data for charts
 	const prepareToChart = (resultsByType, resultsByDomain) => {
 		const testData = {};
+		//set subdomain as label and result as value
 		const subdomainData = Object.entries(resultsByDomain).map(([subdomain, result]) => ({
 			label: subdomain,
 			value: result
 		}));
 		testData['overall'] = subdomainData;
 	
+		//set date as label and result as value
 		Object.entries(resultsByType).forEach(([testType, results]) => {
 			testData[testType] = results.map(({ score, created_at }) => {
 				const formattedDate = new Date(created_at).toLocaleDateString('uk-UA');
@@ -117,27 +102,19 @@ export default function Home({ setIsAuthenticated }) {
 				};
 			});
 		});
-		// console.log('chart data', testData)
-
-		
-		
-		// setChartData(getChartData)
-
 	
 		return testData;
 	};
+
 	useEffect(()=> {
 		const testData = prepareToChart(testResults, subdomainsResults)
-		
 		setChartData(testData)
-
-
 	}, [testResults])
 	
     
     return (
 		<View style={styles.container} onLayout={(event) => {
-			const { width } = event.nativeEvent.layout;
+			const { width } = event.nativeEvent.layout; //measure width for correct test list sizes
 			setWidth(width);
 		  }}>
 		<CustomButton title="Logout" onPress={handleLogout} />

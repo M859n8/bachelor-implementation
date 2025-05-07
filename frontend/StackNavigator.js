@@ -8,7 +8,6 @@ import Home from "./screens/Home";
 import Login from './screens/Login';
 import ResultsScreen from './screens/ResultsScreen';
 
-import Balance from "./screens/tests/Balance";
 import BellsCancellation from "./screens/tests/BellsCancellation";
 import BlockDesign from "./screens/tests/BlockDesign";
 import ComplexFigure from "./screens/tests/ComplexFigure";
@@ -54,15 +53,12 @@ export default function StackNavigator() {
   }, []);
 
   return (
-    <Stack.Navigator screenOptions={{headersShown: false, cardStyle: {
-                flex: 1
-              }}}>
+    <Stack.Navigator screenOptions={{headersShown: false, cardStyle: {flex: 1}}}>
         {isAuthenticated ? (
         <Stack.Group> 
           <Stack.Screen name="Home" >
             {props => <Home {...props} setIsAuthenticated={setIsAuthenticated} />} 
 			</Stack.Screen>
-			<Stack.Screen name="Balance" component={Balance} />
 			<Stack.Screen name="BellsCancellation" component={BellsCancellation} />
 			<Stack.Screen name="BlockDesign" component={BlockDesign} />
 			<Stack.Screen name="ComplexFigure" component={ComplexFigure} />

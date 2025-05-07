@@ -1,5 +1,16 @@
-import connection from './db-config.js';
+// import connection from './db-config.js';
+import mysql from 'mysql2/promise';
+import dotenv from 'dotenv';
 
+dotenv.config();
+const connectionConfig = {
+	host: process.env.DB_HOST,
+	port: process.env.DB_PORT,
+	user: process.env.DB_USER,
+	password: process.env.DB_PASSWORD,
+	multipleStatements: true
+  };
+  
 
 // SQL для створення таблиці
 const createUserTableQuery = `
@@ -36,7 +47,16 @@ CREATE TABLE IF NOT EXISTS test_results (
 // Функція для створення бази даних і таблиць
 const createDatabaseAndTable = async () => {
   // Створення бази даних
-	try {
+  let connection;
+  try {
+    connection = await mysql.createConnection(connectionConfig);
+		// Створення бази даних, якщо вона не існує
+		await connection.query(`CREATE DATABASE IF NOT EXISTS motor_cognitive_db`);
+		console.log('Database motor_cognitive_db created or already exists');
+
+		// Використання бази даних
+		await connection.query(`USE motor_cognitive_db`);
+		console.log('Using database motor_cognitive_db');
 		// Створення таблиці users
 		await connection.query(createUserTableQuery);
 		console.log('User table created or already exists');
@@ -48,7 +68,9 @@ const createDatabaseAndTable = async () => {
 	} catch (err) {
 		console.error('Error:', err);
 	} finally {
-		await connection.end(); // Закриваємо з'єднання
+		if (connection) {
+			await connection.end(); // Закриваємо з'єднання
+		  }
 	}
 };
 

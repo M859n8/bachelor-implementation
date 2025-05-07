@@ -42,7 +42,7 @@ const userModel = {
 		await db.execute(
             `INSERT INTO test_results (user_id, test_type, score)
             VALUES (?, ?, ?)`,
-            [userId, testType, score]  // передаємо правильні змінні
+            [userId, testType, score] 
         );
 
 	}
@@ -50,10 +50,4 @@ const userModel = {
 
 export default userModel;
 
-// createUser: (username, password, callback) => {
-//   const query = 'INSERT INTO users (username, password) VALUES (?, ?)';
-//   db.query(query, [username, password], (err, results) => {
-//     if (err) return callback(err, null);
-//     callback(null, { id: results.insertId, username: username });
-//   });
-// }
+

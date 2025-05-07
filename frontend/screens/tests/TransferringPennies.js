@@ -2,6 +2,8 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Modal, Button, Image, Dimensions, Animated, Alert } from 'react-native';
 import { useState, useEffect , useRef} from 'react';
 import Penny from '../../shared/Penny.js';
+import {sendAuthenticatedRequest} from '../../shared/sendAuthenticatedRequest.js';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ScreenOrientation from "expo-screen-orientation";
 import RulesModal from '../../shared/RulesModal.js';
@@ -30,14 +32,14 @@ export default function TransferringPennies({route}) {
    // Масиви монеток для лівої і правої сторін
 	const [elements, setElements] = useState([
 		{ id: 1, status: 'left' },
-		{ id: 2, status: 'left' },
-		{ id: 3, status: 'left' },
-        { id: 4, status: 'left' },
-		{ id: 5, status: 'left' },
-		{ id: 6, status: 'left' },
-        { id: 7, status: 'left' },
-		{ id: 8, status: 'left' },
-		{ id: 9, status: 'left' },
+		// { id: 2, status: 'left' },
+		// { id: 3, status: 'left' },
+        // { id: 4, status: 'left' },
+		// { id: 5, status: 'left' },
+		// { id: 6, status: 'left' },
+        // { id: 7, status: 'left' },
+		// { id: 8, status: 'left' },
+		// { id: 9, status: 'left' },
 	 
   	]);
 
@@ -63,7 +65,6 @@ export default function TransferringPennies({route}) {
 	//measure right and left zines position
 	 // Функція для вимірювання позицій
 	const measureZones = () => {
-		console.log('measure zones')
 		if (leftZoneRef.current) {
 		leftZoneRef.current.measure((x, y, width, height, pageX, pageY) => {
 			setLeftZonePos({ x: pageX, y: pageY, width, height });
@@ -97,7 +98,7 @@ export default function TransferringPennies({route}) {
 	useEffect(() => {
 		if (leftZonePos.width && rightZonePos.x) {
 			const calculatedWidth = (rightZonePos.x - (leftZonePos.x + leftZonePos.width)) / 160;
-			console.log('width in inches', calculatedWidth);
+			// console.log('width in inches', calculatedWidth);
 	
 			additionalData.current.width = calculatedWidth; // Зберігаємо в useRef без використання useState
 		}
@@ -211,41 +212,23 @@ export default function TransferringPennies({route}) {
 	};
 
     const sendDataToBackend = async () => {
-		// console.log('before normalize')
+		console.log('before normalize')
 
-        const token = await AsyncStorage.getItem('authToken');
 		// console.log('coinData before normalize:', JSON.stringify(coinData, null, 2));
 		const normalizedData = normalizeData(coinData);
+		
 		const requestBody = {
 			// coinData : coinData,
 			coinData : normalizedData,
             additionalData : additionalData.current
 		}
-		console.log('got to try')
-		try {
-			const response = await fetch('http://192.168.0.12:5000/api/result/pennies/saveResponse', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${token}`
-
-				},
-				body: JSON.stringify(requestBody), //надсилаємо саме об'єкт
-			})
-			const result = await response.json();
-
-			if (response.ok) {
-				navigation.navigate('Results', { result });
-
-			}else{
-				Alert.alert('Failure', 'Response failure');
-
-
-			}
-        } catch (error) {
-        	Alert.alert('Failure', 'Can not send answers');
-
-        }
+		await sendAuthenticatedRequest({
+			url: 'http://192.168.0.12:5000/api/result/pennies/saveResponse',
+			body: requestBody,
+			navigation,
+			// setIsAuthenticated,
+			onSuccess: result => navigation.navigate('Results', { result })
+		});
         
     };
 

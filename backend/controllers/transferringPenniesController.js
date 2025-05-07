@@ -1,37 +1,32 @@
 // import {spawn} from 'child_process';
 import userModel from '../models/user.js';
 
-
-const COINS_PER_ROUND = 9; //will be 9 in final variant
+const COINS_PER_ROUND = 9; 
 const REFERENCE_SPEED = 24; //18*20/15 
 const REFERENCE_WIDTH = 18; //inches
 
 
 const transferringPenniesController ={
 	
-		// Збереження відповіді в локальний масив
 	saveResponse: async (req, res) => {
-
 		const {coinData, additionalData} = req.body;
 		const user_id = req.user.id;
+
 		if (!user_id || !coinData || !additionalData) {
 			return res.status(400).json({ error: "Missing required fields" });
 		}
 		//--- assess speed ---
 		const {round1, round2} = transferringPenniesController.assessOverall(additionalData);
-		// console.log('round 1 and 2', round1, round2)
 		const finalScore = (round1+round2)/2;
-		// console.log("Received Data: ", JSON.stringify(coinData, null, 2));
 		//--- assess bilateral coordination ---
 		const features = transferringPenniesController.extractFeatures(coinData);
 		const {resultLeft, resultRight} = transferringPenniesController.assessCoordination(features);
-		// console.log(`left percentage is ${resultLeft}, and right is ${resultRight}`);
-		
 		
 		try {
-			// console.log('final score', finalScore, 'resultLeft', resultLeft)
+			//save to db
 			await userModel.saveToDatabase(user_id, "movementSpeed", finalScore)
 			await userModel.saveToDatabase(user_id, "bilateralCoordination", resultLeft)
+			//return to user
 			res.json({
 				message: "Final score calculated",
 				finalScore: `${finalScore}`,
@@ -43,23 +38,20 @@ const transferringPenniesController ={
 		
 	},
 
-	// Функція для обчислення відстані між точками
+	//calculate distance between points
 	distance : (point1, point2) => {
 		return Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2));
 	},
 
-	//because i do not have big dataset, im gona calculate detailed data 
+	//extract features depending on active hand
 	extractFeatures : (data) => {
-		// Масив для збереження результатів
 		const results = [];
-		// Обчислення для кожного елементу
+		//for each coin
 		data.forEach(entry => {
 			const handChange = entry.hand_change_points;
-			// console.log('hand change obj', handChange, entry);
 			//processing only data where hand change point is detected
 			if (!handChange){
-				// console.log('no hand change')
-				return; // Пропускаємо, якщо немає зміни руки
+				return; 
 			}  
 		
 			const coordStart = entry.start_coordinates;
@@ -70,23 +62,23 @@ const transferringPenniesController ={
 			const timeHandChange = handChangeCoord.time;
 			const errors = entry.errors;
 			const wholeDistance = transferringPenniesController.distance(coordStart, coordEnd);
-			// const timeErr = entry.errors.reduce((sum, err) => sum + err.time, 0);
 			let paramsL, paramsR;
+
 			if(entry.round == 1){
+				//for the first round movement was performed with left hand before hand change point and right hand after
 				paramsL = transferringPenniesController.calculateParams(coordStart, handChangeCoord, timeStart, timeHandChange, errors, wholeDistance);
 				paramsR = transferringPenniesController.calculateParams(handChangeCoord,coordEnd, timeHandChange, timeEnd, errors, wholeDistance);	
 			}else{
-				// transferringPenniesController.calculateParams(speedRight, partRight, errNumRight, errTimeRight);
-				// transferringPenniesController.calculateParams(handChangeCoord,coordEnd, timeHandChange, timeEnd, errors, wholeDistance);
+				//for the secons round first was right hand, than left
 				paramsR = transferringPenniesController.calculateParams(coordStart, handChangeCoord, timeStart, timeHandChange, errors, wholeDistance);
 				paramsL = transferringPenniesController.calculateParams(handChangeCoord,coordEnd, timeHandChange, timeEnd, errors, wholeDistance);
 			
 			}
+			
 			const {speed: speedLeft, part: partLeft, errNum: errNumLeft,errTime: errTimeLeft} = paramsL;
 			const {speed: speedRight, part: partRight, errNum: errNumRight,errTime: errTimeRight} = paramsR;
-			// Додаємо результат
+			//save result for each coin
 			results.push({
-				// id: entry.id,
 				round: entry.round,
 				speedLeft, speedRight,
 				partLeft, partRight,
@@ -95,11 +87,10 @@ const transferringPenniesController ={
 			});
 		
 		});
-		// Показуємо результати
-		console.log(results);
 		return results;
 	},
 
+	//calculate four params for left/right hand comparation (speed, part of path, errors number and time)
 	calculateParams : (coordStart, coordEnd, timeStart, timeEnd, errors, wholeDistance) => {
 
 		const errInZone = errors.filter(err => 
@@ -113,77 +104,66 @@ const transferringPenniesController ={
 		return { speed, part, errNum, errTime  }; 
 	},
 
-	
-
+	//assess bilateral coordination using data from all coins
 	assessCoordination: (dataArr) => {
-		//speed, part, errors, errorsTime
+		//speed, part, errors, errorsTime for each hand
 		let totals = { left: [0, 0, 0, 0], right: [0, 0, 0, 0] };
 		let errorsEntries = 0;
-		// let numEntries = dataArr.length;
 	
 		dataArr.forEach(({ speedLeft, speedRight, partLeft, partRight, errNumLeft, errNumRight, errTimeLeft, errTimeRight }) => {
+			//save the amount of moves where error occured
 			if (errNumLeft > 0 || errNumRight > 0) {
 				errorsEntries++;
 			}
+			//compare left to right and calculate total value for each indicator
 			[speedLeft, partLeft, errNumLeft, errTimeLeft].forEach((leftVal, i) => {
 				let rightVal = [speedRight, partRight, errNumRight, errTimeRight][i];
+				//get percentage ration for each indicator
 				let {percentage1, percentage2} = transferringPenniesController.percentageRatio(leftVal, rightVal);
 				totals.left[i] += percentage1;
 				totals.right[i] += percentage2;
-				// if(i === 3){
-				// 	console.log(`errrors left ${errNumLeft} and right ${errNumRight}`);
-				// }
 				
 			});
 		});
 	
-		// Допоміжна функція для обчислення середнього, враховуючи кількість записів з помилками
+		// calculate the mean
 		const safeDiv = (val, div) => div === 0 ? 0 : val / div;
 
-		// Обчислення середніх значень для лівої і правої руки
+		// calculate arithmetic mean for each hand for each indicator
 		const avgLeft = totals.left.map((val, i) => safeDiv(val, i < 2 ? dataArr.length : errorsEntries));
 		const avgRight = totals.right.map((val, i) => safeDiv(val, i < 2 ? dataArr.length : errorsEntries));
 
-		// Оцінки для лівої і правої руки (швидкість + задіяність + помилки та час)
+		// get score from all indicators
 		const scoreLeft = avgLeft[0] + avgLeft[1] + avgRight[2] + avgRight[3];
 		const scoreRight = avgRight[0] + avgRight[1] + avgLeft[2] + avgLeft[3];
 
-		// Порівняння відсотків між лівою та правою рукою
+		// compare left to right
 		let { percentage1, percentage2 } = transferringPenniesController.percentageRatio(scoreLeft, scoreRight);
 
 		return { resultLeft: percentage1 , resultRight: percentage2  };
 	},
 
-
+	//assess test performance by original test score system
 	assessOverall: (data) => {
 		const round1Duration = (data.timeEndRound1 - data.timeStartRound1)/1000;
 		const round2Duration = (data.timeEndRound2 - data.timeStartRound2)/1000;
 
-		console.log('round 1 duration', round1Duration, 'round 2 duration', round2Duration);
-
-		//reference speed = pathWidth * coinsAmount / 15 sec
+		//reference speed = refPathWidth * refCoinsAmount / refTime
 		const speedRound1 = COINS_PER_ROUND * data.width / round1Duration;
 		const speedRound2 = COINS_PER_ROUND * data.width / round2Duration;
-		console.log('data width ', data.width, 'in cm ', data.width*2.45)
-		console.log('round 1 speed', speedRound1, 'round 2 speed', speedRound2);
 		
-		
+		//compare to reference speed and convert to percent
 		const resultRound1 = (speedRound1 * 100) / REFERENCE_SPEED
 		const resultRound2 = (speedRound2 * 100) / REFERENCE_SPEED
 
-		console.log('results round 1 ', resultRound1, 'results round 2 ', resultRound2)
 		
 		return ({round1: resultRound1 , round2 : resultRound2 })
-
-		
-
-		//for each round get time start and end, divide by COINS_PER_ROUND and compare this speed to reference
 
 	},
 	
 	percentageRatio: (value1, value2) => {
 		let total = value1 + value2; 
-		if (total === 0) return { percentage1: 0, percentage2: 0 }; // Уникнення ділення на 0
+		if (total === 0) return { percentage1: 0, percentage2: 0 }; //avoid dividing by 0
 		return { percentage1: (value1 * 100) / total, percentage2: (value2 * 100) / total };
 	},
 

@@ -5,27 +5,24 @@ const blockDesignController = {
     saveResponse: async (req, res) => {
         const {roundBlocks}= req.body;
         const user_id = req.user.id;
+
         if (!user_id || !roundBlocks ) {
             return res.status(400).json({ error: "Missing required fields" });
         }
-		const resultsPerRound = await blockDesignController.calculateResults(roundBlocks)
 
-		// let allRoundsScore = 0;
-		// resultsPerRound.forEach((round) => {
-		// 	allRoundsScore += round.totalScore / 3; 
-		// })
-
+		//get results for each round
+		const resultsPerRound = await blockDesignController.calculateResults(roundBlocks);
+		//calculate final score with weights for each round
 		const finalScore = (
 			(resultsPerRound[0].totalScore * 8 + resultsPerRound[1].totalScore * 9 + resultsPerRound[2].totalScore * 10) / 
 			(8 + 9 + 10)
 		 ) ;
 
-		// console.log('final score', finalScore)
 
 		try {
-			console.log(`User ${user_id} final score: ${finalScore}%`);
+			//save to db
 			await userModel.saveToDatabase(user_id, "assemblingObjects", finalScore)
-
+			//send to user
 			res.json({
 				message: "Final score calculated",
 				finalScore: `${finalScore}`,
@@ -36,6 +33,7 @@ const blockDesignController = {
 		}
     },
 
+	//calculate accuracy, speed and efficiency percent
     calculateResults: async (submittedRounds) => {
 	
 		const results = submittedRounds.map((roundData) => {
@@ -44,39 +42,38 @@ const blockDesignController = {
 				return { round: roundData.round, error: 'Template not found' };
 			}
 
-		//accuracy percent - calculate errors
+		//--- accuracy percent ---
 			const gridSize = template.gridSize * template.gridSize;
 			const errorsCount = blockDesignController.checkBlocksPosition(roundData, template);
+			//compare error objects to all objects
 			const accuracyPercent = Math.max(0, 100 * (gridSize - errorsCount) / gridSize);
 
-			console.log('Errors count ', errorsCount, 'and accuracy', accuracyPercent)
 
-		//calculate speed percent
-			const duration = (roundData.endTime - roundData.startTime) / 1000; // в секундах
+		//--- calculate speed percent ---
+			const duration = (roundData.endTime - roundData.startTime) / 1000; //in seconds
 			const maxAllowed = template.duration;
-			// const speedPercent = Math.min(100, 100 * (maxAllowed - duration) / maxAllowed);
+			//compare speed to reference speed
 			const speedPercent = duration > maxAllowed 
 			? 0 
 			: ((maxAllowed - duration) / maxAllowed) * 100;
 
-			// console.log('Time max' , maxAllowed, 'and your duration',duration, 'and', speedPercent)
 
 
-		//calculate efficiency percent -- actions count
+		//--- calculate efficiency percent -- actions count ---
 			const actionsCount = roundData.blocks.reduce((total, block) => {
 				return total += block.changesCount;
 			}, 0);
-
-			const expectedActions = template.expectedActions; // число з шаблону
+			// compare action count to reference count
+			const expectedActions = template.expectedActions; 
 
 			const efficiencyPercent = actionsCount <= expectedActions
 			? 100
 			: 100 * (expectedActions / actionsCount);
 
 
-			// console.log('ActionsCount', actionsCount, 'and ', efficiencyPercent)
 
-		//total score
+		//--- total score ---
+			//calculate total score with defined weights
 			const totalScore = (!accuracyPercent || !speedPercent || !efficiencyPercent)
 			? 0
 			: (accuracyPercent * 0.5 + speedPercent * 0.3 + efficiencyPercent * 0.2).toFixed(1);
@@ -87,30 +84,27 @@ const blockDesignController = {
 				totalScore: parseFloat(totalScore)
 			};
 		});
-	
-		console.log('Results:', results);
-		// console.log(JSON.stringify(results, null, 2));
 
 		return results;
 	},
 
+	//check if the block is in the correct position
 	checkBlocksPosition: (roundData, template)=>{
 		const userBlocks = roundData.blocks;
 		let errorsCount =0;
-
+		//get pos from template
 		template.correctBlocks.forEach(correctBlock => {
 			const { row, col, color: correctColor, rotation: correctRotation } = correctBlock;
-
+			//check row and col
 			const userBlock = userBlocks.find(b => 
 				b.position.row === row && b.position.col === col
 			);
-			
+			//error if position is empty
 			if (!userBlock) {
-				console.log('error pos', row, col);
 				errorsCount += 1;
 				return;
 			}
-
+			//check color and rotation
 			const userColor = userBlock.color;
 			const userRotation = userBlock.rotation;
 
@@ -123,17 +117,14 @@ const blockDesignController = {
 				if (correctColor === 'white' || correctColor === 'red') { 
 					return userRotation % 90 === 0;
 				}
-				// На всяк випадок — якщо колір неочікуваний
 				return false;
 			})();
 			
 			if (userColor !== correctColor || !isRotationValid) {
-				// console.log('error color', row, col)
 				errorsCount += 1;
 			}
 		
 		});
-		// console.log(errorsCount);
 		return errorsCount;
 	}, 
 	

@@ -1,16 +1,11 @@
-
 import fs from 'fs';
-import connection from './../db-config.js';
 import userModel from '../models/user.js';
 
 import {spawn} from 'child_process';
 
 const complexFigureController = {
 
-    //Використання async/await забезпечить, що ваш сервер не буде блокуватися при виконанні обчислень.
     saveResponse: async (req, res) => {
-		console.log('got here 12');
-        // const {bellsObjects, additionalData }= req.body;
         const user_id = req.user.id;
         const { svg } = req.body;
 
@@ -21,47 +16,42 @@ const complexFigureController = {
 
 		fs.writeFileSync('./assets/originalDrawing.svg', svg, 'utf-8');
 
-		// Викликаємо Python скрипт, передаючи шлях до SVG файлу
+		// Calling a Python script, passing the path to the SVG file
 		const child = spawn('python3', ['../backend/MLmodels/complexFigure/main.py', './assets/originalDrawing.svg']);
 
 		let output = '';
-		 // Обробляємо вивід з Python скрипта
+		// Processing output from a Python script
 		child.stdout.on('data', (data) => {
 		   console.log(`stdout: ${data.toString()}`);
 		   output += data.toString();
 		});
 		
-		 // Обробляємо помилки
+		// Process errors
 		child.stderr.on('data', (data) => {
 		   console.error(`stderr: ${data.toString()}`);
 		});
 	   
-		 // Перевірка завершення процесу
+		// Checking the completion of the process
 		child.on('close', async (code) => {
 			if (code === 0) {
 
 				try {
-					// (Тут можна зберігати фінальний результат у базу)
-					// console.log(`User ${user_id} final score: ${finalScore}%`);
+					//convert result to percent
 					let finalScore = parseFloat(output).toFixed(4);
 					finalScore *= 100;
-
-
-		
-					// await complexFigureController.saveToDatabase(user_id, finalScore, res);
+					//save result in database
 					await userModel.saveToDatabase(user_id, "copyingObjects", finalScore)
-		
+					//send resukt to the frontend
 					res.json({
 						message: "Final score calculated",
-						
-						finalScore: `${finalScore}%`,
+						finalScore: `${finalScore}`,
 					});
 				} catch (error) {
 					console.error(error);
 					res.status(500).json({ error: "Database error" });
 				}
 			} else {
-				// Якщо процес завершився з помилкою
+				// Python process ended with error
 				res.status(500).json({ error: 'Error processing SVG' });
 			}
 		});
