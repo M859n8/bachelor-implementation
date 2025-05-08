@@ -34,13 +34,10 @@ export default function Home({ setIsAuthenticated }) {
     const handleLogout = async () => {
 		try {
 			await AsyncStorage.removeItem('authToken'); //delete token after logout
-			Toast.show({
-				type: 'success',
-				text1: 'Logged out',
-				text2: 'You have been logged out successfully.',
-			});
+		
 		
 			setIsAuthenticated(false);  // update authorisation state
+			
 		} catch (error) {
 			Toast.show({
 				type: 'error',
@@ -49,6 +46,19 @@ export default function Home({ setIsAuthenticated }) {
 			});
 		}
 	};
+
+	// const handleLogout = async () => {
+    //     try {
+    //       await AsyncStorage.removeItem('authToken'); // Видаляємо токен
+    //     //   Alert.alert('Logged out', 'You have been logged out successfully.');
+    
+    //       setIsAuthenticated(false);  // Оновлюємо стан авторизації
+    //     //   navigation.navigate('Login');
+    //     } catch (error) {
+    //       console.error('Logout error:', error);
+    //       Alert.alert('Error', 'Something went wrong while logging out.');
+    //     }
+    //   };
 	useEffect(() => {
 		//get user results from previous assessments
 		const fetchUserData = async () => { 
@@ -87,7 +97,8 @@ export default function Home({ setIsAuthenticated }) {
 		//set subdomain as label and result as value
 		const subdomainData = Object.entries(resultsByDomain).map(([subdomain, result]) => ({
 			label: subdomain,
-			value: result
+			value: result,
+			frontColor: '#8D77AB'
 		}));
 		testData['overall'] = subdomainData;
 	
@@ -183,14 +194,14 @@ export default function Home({ setIsAuthenticated }) {
 const styles = StyleSheet.create({
 	container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: '#FFFFFF',
         paddingHorizontal: 16,
         // paddingTop: 20,
 		// justifyContent: 'center',
         // alignItems: 'center'
     },
     profileCard: {
-        backgroundColor: '#f2f2f2',
+        backgroundColor: '#F5F5F5',
         borderRadius: 12,
         padding: '5%',
 		// width: 'auto',

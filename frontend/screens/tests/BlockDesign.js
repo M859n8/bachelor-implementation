@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
-		backgroundColor: '#E0FFFF', // Колір фону
+		backgroundColor: '#F5F5F5', // Колір фону
 
 	},
 	
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
 		height: 100,
 		// borderRadius: 5,
 		borderRadius: 5,
-		borderColor: 'black',
+		borderColor: '#fff',
 		borderWidth: 2,
 	  },
 	  zoomedImage: {
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
 		height: 500,
 		
 		borderRadius: 5,
-		borderColor: 'black',
+		borderColor: '#fff',
 		borderWidth: 2,
 		zIndex: 1,
 	  },

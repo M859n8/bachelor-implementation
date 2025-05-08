@@ -32,14 +32,14 @@ export default function TransferringPennies({route}) {
    // Масиви монеток для лівої і правої сторін
 	const [elements, setElements] = useState([
 		{ id: 1, status: 'left' },
-		// { id: 2, status: 'left' },
-		// { id: 3, status: 'left' },
-        // { id: 4, status: 'left' },
-		// { id: 5, status: 'left' },
-		// { id: 6, status: 'left' },
-        // { id: 7, status: 'left' },
-		// { id: 8, status: 'left' },
-		// { id: 9, status: 'left' },
+		{ id: 2, status: 'left' },
+		{ id: 3, status: 'left' },
+        { id: 4, status: 'left' },
+		{ id: 5, status: 'left' },
+		{ id: 6, status: 'left' },
+        { id: 7, status: 'left' },
+		{ id: 8, status: 'left' },
+		{ id: 9, status: 'left' },
 	 
   	]);
 

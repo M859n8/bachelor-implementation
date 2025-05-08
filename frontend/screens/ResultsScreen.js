@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import CustomButton from '../shared/CustomButton.js';
 
 export default function ResultsScreen() {
 	console.log('resultScreen')
@@ -11,15 +12,20 @@ export default function ResultsScreen() {
 
 	return (
 		<View style={styles.container}>
-			<Text style={styles.title}>Your Results</Text>
-			<Text style={styles.score}>{result.finalScore}%</Text>
+			<View style={styles.card}>
+				<Text style={styles.title}>Your Results</Text>
+				<Text style={styles.score}>{result.finalScore}</Text>
+	
+				<CustomButton 
+					title="Go Home"
+					onPress={() => navigation.navigate('Home')}
+					buttonStyle={{ backgroundColor: '#4B8A68'}}
 
-			<Button
-				title="Go Home"
-				onPress={() => navigation.navigate('Home')}
-			/>
+				/>
+			</View>
 		</View>
 	);
+	
 }
 
 const styles = StyleSheet.create({
@@ -27,16 +33,32 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
-		backgroundColor: '#fff',
+		backgroundColor: '#FFFFFF',
+		padding: 20,
+	},
+	card: {
+		width: '90%',
+		backgroundColor: '#E1EACD',
+		borderRadius: 20,
+		padding: 30,
+		alignItems: 'center',
+		shadowColor: '#8D77AB',
+		shadowOffset: { width: 0, height: 6 },
+		shadowOpacity: 0.3,
+		shadowRadius: 10,
+		elevation: 6,
 	},
 	title: {
-		fontSize: 24,
+		fontSize: 36,
 		fontWeight: 'bold',
-		marginBottom: 20,
+		marginBottom: 10,
+		color: '#4B8A68',
 	},
+
 	score: {
-		fontSize: 48,
-		color: '#4CAF50',
-		marginBottom: 40,
+		fontSize: 30,
+		fontWeight: 'bold',
+		color: '#fff', 
+		marginVertical: 20,
 	},
 });

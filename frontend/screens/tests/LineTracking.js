@@ -319,14 +319,14 @@ export default function LineTracking() {
 			>
 				<Path //template path
 					d={svgPathD}
-					stroke="lightgray"
+					stroke="#C4E3D7"
 					strokeWidth={LINE_WIDTH}
 					fill="none"
 				/>
 				{path.length > 0 &&  //user path
 					<Path 
 						d={convertPointsToPath(path)} 
-						stroke="black" 
+						stroke="#4CAF50" 
 						strokeWidth={2} 
 						fill="none" 
 					/>
@@ -344,7 +344,9 @@ export default function LineTracking() {
 						position: 'absolute', // обов'язково, інакше translate не буде працювати правильно
 						top: startMarkPos.y,
 						left: startMarkPos.x,
-						backgroundColor: 'red'
+						backgroundColor: '#4CAF50',
+						zIndex: 20,
+
 					},
 					animatedStyle, //connect animation
 					]}
@@ -359,12 +361,12 @@ export default function LineTracking() {
 					style={{
 						width: 5,
 						height: 5,
-						backgroundColor: 'red',
+						backgroundColor: '#fff',
 						borderRadius: 3, // щоб були круглі
 						position: 'absolute',
 						top: point.y,
 						left: point.x,
-						zIndex: 100,
+						zIndex: 10,
 					}}
 				/>
 			))}
@@ -377,13 +379,14 @@ export default function LineTracking() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+		backgroundColor: '#fff',
     },
-    infoBox: {
-        position: 'absolute',
-        top: 40,
-        left: 20,
-        backgroundColor: 'rgba(255,255,255,0.8)',
-        padding: 10,
-        borderRadius: 10
-    }
+    // infoBox: {
+    //     position: 'absolute',
+    //     top: 40,
+    //     left: 20,
+    //     backgroundColor: '#C4E3D7',
+    //     padding: 10,
+    //     borderRadius: 10
+    // }
 });

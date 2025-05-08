@@ -38,7 +38,6 @@ const userModel = {
 	},
 
 	saveToDatabase: async (userId, testType, score)=>{
-		console.log('save to db')
 		await db.execute(
             `INSERT INTO test_results (user_id, test_type, score)
             VALUES (?, ?, ?)`,

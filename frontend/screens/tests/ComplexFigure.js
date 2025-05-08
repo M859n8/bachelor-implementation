@@ -120,14 +120,14 @@ export default function ComplexFigure() {
 				style={[styles.button, tool === 'pencil' && styles.activeButton]}
 				onPress={() => setTool('pencil')}
 			>
-				<Icon name="edit-2" size={24} color={tool === 'pencil' ? 'white' : '#550080'} />
+				<Icon name="edit-2" size={24} color={tool === 'pencil' ? 'white' : '#4CAF50'} />
 			</TouchableOpacity>
 
 			<TouchableOpacity //eraser button
 				style={[styles.button, tool === 'eraser' && styles.activeButton]}
 				onPress={() => setTool('eraser')}
 			>
-				<Icon name="trash-2" size={24} color={tool === 'eraser' ? 'white' : '#550080'} />
+				<Icon name="trash-2" size={24} color={tool === 'eraser' ? 'white' : '#4CAF50'} />
 			</TouchableOpacity>
 		</View>
 		<TouchableOpacity  //template
@@ -181,6 +181,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
+		backgroundColor: '#fff'
 	},
 	buttonContainer: {
 		alignItems: 'space-between',
@@ -203,7 +204,7 @@ const styles = StyleSheet.create({
 	},
 
 	activeButton: {
-		backgroundColor: '#550080',
+		backgroundColor: '#4CAF50',
 	},
 	
 	paintContainer: {
@@ -211,10 +212,10 @@ const styles = StyleSheet.create({
 		// height: '70%', // Висота області малювання
 		width: 500,
 		height: 500,
-		backgroundColor: '#EABFFF', // Колір фону
+		backgroundColor: '#C4E3D7', // Колір фону
 		borderRadius: 10, // Закруглені кути
-		borderWidth: 2,
-		borderColor: '#000',
+		// borderWidth: 2,
+		// borderColor: '#000',
 		margin: 20,
 		// overflow: 'hidden', // Щоб лінії не виходили за межі
 	},
@@ -228,7 +229,7 @@ const styles = StyleSheet.create({
 		height: 100,
 		// borderRadius: 5,
 		borderRadius: 5,
-		borderColor: 'black',
+		borderColor: '#ccc',
 		borderWidth: 2,
 	  },
 	  zoomedImage: {
@@ -236,7 +237,7 @@ const styles = StyleSheet.create({
 		height: 500,
 		
 		borderRadius: 5,
-		borderColor: 'black',
+		borderColor: '#ccc',
 		borderWidth: 2,
 		zIndex: 1,
 	  },

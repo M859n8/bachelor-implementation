@@ -4,7 +4,6 @@ import { StyleSheet,Button, Text, View, Modal, Image, TextInput, Alert, Dimensio
 import { useState, useEffect, useRef, useMemo  } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, TouchableWithoutFeedback, Keyboard, TouchableOpacity } from 'react-native';
 import CustomButton from '../../shared/CustomButton.js';
-// import ResultsModal from '../../shared/resultsModal.js';
 import RulesModal from '../../shared/RulesModal.js';
 import ChoiceTask from '../../shared/ChoiceTask.js';
 
@@ -44,10 +43,14 @@ const images1 = [
 
   const images2 = [
 	// { index: 25, image: require('../../assets/visual_organiz/spatial.jpeg')},
-	{ index: 26, image: require('../../assets/visual_organiz/26.png')},
-	{ index: 27, image: require('../../assets/visual_organiz/27.png')},
-	{ index: 28, image: require('../../assets/visual_organiz/28.png')},
-	{ index: 29, image: require('../../assets/visual_organiz/29.png')},
+	// { index: 26, image: require('../../assets/visual_organiz/26.png')},
+	// { index: 27, image: require('../../assets/visual_organiz/27.png')},
+	// { index: 28, image: require('../../assets/visual_organiz/28.png')},
+	// { index: 29, image: require('../../assets/visual_organiz/29.png')},
+	{ index: 30, image: require('../../assets/visual_organiz/30.png')},
+	{ index: 31, image: require('../../assets/visual_organiz/31.png')},
+	{ index: 32, image: require('../../assets/visual_organiz/32.png')},
+	{ index: 33, image: require('../../assets/visual_organiz/33.png')},
 
   ];
   
@@ -122,12 +125,12 @@ export default function VisualOrganization() {
 
 	const generateTestSet = () => {
 
-		const selectedFromImages1 = getRandomSample(images1, 5).map((item, i) => ({
-			type: 'text',
-			image: item.image,
-			index: item.index,
-			answer: '',
-		}));
+		// const selectedFromImages1 = getRandomSample(images1, 5).map((item, i) => ({
+		// 	type: 'text',
+		// 	image: item.image,
+		// 	index: item.index,
+		// 	answer: '',
+		// }));
 		
 		const selectedFromImages2 = getRandomSample(images2, 5).map((item) => {
 			const { choices, correctIndex } = generateChoices(item.image);
@@ -143,7 +146,9 @@ export default function VisualOrganization() {
 		});
 		
 		// Об’єднуємо, можна також перемішати фінальний масив
-		const combinedTasks = [...selectedFromImages1, ...selectedFromImages2];
+		// const combinedTasks = [...selectedFromImages1, ...selectedFromImages2];
+		const combinedTasks = [ ...selectedFromImages2];
+
 		console.log('test set', combinedTasks); 
 		return combinedTasks
 
@@ -226,7 +231,6 @@ export default function VisualOrganization() {
   
 
     const sendToBackend = async () => {
-		console.log('results', results.current)
 		try {
 			const token = await AsyncStorage.getItem('authToken');
 			setIsLoading(true);  //start loading process untill we got data from backend
@@ -272,10 +276,10 @@ export default function VisualOrganization() {
 		/>
 
 		<Modal
-		transparent={true}
-		animationType="fade"
-		visible={showEmptyConfirm}
-		onRequestClose={() => setShowEmptyConfirm(false)}
+			transparent={true}
+			animationType="fade"
+			visible={showEmptyConfirm}
+			onRequestClose={() => setShowEmptyConfirm(false)}
 		>
 		<View style={styles.modalOverlay}>
 			<View style={styles.modalContainer}>
@@ -343,6 +347,7 @@ export default function VisualOrganization() {
 					<ChoiceTask 
 						task={testSet.current[currentImageIndex]}
 						onSelect={(choiceIndex) => handleChoiceSelect(choiceIndex)}
+
 					/>
 				)}
 
@@ -359,7 +364,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		//   justifyContent: 'center',
 		alignItems: 'center',
-		backgroundColor: 'white'
+		backgroundColor: '#f5f5f5'
 	},
 	screenText: {
 		fontSize: 24
@@ -415,6 +420,8 @@ const styles = StyleSheet.create({
 	textInput: {
 		padding: 5,
 		fontSize: 22,
+		backgroundColor: '#fff',
+		borderRadius: 5,
 	},
  
  

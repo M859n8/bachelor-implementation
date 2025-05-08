@@ -37,14 +37,15 @@ const complexFigureController = {
 
 				try {
 					//convert result to percent
-					let finalScore = parseFloat(output).toFixed(4);
-					finalScore *= 100;
+					let finalScore = parseFloat(output); 
+					finalScore *= 100; 
+					const finalScoreRounded = finalScore.toFixed(2); 
 					//save result in database
 					await userModel.saveToDatabase(user_id, "copyingObjects", finalScore)
 					//send resukt to the frontend
 					res.json({
 						message: "Final score calculated",
-						finalScore: `${finalScore}`,
+						finalScore: `${finalScoreRounded}%`,
 					});
 				} catch (error) {
 					console.error(error);

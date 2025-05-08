@@ -7,15 +7,17 @@ import CustomButton from '../../shared/CustomButton.js';
 
 import generateObjects from '../../shared/GenerateBells.js';
 // import generateObjects from '../../shared/GenerateBells.js';
-import ResultsModal from '../../shared/resultsModal.js';
 import RulesModal from '../../shared/RulesModal.js';
 import Timer from '../../shared/Timer.js';
+import { useNavigation } from '@react-navigation/native';
 
 
 export default function BellsCancellation({route}) {
+	const navigation = useNavigation(); 
+
 	const [rulesModal, setRulesModal] = useState(true);
-	const [resultsModal, setResultsModal] = useState(false);
-	const [results, setResults] = useState({ finalScore: 100 });
+	// const [resultsModal, setResultsModal] = useState(false);
+	// const [results, setResults] = useState({ finalScore: 100 });
 
 	const [timerIsRunning, setTimerIsRunning] = useState(false); 
 
@@ -143,8 +145,7 @@ export default function BellsCancellation({route}) {
 			const result = await response.json();
 
             if (response.ok) {
-                setResults(result); 
-				setResultsModal(true);
+                navigation.navigate('Results', { result });
             }
         } catch (error) {
         Alert.alert('Failure', 'Can not send answers');
@@ -175,11 +176,11 @@ export default function BellsCancellation({route}) {
 				}} 
 			/>
 
-			<ResultsModal 
+			{/* <ResultsModal 
 				visible={resultsModal} 
 				results={results} 
 				onClose={() => setResultsModal(false)} 
-			/>
+			/> */}
 		<Timer isRunning={timerIsRunning} startTime={startTime.current} />
             
 		<View  style={styles.gameArea}>
@@ -219,7 +220,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#eee'
+        backgroundColor: '#F5F5F5'
     },
     screenText: {
         fontSize: 24

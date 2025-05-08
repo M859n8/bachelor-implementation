@@ -165,18 +165,21 @@ export default function Block({ blockId, gridPosition, updateBlockValue, blockSi
 
 const styles = StyleSheet.create({
 	square: {
-	//   width: 150,
-	//   height: 150,
-		// width: blockSize,
-		// height: blockSize,
-    	// aspectRatio: 1, //square
 		backgroundColor: 'white',
 		alignSelf: 'center',
-		// position: 'absolute', //позиція абсолют, щоб болк рухався фактично, а не тільки в леєрі уі
-		zIndex: 1, 
-		// top:0,
-		// left: 0,
-		overflow: 'hidden'
+		// borderRadius: 12, // закруглені кути
+		borderWidth: 1,
+		borderColor: '#ddd', // світла межа для кращого об’єму
+		// shadowColor: '#000',
+		// shadowOffset: {
+		// 	width: 0,
+		// 	height: 2,
+		// },
+		// shadowOpacity: 0.2,
+		// shadowRadius: 4,
+		// elevation: 5, // для Android — створює тінь
+		zIndex: 1,
+		overflow: 'hidden',
 	},
 	whiteHalf: {
 		position: 'absolute',

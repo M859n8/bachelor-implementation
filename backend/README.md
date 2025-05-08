@@ -11,7 +11,7 @@ It accepts requests from the user, processes data from six tests, saves results 
 - `/MLmodels` — Python scripts for SVG/graphics analysis
 - `/routes` — HTTP routes
 - `/models` — Database models
-- `/assets` — Saved SVG files
+- `/assets` — Static files
 
 ### Root files 
 

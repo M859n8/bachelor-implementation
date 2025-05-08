@@ -86,7 +86,7 @@ const visualorganizationController ={
 			//return to user
 			res.json({
 				message: "Final score calculated",
-				finalScore: `${finalScore}%`,
+				finalScore: `${finalScore.toFixed(2)}%`,
 			});
 		} catch (error) {
 			console.error(error);

@@ -20,9 +20,8 @@ export default function Grid({cellSize, dimention}){
 		{Array.from({ length: dimention }).map((_, rowIndex) => (
 		  <View key={rowIndex} style={styles.row}>
 			{Array.from({ length: dimention }).map((_, colIndex) => (
-			  <View key={colIndex} style={[styles.cell, { width: cellSize, aspectRatio: 1,}]}>
-				<Text>{`(${rowIndex},${colIndex})`}</Text>
-			  </View>
+			  <View key={colIndex} style={[styles.cell, { width: cellSize, aspectRatio: 1,}]}/>
+			
 			))}
 		  </View>
 		))}
@@ -32,26 +31,37 @@ export default function Grid({cellSize, dimention}){
 
   const styles = StyleSheet.create({
 	grid: {
-		// width: '45%',
-		// height: 'auto',
-    	// aspectRatio: 1, 
 		flexDirection: 'column',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		borderWidth: 1,
-		borderColor: 'black',
-	  },
-	  row: {
+		
+		// backgroundColor: '#f0f0f0',       // Або 'transparent', якщо фон ззаду кольоровий
+		borderWidth: 3,
+		borderColor: '#4CAF50',
+		// borderRadius: 16,
+	
+		shadowColor: '#4CAF50',
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.5,
+		shadowRadius: 6,
+		elevation: 6,                     // Для Android
+	
+		padding: 12,
+		margin: 10,
+	}
+	,
+	
+	row: {
 		flexDirection: 'row',
 		// justifyContent: 'space-between',
 		width: '100%',
-	  },
-	  cell: {
+	},
+	cell: {
 		// width: '34%',
 		// height: 'auto',
-    	// aspectRatio: 1, 
+		// aspectRatio: 1, 
 		justifyContent: 'center',
 		alignItems: 'center',
-		
-	  },
+	
+	},
   });

@@ -153,13 +153,13 @@ export default function Login({ setIsAuthenticated }) {
 				<CustomButton
 					title="Register"
 					onPress={handleRegister}
-					buttonStyle={{ backgroundColor: 'green', width: '80%' }}
+					buttonStyle={{ backgroundColor: '#4CAF50', width: '80%' }}
 					
 				/>
 				<CustomButton
 					title="Login"
 					onPress={handleLogin}
-					buttonStyle={{ backgroundColor: isRegister ? 'grey' : 'green' ,  width: '80%'}} 	
+					buttonStyle={{ backgroundColor: isRegister ? '#ccc' : '#4CAF50' ,  width: '80%'}} 	
 				/>
 				{/* <Button title="Login" onPress={handleLogin} color='blue' /> */}
 			</View>
@@ -175,7 +175,11 @@ export default function Login({ setIsAuthenticated }) {
 			justifyContent: 'center',
 			alignItems: 'center',
 			padding: '10%',
-			backgroundColor: '#ccc',
+			// backgroundColor: '#FFFFFF',
+			// backgroundColor: '#C4E3D7'
+		backgroundColor: '#E1EACD'
+
+
 		},
 		input: {
 			width: '100%',
@@ -203,6 +207,7 @@ export default function Login({ setIsAuthenticated }) {
 			borderColor: '#ccc',
 			borderRadius: 5,
 			backgroundColor: '#fff',
+			
 
 		},
 

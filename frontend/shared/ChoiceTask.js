@@ -17,7 +17,7 @@ const ChoiceTask = ({ task, onSelect }) => {
 					<TouchableOpacity key={index} onPress={() => onSelect(index)}>
 						<Image 
 							source={choice.image}
-							style={{ width: 100, height: 100, margin: 5, transform: choice.transform }}
+							style={{ width: 100, height: 100, margin: 15, transform: choice.transform }}
 						/>
 					</TouchableOpacity>
 				))}
