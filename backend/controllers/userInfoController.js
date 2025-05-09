@@ -3,9 +3,9 @@ import userModel from '../models/user.js';
 
 //features organized by subdomains
 const subdomains = {
-	motorFunctions: ["movementSpeed", "movementAccuracy", "bilateralCoordination"],
-	visualPerception: ["visualDescrimination", "figureGround", "spatialRelations", "visualClosure"],
-	visuoconstructionalReasoning: ["copyingObjects", "assemblingObjects"]
+	"Motor Functions": ["movementSpeed", "movementAccuracy", "bilateralCoordination"],
+	"Visual Perception": ["visualDescrimination", "figureGround", "spatialRelations", "visualClosure"],
+	"Visuoconstructional Reasoning": ["copyingObjects", "assemblingObjects"]
   };
 
   

@@ -24,7 +24,7 @@ const bellsCancellationController = {
 			//send to user 
 			res.json({
 				message: "Final score calculated",
-				finalScore: `Overall result ${result.finalScore}%\nSymmetry score ${result.symmetryScore}%\nAsymmetry ditrection ${result.asymmetryDirection}`, 
+				finalScore: `Overall result ${result.finalScore.toFixed(2)}%\nSymmetry score ${result.symmetryScore.toFixed(2)}%\nAsymmetry ditrection ${result.asymmetryDirection}`, 
 
 			});
 		} catch (error) {

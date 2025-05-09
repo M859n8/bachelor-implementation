@@ -311,7 +311,9 @@ export default function LineTracking() {
 			}}
 		/>
 		<>
+			
 			<View>
+
 			<Svg
 				width={width}
 				height={height}
@@ -370,7 +372,9 @@ export default function LineTracking() {
 					}}
 				/>
 			))}
+
         </>
+
 	</View>
 		
 	);
@@ -381,12 +385,5 @@ const styles = StyleSheet.create({
         flex: 1,
 		backgroundColor: '#fff',
     },
-    // infoBox: {
-    //     position: 'absolute',
-    //     top: 40,
-    //     left: 20,
-    //     backgroundColor: '#C4E3D7',
-    //     padding: 10,
-    //     borderRadius: 10
-    // }
+   
 });

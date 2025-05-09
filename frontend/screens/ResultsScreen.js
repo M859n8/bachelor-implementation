@@ -4,7 +4,6 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import CustomButton from '../shared/CustomButton.js';
 
 export default function ResultsScreen() {
-	console.log('resultScreen')
 	const navigation = useNavigation();
 	const route = useRoute();
 	const { result } = route.params || {};

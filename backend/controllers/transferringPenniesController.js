@@ -2,7 +2,7 @@
 import userModel from '../models/user.js';
 
 const COINS_PER_ROUND = 9; 
-const REFERENCE_SPEED = 24; //18*20/15 
+const REFERENCE_SPEED = 4; //(18*20/15 ) * 0.4 (after testing changed to 4)
 const REFERENCE_WIDTH = 18; //inches
 
 
@@ -151,7 +151,6 @@ const transferringPenniesController ={
 		//reference speed = refPathWidth * refCoinsAmount / refTime
 		const speedRound1 = COINS_PER_ROUND * data.width / round1Duration;
 		const speedRound2 = COINS_PER_ROUND * data.width / round2Duration;
-		
 		//compare to reference speed and convert to percent
 		const resultRound1 = (speedRound1 * 100) / REFERENCE_SPEED
 		const resultRound2 = (speedRound2 * 100) / REFERENCE_SPEED

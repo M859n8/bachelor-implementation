@@ -103,6 +103,7 @@ export default function ComplexFigure() {
 		} catch (error) {
 			Alert.alert('Failure', 'Can not send answers');
 			console.log(error);
+			setIsLoading(false);
 		}
 		
 	}

@@ -174,6 +174,6 @@ def normalize_drawings(svg_user):
 	merged_lines = merge_lines(merged_features)
 	# clean small lines 
 	result_features = clean_small_lines(merged_lines, 5.0)
-
+	# save_lines_to_svg(result_features, './assets/normalizedOutput.svg') # debug
 	return result_features
 

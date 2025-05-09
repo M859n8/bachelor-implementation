@@ -43,10 +43,10 @@ const images1 = [
 
   const images2 = [
 	// { index: 25, image: require('../../assets/visual_organiz/spatial.jpeg')},
-	// { index: 26, image: require('../../assets/visual_organiz/26.png')},
-	// { index: 27, image: require('../../assets/visual_organiz/27.png')},
-	// { index: 28, image: require('../../assets/visual_organiz/28.png')},
-	// { index: 29, image: require('../../assets/visual_organiz/29.png')},
+	{ index: 26, image: require('../../assets/visual_organiz/26.png')},
+	{ index: 27, image: require('../../assets/visual_organiz/27.png')},
+	{ index: 28, image: require('../../assets/visual_organiz/28.png')},
+	{ index: 29, image: require('../../assets/visual_organiz/29.png')},
 	{ index: 30, image: require('../../assets/visual_organiz/30.png')},
 	{ index: 31, image: require('../../assets/visual_organiz/31.png')},
 	{ index: 32, image: require('../../assets/visual_organiz/32.png')},
@@ -125,12 +125,12 @@ export default function VisualOrganization() {
 
 	const generateTestSet = () => {
 
-		// const selectedFromImages1 = getRandomSample(images1, 5).map((item, i) => ({
-		// 	type: 'text',
-		// 	image: item.image,
-		// 	index: item.index,
-		// 	answer: '',
-		// }));
+		const selectedFromImages1 = getRandomSample(images1, 5).map((item, i) => ({
+			type: 'text',
+			image: item.image,
+			index: item.index,
+			answer: '',
+		}));
 		
 		const selectedFromImages2 = getRandomSample(images2, 5).map((item) => {
 			const { choices, correctIndex } = generateChoices(item.image);
@@ -146,8 +146,7 @@ export default function VisualOrganization() {
 		});
 		
 		// Об’єднуємо, можна також перемішати фінальний масив
-		// const combinedTasks = [...selectedFromImages1, ...selectedFromImages2];
-		const combinedTasks = [ ...selectedFromImages2];
+		const combinedTasks = [...selectedFromImages1, ...selectedFromImages2];
 
 		console.log('test set', combinedTasks); 
 		return combinedTasks
@@ -309,15 +308,15 @@ export default function VisualOrganization() {
 		</Modal>
 		{!rulesModal && (
 		<KeyboardAvoidingView 
-		behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-		style={{ flex: 1 }}
+			behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+			style={{ flex: 1 }}
 		>
 		<ScrollView
 			contentContainerStyle={{ flexGrow: 1 }}
 			keyboardShouldPersistTaps="handled"
 		>
 			<View style={styles.mainZone}>
-				<Text>{currentImageIndex} / {testSet.current.length-1} </Text>
+				<Text style={styles.counter}>{currentImageIndex} / {testSet.current.length-1} </Text>
 			
 				{testSet.current[currentImageIndex].type === 'text' ? (
 					<>
@@ -423,6 +422,12 @@ const styles = StyleSheet.create({
 		backgroundColor: '#fff',
 		borderRadius: 5,
 	},
- 
+	counter: {
+		fontSize: 30,
+		fontWeight: 'bold',
+		textAlign: 'center',
+		color: '#333',
+		marginBottom: 10,
+	}
  
 });

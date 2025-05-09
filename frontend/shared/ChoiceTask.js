@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Image, TouchableOpacity, Text } from 'react-native';
+import { StyleSheet, View, Image, TouchableOpacity, Text } from 'react-native';
 
 const ChoiceTask = ({ task, onSelect }) => {
 	console.log('choice task', task)
@@ -10,7 +10,7 @@ const ChoiceTask = ({ task, onSelect }) => {
 					source={task.image} 
 					style={{ width: 200, height: 200, resizeMode: 'contain' }} 
 				/> */}
-				<Text>find flipped image </Text>
+				<Text style={styles.title}>Find flipped image</Text>
 			</View>
 			<View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}>
 				{task.choices.map((choice, index) => (
@@ -25,5 +25,14 @@ const ChoiceTask = ({ task, onSelect }) => {
 		</View>
 	);
 };
-
+const styles = StyleSheet.create({
+	title: {
+	  fontSize: 44,
+	  fontWeight: 'bold',
+	  textAlign: 'center',
+	  color: '#333',
+	  marginBottom: 10,
+	},
+  });
+  
 export default ChoiceTask;

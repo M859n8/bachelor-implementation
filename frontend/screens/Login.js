@@ -177,7 +177,7 @@ export default function Login({ setIsAuthenticated }) {
 			padding: '10%',
 			// backgroundColor: '#FFFFFF',
 			// backgroundColor: '#C4E3D7'
-		backgroundColor: '#E1EACD'
+		backgroundColor: '#ccc'
 
 
 		},
