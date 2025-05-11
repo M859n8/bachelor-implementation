@@ -4,10 +4,9 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import CustomButton from '../shared/CustomButton.js';
 
 export default function ResultsScreen() {
-	const navigation = useNavigation();
+	const navigation = useNavigation(); //to navigate home
 	const route = useRoute();
-	const { result } = route.params || {};
-	console.log('result', result, result.finalScore)
+	const { result } = route.params || {}; //results from the backend
 
 	return (
 		<View style={styles.container}>

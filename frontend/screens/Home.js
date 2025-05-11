@@ -1,20 +1,19 @@
-import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState } from 'react';
-import { View, Text, Button, FlatList, TouchableOpacity, StyleSheet,ScrollView, Dimensions, Alert, useWindowDimensions } from 'react-native';
+import React, { useEffect, useState, useContext } from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Login from './Login';
 import Chart from '../shared/Chart.js';
 import CustomButton from '../shared/CustomButton.js';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { AuthContext } from '../shared/AuthContext.js';
 
 const tests = ["BellsCancellation","BlockDesign",
     "ComplexFigure","TransferringPennies", "VisualOrganization", "LineTracking"];
 
-export default function Home({ setIsAuthenticated }) {
+export default function Home() {
+	const { setIsAuthenticated } = useContext(AuthContext);
 
     const navigation = useNavigation();
-	const [width, setWidth] = useState(0);
+	const [width, setWidth] = useState(0); //saves width for correct test list sizes
 
 	const [radius, setRadius] = useState(0);
 
@@ -28,14 +27,11 @@ export default function Home({ setIsAuthenticated }) {
 	const [testResults, setTestResults] = useState([]);
 	const [subdomainsResults, setSubdomainsResults] = useState([]);
 
-	const [chartData, setChartData] = useState([]);
-	// const [chartData2, setChartData2] = useState([])
+	const [chartData, setChartData] = useState([]);//saves data prepared for the chart
 
     const handleLogout = async () => {
 		try {
 			await AsyncStorage.removeItem('authToken'); //delete token after logout
-		
-		
 			setIsAuthenticated(false);  // update authorisation state
 			
 		} catch (error) {
@@ -47,20 +43,9 @@ export default function Home({ setIsAuthenticated }) {
 		}
 	};
 
-	// const handleLogout = async () => {
-    //     try {
-    //       await AsyncStorage.removeItem('authToken'); // Видаляємо токен
-    //     //   Alert.alert('Logged out', 'You have been logged out successfully.');
-    
-    //       setIsAuthenticated(false);  // Оновлюємо стан авторизації
-    //     //   navigation.navigate('Login');
-    //     } catch (error) {
-    //       console.error('Logout error:', error);
-    //       Alert.alert('Error', 'Something went wrong while logging out.');
-    //     }
-    //   };
+
 	useEffect(() => {
-		//get user results from previous assessments
+		//get user results about previous assessments
 		const fetchUserData = async () => { 
 			try {
 				const token = await AsyncStorage.getItem('authToken');
@@ -116,7 +101,7 @@ export default function Home({ setIsAuthenticated }) {
 	
 		return testData;
 	};
-
+	
 	useEffect(()=> {
 		const testData = prepareToChart(testResults, subdomainsResults)
 		setChartData(testData)
@@ -129,14 +114,14 @@ export default function Home({ setIsAuthenticated }) {
 			setWidth(width);
 		  }}>
 		<CustomButton title="Logout" onPress={handleLogout} />
-		{width > 0 && (
+		{width > 0 && ( //if width was measured
 		<FlatList
 			data={tests}
 			numColumns={3}
 			keyExtractor={(item) => item}
 		
 			contentContainerStyle={styles.testListContainer}
-			ListHeaderComponent={
+			ListHeaderComponent={ // user registration information
 			<>
   
 			  {userInfo && (
@@ -162,7 +147,7 @@ export default function Home({ setIsAuthenticated }) {
 		  }
   
 		  
-		  renderItem={({ item }) => (
+		  renderItem={({ item }) => ( //each test item
 			<TouchableOpacity
 				onLayout={handleLayout}
 				style={[
@@ -178,7 +163,7 @@ export default function Home({ setIsAuthenticated }) {
 			  <Text style={styles.testText}>{item}</Text>
 			</TouchableOpacity>
 		  )}
-		  ListFooterComponent={
+		  ListFooterComponent={ //results charts
 			<View style={styles.resultsPart}>
 			  <Text style={styles.profileTitle}>Results charts</Text>
 			  <Chart testResults={chartData}/>
@@ -196,15 +181,11 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#FFFFFF',
         paddingHorizontal: 16,
-        // paddingTop: 20,
-		// justifyContent: 'center',
-        // alignItems: 'center'
     },
     profileCard: {
         backgroundColor: '#F5F5F5',
         borderRadius: 12,
         padding: '5%',
-		// width: 'auto',
         marginBottom: '10%',
         shadowColor: '#000',
         shadowOpacity: 0.1,
@@ -232,13 +213,7 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         color: '#000',
     },
-    testHeader: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 12,
-        textAlign: 'center',
-        color: '#333',
-    },
+    
     testListContainer: {
         alignItems: 'center',
         paddingBottom: 60,

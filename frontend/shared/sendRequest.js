@@ -1,19 +1,21 @@
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
-import { Alert } from 'react-native';
 
-export async function sendAuthenticatedRequest({
+//function that passes data from tests to the backend and processes the result
+export async function sendRequest({
 	url,
 	method = 'POST',
 	body = {},
 	onSuccess,
-	onUnauthorized,
 	navigation,
-	// setIsAuthenticated
+	setIsAuthenticated,
 }) {
-	try {
-		const token = await AsyncStorage.getItem('authToken');
 
+	try {
+		//get token
+		const token = await AsyncStorage.getItem('authToken');
+		//send request
 		const response = await fetch(url, {
 			method,
 			headers: {
@@ -23,14 +25,11 @@ export async function sendAuthenticatedRequest({
 			body: JSON.stringify(body)
 		});
 
-		if (response.status === 401) {
+		//if there is problems with authorization
+		if (response.status === 401 || response.status === 403) {
 			await AsyncStorage.removeItem('authToken');
-			// if (typeof setIsAuthenticated === 'function') {
-			// 	setIsAuthenticated(false);
-			// }
-			if (typeof onUnauthorized === 'function') {
-				onUnauthorized();
-			}
+			setIsAuthenticated(false); // update auth status
+			
 			Toast.show({
 				type: 'error',
 				text1: 'Session expired',
@@ -41,7 +40,7 @@ export async function sendAuthenticatedRequest({
 
 		const result = await response.json();
 
-		if (response.ok) {
+		if (response.ok) { //perform on success bechaviour
 			if (typeof onSuccess === 'function') {
 				onSuccess(result);
 			}

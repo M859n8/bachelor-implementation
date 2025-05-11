@@ -1,25 +1,22 @@
-// Chart.js
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { BarChart } from "react-native-gifted-charts";
-import { useState, useRef, useEffect} from 'react';
 import Toast from 'react-native-toast-message';
 
+//charts for results visualized on home page
 export default function Chart({ testResults}) {
-	// console.log('got into chart with data', testResults)
-	const [selectedInfo, setSelectedInfo] = useState(null);
 
-	const formatTestType = (str) => {
+	const formatTestType = (str) => { //formate chart header
 		return str
-			.replace(/([a-z])([A-Z])/g, '$1 $2') // додає пробіл перед великою літерою
-			.replace(/\b\w/g, (char) => char.toUpperCase()); // кожне слово з великої
+			.replace(/([a-z])([A-Z])/g, '$1 $2') 
+			.replace(/\b\w/g, (char) => char.toUpperCase()); 
 	};
 
 	return (
 	<ScrollView contentContainerStyle={{ padding: 16 }}>
 		{Object.keys(testResults).length > 0 ? (
 			Object.entries(testResults).map(([testType, rawData]) => {
-				// додаємо onPress у кожен елемент
+				// to show detailed info about chart
 				const data = rawData.map((item) => ({
 					...item,
 					onPress: () => {
@@ -51,11 +48,7 @@ export default function Chart({ testResults}) {
 							xAxisLabelTextStyle={{ fontSize: 10 }}
 						/>
 
-						{selectedInfo && (
-							<Text style={{ marginTop: 10, fontSize: 14, color: '#333' }}>
-								{selectedInfo.label}: {selectedInfo.value}
-							</Text>
-						)}
+						
 					</View>
 				);
 			})

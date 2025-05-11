@@ -1,19 +1,10 @@
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated from 'react-native-reanimated';
-import {
-	useSharedValue,
-	useAnimatedStyle,
-	withSpring,
-	withTiming,
-  } from 'react-native-reanimated';
-import { StyleSheet, Text, View, Modal, Button,  TouchableOpacity, Image, Alert } from 'react-native';
+import { StyleSheet, View} from 'react-native';
 
 
-
+//grid element from block design test
 export default function Grid({cellSize, dimention}){
-
-	// console.log(cellSize, 'and', dimention)
-	const gridWidth= cellSize*dimention
+	//create grid of a given dimention
+	const gridWidth= cellSize*dimention;
 
 	return (
 	  <View style={[styles.grid, {width: gridWidth, aspectRatio: 1}]}>
@@ -35,31 +26,23 @@ export default function Grid({cellSize, dimention}){
 		justifyContent: 'space-between',
 		alignItems: 'center',
 		
-		// backgroundColor: '#f0f0f0',       // Або 'transparent', якщо фон ззаду кольоровий
 		borderWidth: 3,
 		borderColor: '#4CAF50',
-		// borderRadius: 16,
-	
 		shadowColor: '#4CAF50',
 		shadowOffset: { width: 0, height: 4 },
 		shadowOpacity: 0.5,
 		shadowRadius: 6,
-		elevation: 6,                     // Для Android
+		elevation: 6, //for android
 	
 		padding: 12,
 		margin: 10,
-	}
-	,
+	},
 	
 	row: {
 		flexDirection: 'row',
-		// justifyContent: 'space-between',
 		width: '100%',
 	},
 	cell: {
-		// width: '34%',
-		// height: 'auto',
-		// aspectRatio: 1, 
 		justifyContent: 'center',
 		alignItems: 'center',
 	

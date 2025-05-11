@@ -1,19 +1,32 @@
-import { SafeAreaView, StatusBar } from 'react-native';
+import React from 'react';
+import { SafeAreaView } from 'react-native';
 import { NavigationContainer } from "@react-navigation/native"
-import { StyleSheet, Text, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 import StackNavigator from "./StackNavigator";
-// import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-function App() {
-    return (
+import { AuthProvider, AuthContext } from './shared/AuthContext';
+
+function MainApp() {
+	//get authentication status from context
+	const { isAuthenticated } = React.useContext(AuthContext);
+	// prevent rendering until auth status is determined
+	if (isAuthenticated === null) return null; 
+
+	return (
 		<SafeAreaView style={{ flex: 1 }}>
-            <NavigationContainer>
-                <StackNavigator />
-				<Toast />
-            </NavigationContainer>
+			<NavigationContainer>
+				<StackNavigator isAuthenticated={isAuthenticated} />
+				<Toast /> 
+			</NavigationContainer>
 		</SafeAreaView>
-    );
+	);
 }
 
-export default App;
+export default function App() {
+	return (
+		<AuthProvider> 
+			<MainApp />
+		</AuthProvider>
+	);
+}
+

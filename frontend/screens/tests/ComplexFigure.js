@@ -1,36 +1,37 @@
-// import 'react-native-gesture-handler';
 import { Gesture, GestureHandlerRootView, GestureDetector } from 'react-native-gesture-handler';
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Modal, Button,  TouchableOpacity, Image, Alert } from 'react-native';
-import { useState, useRef, useEffect} from 'react';
+import { StyleSheet, View, TouchableOpacity, Image} from 'react-native';
+import { useState} from 'react';
 import Svg, { Path } from 'react-native-svg';
-import { Dimensions } from "react-native";
 import Icon from 'react-native-vector-icons/Feather';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import CustomButton from '../../shared/CustomButton.js';
+import RulesModal from '../../shared/RulesModal.js';
 
-
-// const { width, height } = Dimensions.get('window');
+import { useContext } from 'react';
+import { AuthContext } from '../../shared/AuthContext.js';
+import {sendRequest} from '../../shared/sendRequest.js';
 
 export default function ComplexFigure() {
-	const navigation = useNavigation(); 
+	const navigation = useNavigation(); //using for navigation to the result page
+	const { setIsAuthenticated } = useContext(AuthContext); //using for updating auth flag based on server response
 
-	const [isLoading, setIsLoading] = useState(false);
+	const [rulesModal, setRulesModal] = useState(true); //rules at the start of the game
 
-	const [lines, setLines] = useState([]); // Масив для зберігання ліній
 
-	const [tool, setTool] = useState('pencil'); // 'pencil' або 'eraser'
+	const [isLoading, setIsLoading] = useState(false);//loading status for end test button
 
-	const [backgroundZoomed, setBackgroundZoomed] = useState(false); // Стан для контролю масштабу
+	const [lines, setLines] = useState([]); //array for lines
+	const [tool, setTool] = useState('pencil'); //active tool: 'pencil' or 'eraser'
 
-	
+	const [backgroundZoomed, setBackgroundZoomed] = useState(false); //control template zoom
+
+	//gesture for pencil painting
 	const paintGesture = Gesture.Pan()
 		.onBegin((event) => {
 			const { x, y } = event;
 			setLines((prevLines) => [
 				...prevLines,
-				[{ x, y }] // Початкова точка для нової лінії
+				[{ x, y }] //set start point 
 			]);
 			
 		})
@@ -38,24 +39,23 @@ export default function ComplexFigure() {
 			const { x, y } = event;
 			setLines((prevLines) => {
 				const updatedLines = [...prevLines];
-				const lastLine = updatedLines[updatedLines.length - 1];
-				lastLine.push({ x: x, y: y }); // Додаємо нову точку до останньої лінії
+				const lastLine = updatedLines[updatedLines.length - 1]; //get last array
+				lastLine.push({ x: x, y: y }); //add points to the last array (last line)
 				return updatedLines;
 			});
 		})
-		.onEnd(() => {
-			
-		})
-		.runOnJS(true);
+		.runOnJS(true); //run on js thread so i can freely use js functions
 	
+	//gesture for erasor
 	const eraseGesture = Gesture.Pan()
 		.onUpdate((event) => {
 			const { x , y } = event;
 			setLines((prevLines) =>
-				prevLines.filter((line) => { //проходить по кожній лінії та залишає тільки ті, які не торкається гумка.
+				//goes through lines and leaves only those that are not touched by the eraser
+				prevLines.filter((line) => {
 
-				// Перевіряємо кожну точку лінії на відстань до гумки
-				return line.every( //Якщо усі точки лінії знаходяться далі ніж 10px від гумки (x, y), ця лінія залишається.
+				//check each line point 
+				return line.every(
 					(point) => Math.sqrt((point.x - x) ** 2 + (point.y - y) ** 2) > 10 //
 				);
 				})
@@ -64,7 +64,7 @@ export default function ComplexFigure() {
 		.runOnJS(true);
 
 
-
+	//generate svg
 	function generateSVGString() {
 		
 		return `
@@ -79,41 +79,35 @@ export default function ComplexFigure() {
 		`;
 	}
 
+	//handle `end test` button click and send data to the backend
 	async function sendToBackend() {
 		const svgString = generateSVGString();
-		setIsLoading(true)
-        const token = await AsyncStorage.getItem('authToken');
-		try{
-			const response = await fetch('http://192.168.0.12:5000/api/result/figure/saveResponse', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${token}`
-
-				},
-				body: JSON.stringify({ svg: svgString })
-			});
-
-			const result = await response.json();
-			
-			if (response.ok) {
-				navigation.navigate('Results', { result });
-
-			}
-		} catch (error) {
-			Alert.alert('Failure', 'Can not send answers');
-			console.log(error);
-			setIsLoading(false);
-		}
+		setIsLoading(true); //upd loading state of the button
+		await sendRequest({
+			url: 'http://192.168.0.12:5000/api/result/figure/saveResponse',
+			body: {svg: svgString},
+			setIsAuthenticated,
+			navigation,
+			onSuccess: result => navigation.navigate('Results', { result })
+		});
+     
 		
 	}
 
 	const handleImagePress = () => {
-		setBackgroundZoomed(!backgroundZoomed); // Перемикання стану для збільшення
+		setBackgroundZoomed(!backgroundZoomed); //increase template size
 	  };
 
   	return (  
-		
+	<>	
+	<RulesModal 
+		visible={rulesModal} 
+		rules='Recreate the drawing according to the given template. The template increases in size by clicking. You have drawing and erasing available. When the drawing is completed, click the end test button.' 
+		onClose={() => {
+			setRulesModal(false);
+
+		}} 
+	/>
 	<GestureHandlerRootView style={styles.container}>
 	
 		<View style={styles.buttonContainer}>
@@ -136,7 +130,7 @@ export default function ComplexFigure() {
 			onPress={handleImagePress}
 		>
 			<Image 
-			source={require("../../assets/complex_figure/complexFigure.png")} // Ваша URL картинки
+			source={require("../../assets/complex_figure/complexFigure.png")} 
 			style={[styles.image, backgroundZoomed ? styles.zoomedImage : {}]} 
  			resizeMode="contain"
 			/>
@@ -145,35 +139,36 @@ export default function ComplexFigure() {
 		
 			<GestureDetector gesture={tool === 'pencil' ? paintGesture : eraseGesture}>
 
+				<View style={styles.paintContainer}>
+				<Svg style={{ flex: 1 }}>
+					{lines.map((line, index) => {
+						const path = line
+						//dynamicly create line. first point with the tag 'M' and others with 'L'
+						.map((point, i) => (i === 0 ? `M${point.x},${point.y}` : `L${point.x},${point.y}`))
+						.join(' ');
 
-			<View style={styles.paintContainer}>
-			<Svg style={{ flex: 1 }}>
-				{lines.map((line, index) => {
-					const path = line
-					.map((point, i) => (i === 0 ? `M${point.x},${point.y}` : `L${point.x},${point.y}`))
-					.join(' ');
-
-					return (
-					<Path
-						key={index}
-						d={path}
-						stroke="black"
-						strokeWidth={2}
-						fill="none"
-					/>
-					);
-				})}
-			</Svg>
-			</View>
-		</GestureDetector>
+						return (
+						<Path
+							key={index}
+							d={path}
+							stroke="black"
+							strokeWidth={2}
+							fill="none"
+						/>
+						);
+					})}
+				</Svg>
+				</View>
+			</GestureDetector>
 	
 		<CustomButton
-			title="Send"
+			title="End test"
 			onPress={() => sendToBackend()}
 			isLoading={isLoading}
 		/>
 
 	</GestureHandlerRootView>
+	</>
   	);
 }
 
@@ -188,7 +183,6 @@ const styles = StyleSheet.create({
 		alignItems: 'space-between',
 		flexDirection: 'row',
 		gap: 20,
-		// marginVertical: 20,
 	},
 	button: {
 		width: 50,
@@ -197,7 +191,7 @@ const styles = StyleSheet.create({
 		backgroundColor: 'white',
 		alignItems: 'center',
 		justifyContent: 'center',
-		elevation: 4, // Android тінь
+		elevation: 4, // Android shadow
 		shadowColor: '#000',
 		shadowOffset: { width: 0, height: 2 },
 		shadowOpacity: 0.2,
@@ -209,37 +203,30 @@ const styles = StyleSheet.create({
 	},
 	
 	paintContainer: {
-		// width: '70%',  // Ширина області малювання
-		// height: '70%', // Висота області малювання
 		width: 500,
 		height: 500,
-		backgroundColor: '#C4E3D7', // Колір фону
-		borderRadius: 10, // Закруглені кути
-		// borderWidth: 2,
-		// borderColor: '#000',
+		backgroundColor: '#C4E3D7', 
+		borderRadius: 10, 
 		margin: 20,
-		// overflow: 'hidden', // Щоб лінії не виходили за межі
 	},
 	imageContainer: {
-		// padding: 5,
 		backgroundColor: 'white',
 		zIndex: 10, 
-	  },
-	  image: {
+	},
+	image: {
 		width: 100,
 		height: 100,
-		// borderRadius: 5,
 		borderRadius: 5,
 		borderColor: '#ccc',
 		borderWidth: 2,
-	  },
-	  zoomedImage: {
-		width: 500, // Збільшений розмір
+	},
+	zoomedImage: {
+		width: 500, 
 		height: 500,
 		
 		borderRadius: 5,
 		borderColor: '#ccc',
 		borderWidth: 2,
 		zIndex: 1,
-	  },
+	},
 });

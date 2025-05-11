@@ -1,4 +1,3 @@
-// import connection from './db-config.js';
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 
@@ -12,7 +11,7 @@ const connectionConfig = {
   };
   
 
-// SQL для створення таблиці
+// create users table
 const createUserTableQuery = `
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -22,7 +21,7 @@ CREATE TABLE IF NOT EXISTS users (
   handOrientation ENUM( 'left', 'right') NOT NULL
 );
 `;
-// SQL для вибору бази даних
+// create results table
 const createTestTableQuery = `
 CREATE TABLE IF NOT EXISTS test_results (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -44,24 +43,24 @@ CREATE TABLE IF NOT EXISTS test_results (
 );
 `;
 
-// Функція для створення бази даних і таблиць
+// creates database and tables
 const createDatabaseAndTable = async () => {
-  // Створення бази даних
+  
   let connection;
   try {
+	//setup connection
     connection = await mysql.createConnection(connectionConfig);
-		// Створення бази даних, якщо вона не існує
+		// create the database
 		await connection.query(`CREATE DATABASE IF NOT EXISTS motor_cognitive_db`);
 		console.log('Database motor_cognitive_db created or already exists');
 
-		// Використання бази даних
+		// use database
 		await connection.query(`USE motor_cognitive_db`);
 		console.log('Using database motor_cognitive_db');
-		// Створення таблиці users
+		// create tables
 		await connection.query(createUserTableQuery);
 		console.log('User table created or already exists');
 
-		// Створення таблиці tests
 		await connection.query(createTestTableQuery);
 		console.log('Test table created or already exists');
 
@@ -69,10 +68,10 @@ const createDatabaseAndTable = async () => {
 		console.error('Error:', err);
 	} finally {
 		if (connection) {
-			await connection.end(); // Закриваємо з'єднання
-		  }
+			await connection.end(); // close connectioin
+		}
 	}
 };
 
-// Виконання створення бази даних і таблиці
+// execute
 createDatabaseAndTable();

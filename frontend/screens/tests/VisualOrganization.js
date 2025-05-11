@@ -1,18 +1,18 @@
-
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet,Button, Text, View, Modal, Image, TextInput, Alert, Dimensions } from 'react-native';
-import { useState, useEffect, useRef, useMemo  } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, TouchableWithoutFeedback, Keyboard, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Modal, Image, TextInput,  Dimensions } from 'react-native';
+import { useState, useRef, useMemo  } from 'react';
+import { KeyboardAvoidingView, Platform, ScrollView, Keyboard} from 'react-native';
 import CustomButton from '../../shared/CustomButton.js';
 import RulesModal from '../../shared/RulesModal.js';
 import ChoiceTask from '../../shared/ChoiceTask.js';
+import {sendRequest} from '../../shared/sendRequest.js';
 
+import { useContext } from 'react';
+import { AuthContext } from '../../shared/AuthContext.js';
 
 import { useNavigation } from '@react-navigation/native';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
-//array of images
+//array of images for first part of the test
 const images1 = [
 	{ index: 0, image: require('../../assets/visual_organiz/1.png') },
 	{ index: 1, image: require('../../assets/visual_organiz/2.png') },
@@ -39,10 +39,9 @@ const images1 = [
 	{ index: 22, image: require('../../assets/visual_organiz/23.png') },
 	{ index: 23, image: require('../../assets/visual_organiz/24.png') },
 	{ index: 24, image: require('../../assets/visual_organiz/25.png') },
-  ];
-
-  const images2 = [
-	// { index: 25, image: require('../../assets/visual_organiz/spatial.jpeg')},
+];
+  //images for second part of the test (multiple-choice)
+const images2 = [
 	{ index: 26, image: require('../../assets/visual_organiz/26.png')},
 	{ index: 27, image: require('../../assets/visual_organiz/27.png')},
 	{ index: 28, image: require('../../assets/visual_organiz/28.png')},
@@ -51,69 +50,63 @@ const images1 = [
 	{ index: 31, image: require('../../assets/visual_organiz/31.png')},
 	{ index: 32, image: require('../../assets/visual_organiz/32.png')},
 	{ index: 33, image: require('../../assets/visual_organiz/33.png')},
-
-  ];
+];
+	
   
-  
-
 export default function VisualOrganization() {
-	const navigation = useNavigation(); 
+	const navigation = useNavigation(); //using for navigation to the result page
+	const { setIsAuthenticated } = useContext(AuthContext); //using for updating auth flag based on server response
+	const [rulesModal, setRulesModal] = useState(true); //rules at the start of the test
+
 
 	const [textResponse, setTextResponse] = useState(''); //for text field
-	const [isLoading, setIsLoading] = useState(false); //loading indicator
-	const inputRef = useRef(null); //ref on input field
+	const inputRef = useRef(null); //ref on input field, for keybord activation
+
+	const [isLoading, setIsLoading] = useState(false); //loading indicator for submit button
 	const [currentImageIndex, setCurrentImageIndex] = useState(0); //current image
-	const [rulesModal, setRulesModal] = useState(true); //
 	const [showEmptyConfirm, setShowEmptyConfirm] = useState(false); //modal to confirm empty answer
 
-	// const [visualClosureArray, setVisualClosureArray ] = useState([])
-	// const [spatialRelationsArray, setSpatialRelationsArray ] = useState([])
-	const testSet = useRef([]);
+	const testSet = useRef([]); //set with test images
 
-	const visualClosureAnswers = useRef([]); //ref for user answers
-	const spatialRelationsAnswers = useRef([]); 
+	const results = useRef([]); //correct results from multiple-choice task
 
-	const results = useRef([]);
-
-	//calculate the card size
+	//calculate the image card size
 	const { width, height } = Dimensions.get('window');
 	const minDimension = Math.min(width, height);
-	const cardSize = 0.4*minDimension;
+	const cardSize = 0.4 * minDimension;
 
+	//gets random indexes from array
 	const getRandomSample = (array, count) => {
-		const copy = [...array];
-		for (let i = copy.length - 1; i > 0; i--) {
-			const j = Math.floor(Math.random() * (i + 1));
-			[copy[i], copy[j]] = [copy[j], copy[i]];
-		}
-		return copy.slice(0, count);
+		return array
+			.sort(() => Math.random() - 0.5) //shuffle the array randomly
+			.slice(0, count); //select the first 'count' elements
 	};
+	
+	//generates images for multiple-choice part of the test
 	const generateChoices = (image) => {
+		//get three random angles
 		const possibleAngles = [0, 60, 120, 180, 240, 300];
 		const shuffledAngles = possibleAngles.sort(() => Math.random() - 0.5);
 		const angles = shuffledAngles.slice(0, 3);
 
+		//create three rotated(incorrect variants) 
 		const rotatedChoices = angles.map((angle) => ({
 			image,
 			transform: [{ rotate: `${angle}deg` }],
 			isCorrect: false,
 		}));
 
-		// Правильний варіант – дзеркально відображена
+		//create a correct (reversed) variant
 		const mirroredChoice = {
 			image,
 			transform: [{ scaleX: -1 }, { rotate: `${Math.floor(Math.random() * 360)}deg` }],
 			isCorrect: true,
 		};
 	
-		// Об’єднуємо та перемішуємо
-		const allChoices = [...rotatedChoices, mirroredChoice];
-		for (let i = allChoices.length - 1; i > 0; i--) {
-			const j = Math.floor(Math.random() * (i + 1));
-			[allChoices[i], allChoices[j]] = [allChoices[j], allChoices[i]];
-		}
+		// Combine and shuffle
+		const allChoices = [...rotatedChoices, mirroredChoice].sort(() => Math.random() - 0.5);
 	
-		// Знаходимо індекс правильної відповіді
+		//find index of the correct answer
 		const correctIndex = allChoices.findIndex(choice => choice.isCorrect);
 	
 		return {
@@ -122,19 +115,18 @@ export default function VisualOrganization() {
 		};
 	};
 	
-
+	//generates test set 
 	const generateTestSet = () => {
-
+		//images with text input
 		const selectedFromImages1 = getRandomSample(images1, 5).map((item, i) => ({
 			type: 'text',
 			image: item.image,
 			index: item.index,
 			answer: '',
 		}));
-		
+		//images with multiple-choice
 		const selectedFromImages2 = getRandomSample(images2, 5).map((item) => {
 			const { choices, correctIndex } = generateChoices(item.image);
-			// Тут можна пізніше згенерувати варіанти з поворотами/дзеркальними копіями
 			return {
 				type: 'choice',
 				image: item.image,
@@ -145,84 +137,59 @@ export default function VisualOrganization() {
 			};
 		});
 		
-		// Об’єднуємо, можна також перемішати фінальний масив
+		//merge
 		const combinedTasks = [...selectedFromImages1, ...selectedFromImages2];
 
-		console.log('test set', combinedTasks); 
 		return combinedTasks
 
 	};
-	// const testSet = useRef(generateTestSet());
 	testSet.current = useMemo(() => generateTestSet(), []);
 
-
-
-	// useEffect(() => {
-	// 	// setVisualClosureArray(shuffleArray(images1))
-	// 	// setSpatialRelationsArray(shuffleArray(images2))
-	// 	testSet.current = generateTestSet()
-
-	// }, [rulesModal])
+	//after each text answer handle submit
 	const handleSubmit = async (id, sendEmpty = false) => {
-		console.log('got to handle submit')
-
-		// setIsLoading(true);
+		//check if testresponse is not empty
 		if (!textResponse.trim() && !sendEmpty) {
-			console.log('empty text')
 			//show modal if response is empty 
 			setShowEmptyConfirm(true);
 			return;
 		}
+		//update results
 		results.current.push({
 			index: id,
 			type: 'text',
 			userAnswer: textResponse,
 		});
 		
-		// submitResult();
+		//go to the next image
 		if (currentImageIndex < testSet.current.length-1) {
 			
-			setCurrentImageIndex(currentImageIndex + 1); //go to next img
+			setCurrentImageIndex(currentImageIndex + 1); 
 			setTextResponse(''); //clear response field
 		} else {
+			//if it is last image
 			sendToBackend(); 
 		}
 	
 	};
 
-	//go to next image or send data to backend
-	// const submitResult = () => {
-		
-	// 	if (currentImageIndex < testSet.current.length-1) {
-	// 		//save user answer
-	// 		console.log('test responce', textResponse)
-	// 		visualClosureAnswers.current.push(textResponse);
-	// 		setIsLoading(false); //end liading status
-	// 		setCurrentImageIndex(currentImageIndex + 1); //go to next img
-	// 		setTextResponse(''); //clear response field
-	// 	} else {
-	// 		sendToBackend(); 
-	// 	}
-	// };
+	//after each multiple-choice answer
 	const handleChoiceSelect = (choiceIndex) => {
+		//check if it was correct
 		const currentTask = testSet.current[currentImageIndex];
-	
 		const isCorrect = choiceIndex === currentTask.correctIndex;
-	
+		//update results
 		results.current.push({
 			index: currentTask.index,
 			type: 'multichoice',
 			isCorrect: isCorrect,
 		});
 	
-		// Переходимо до наступного завдання
+		// go to the next task
 		if (currentImageIndex < testSet.current.length - 1) {
-			// setCurrentImageIndex(prev => prev + 1);
 			setCurrentImageIndex(currentImageIndex + 1); //go to next img
 
 		} else {
-			console.log('got to else')
-			// Можеш тут викликати submitResult або показати фінальний екран
+			//send data to the backend after last task
 			sendToBackend(); 
 		}
 	};
@@ -230,84 +197,52 @@ export default function VisualOrganization() {
   
 
     const sendToBackend = async () => {
-		try {
-			const token = await AsyncStorage.getItem('authToken');
-			setIsLoading(true);  //start loading process untill we got data from backend
-			
-			const response = await fetch('http://192.168.0.12:5000/api/result/saveResponse', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${token}`,
-				},
-				body: JSON.stringify({
-					userAnswers: results.current, 
-				}),
-			});
-	
-			const result = await response.json();
-	
-			if (response.ok) {
-				// setResults(result); //save results
-				Keyboard.dismiss();
-				// setResultsModal(true); //show results modal
-				navigation.navigate('Results', { result });
-
-			}
-		} catch (error) {
-			
-			Alert.alert('Error', 'Sending results to backend');
-		}finally {
-			setIsLoading(false);
-		}
+		await sendRequest({
+			url: 'http://192.168.0.12:5000/api/result/visual/saveResponse',
+			body: {userAnswers: results.current},
+			setIsAuthenticated,
+			onSuccess: result => {Keyboard.dismiss(); navigation.navigate('Results', { result })}
+		});
     };
 
-  return (
-      <View style={styles.container}>
-     
-
-		 {/* Модальне вікно */}
+    return (
+    <View style={styles.container}>
 		<RulesModal 
 			visible={rulesModal} 
-			rules='The pictures shows an object divided into parts. Enter the name of the object in the test field' 
-			
+			rules='The pictures shows an object divided into parts. Write the name of the object you see in English. In the second half of the test, among four pictures in different positions, you will need to choose one that is mirrored.' 
 			onClose={() => {setRulesModal(false);inputRef.current?.focus();}} 
 		/>
 
-		<Modal
+		<Modal //in case of empty answer ask for a confirmation
 			transparent={true}
 			animationType="fade"
 			visible={showEmptyConfirm}
 			onRequestClose={() => setShowEmptyConfirm(false)}
 		>
-		<View style={styles.modalOverlay}>
+			<View style={styles.modalOverlay}>
 			<View style={styles.modalContainer}>
-			<Text style={styles.modalTitle}>Надіслати порожню відповідь?</Text>
-			<View style={styles.buttonRow}>
-				<CustomButton
-					title="Cancel"
-					onPress={() => {
-						setShowEmptyConfirm(false); 
-						// setIsLoading(false);
-					}}
-					buttonStyle={{ width: '40%' }}
-					
-				/>
-				<CustomButton
-					title="Send"
-					onPress={() => {
-						setShowEmptyConfirm(false);
-						// submitResult();
-						handleSubmit(testSet.current[currentImageIndex].index, true);
-					}}
-					buttonStyle={{ width: '40%' }}
-				/>
+				<Text style={styles.modalTitle}>Send an empty answer?</Text>
+				<View style={styles.buttonRow}>
+					<CustomButton
+						title="Cancel"
+						onPress={() => {
+							setShowEmptyConfirm(false); 
+						}}
+						
+					/>
+					<CustomButton
+						title="Send"
+						onPress={() => {
+							setShowEmptyConfirm(false);
+							handleSubmit(testSet.current[currentImageIndex].index, true);
+						}}
+					/>
+				</View>
 			</View>
 			</View>
-		</View>
 		</Modal>
-		{!rulesModal && (
-		<KeyboardAvoidingView 
+		{!rulesModal && ( //after rules are closed
+		<KeyboardAvoidingView //activate keyboard
 			behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 			style={{ flex: 1 }}
 		>
@@ -318,7 +253,7 @@ export default function VisualOrganization() {
 			<View style={styles.mainZone}>
 				<Text style={styles.counter}>{currentImageIndex} / {testSet.current.length-1} </Text>
 			
-				{testSet.current[currentImageIndex].type === 'text' ? (
+				{testSet.current[currentImageIndex].type === 'text' ? ( //render tests based on type
 					<>
 						<View style={styles.card}>
 							<Image 
@@ -340,7 +275,7 @@ export default function VisualOrganization() {
 							title="Send"
 							onPress={()=> handleSubmit(testSet.current[currentImageIndex].index) }
 							isLoading={isLoading}
-							/>
+						/>
 					</>
 				) : (
 					<ChoiceTask 
@@ -361,7 +296,6 @@ export default function VisualOrganization() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		//   justifyContent: 'center',
 		alignItems: 'center',
 		backgroundColor: '#f5f5f5'
 	},
@@ -391,15 +325,13 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		width: '100%',
-		gap: 10, // якщо підтримується, або можеш використати marginRight у першої кнопки
+		gap: 10, 
 	},
 	mainZone: {
 		padding: '105'
 
 	},
 	card: {
-		// width: '60%', // конкретний розмір картки
-		// height: '60%', // конкретний розмір картки
 		borderRadius: 6,
 		elevation: 3,
 		backgroundColor: '#fff',
@@ -412,8 +344,7 @@ const styles = StyleSheet.create({
 		alignItems:'center'
 	},
 	image: {
-		width: '100%', // картинка займатиме всю ширину картки
-		// height: '100%', // картинка займатиме всю висоту картки
+		width: '100%', 
 		
 	},
 	textInput: {

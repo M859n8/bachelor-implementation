@@ -1,48 +1,44 @@
-import React, { useRef, useState, useEffect, useMemo } from 'react';
-import { StyleSheet, View, Dimensions,Text, Modal, Button, UIManager, findNodeHandle } from 'react-native';
-import Svg, { Path, Circle } from 'react-native-svg';
+import React, { useRef, useState, useEffect} from 'react';
+import { StyleSheet, View, Text} from 'react-native';
+import Svg, { Path} from 'react-native-svg';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import RulesModal from '../../shared/RulesModal.js';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import {sendRequest} from '../../shared/sendRequest.js';
 
-// import { PathProperties } from 'svg-path-properties';
-import { svgPathProperties } from "svg-path-properties";
+import { useContext } from 'react';
+import { AuthContext } from '../../shared/AuthContext.js';
 
 import Animated from 'react-native-reanimated';
-import {
-	useSharedValue,useAnimatedStyle,withSpring,
-	withTiming,runOnJS,useAnimatedRef, measure, runOnUI, getRelativeCoords 
-  } from 'react-native-reanimated';
+import {useSharedValue,useAnimatedStyle} from 'react-native-reanimated';
 
 export default function LineTracking() {
-	const LINE_WIDTH = 30;
-	const navigation = useNavigation(); 
+	const LINE_WIDTH = 30; //width of the template path
 
-	const [path, setPath] = useState([]);
+	const navigation = useNavigation(); //using for navigation to the result page
+	const { setIsAuthenticated } = useContext(AuthContext); //using for updating auth flag based on server response
 
-	const [currentRound, setCurrentRound] = useState(1);
-	const [round2Modal, setRound2Modal] = useState(false);
+	const [path, setPath] = useState([]); //user path
+
+	const [currentRound, setCurrentRound] = useState(1); //current rount
+	const [round2Modal, setRound2Modal] = useState(false); //modal with fules for each round
 	const [round1Modal, setRound1Modal] = useState(true);
 
-	const linesRound1 = useRef([]);
-	const localRef = useRef(null); 
-	const [startMarkPos, setStartMarkPos] = useState({x: 0, y: 0});
+	const linesRound1 = useRef([]); //save lines from the first round
+
+	const [startMarkPos, setStartMarkPos] = useState({x: 0, y: 0}); //save template start pos
 	
-	const viewRef = useRef(null);
-	const [svgPathD, setSvgPathD] = useState('')
+	const viewRef = useRef(null); //ref of the main view, allows us to measure top shift
 
-	const start = useSharedValue({ x: 0, y: 0 });
-	const offset = useSharedValue({ x: 0, y: 0 });
+	const [svgPathD, setSvgPathD] = useState(''); //template path
 
-	// const { width, height } = Dimensions.get('window');
-	// const [windowSize, setWindowSize] = useState(Dimensions.get("window"));
-	const [width, setWidth ] = useState(0);
+	const start = useSharedValue({ x: 0, y: 0 }); //mark start pos
+	const offset = useSharedValue({ x: 0, y: 0 }); //offset during movement
+
+	const [width, setWidth ] = useState(0); //view size
 	const [height, setHeight] = useState(0);
 
-
-
-	const additionalData = useRef( {
+	const additionalData = useRef( { //metadata that will be send to the backend
 		windowWidth: 0, 
 		windowHeight: 0,
 		completionRound1: 0,
@@ -50,21 +46,20 @@ export default function LineTracking() {
 
 	});
 
-	//measure status bar height
+	//measure status bar height (top shift of the main view)
 	const statusBarHeight = useRef(0)
 	useEffect(() => { 
 		if (viewRef.current) {
 			viewRef.current.measure((x, y, width, height, pageX, pageY) => {
 				statusBarHeight.current = pageY;
-				setWidth(width);
+				setWidth(width); //set width and height of the main view/game area
 				setHeight(height);
 
 			});
 		}
-
 	}, []);
 
-	const checkPointIndex = useRef(0); //check points to track path copletion
+	const checkPointIndex = useRef(0); //check points to track path completion
 	const [checkPoints, setCheckPoints] = useState([
 		//spiral
 		{ x: 0.2, y: 0.55 }, 
@@ -90,7 +85,6 @@ export default function LineTracking() {
 		{ x: 0.95, y: 0.55 },
 		{ x: 0.95, y: 0.70 },
 		{ x: 0.82, y: 0.70 },
-		
 	]);
 
 	//function that generates first part of a template  - Archimedean Spiral
@@ -104,8 +98,10 @@ export default function LineTracking() {
 		const points = [];
 	
 		for (let i = 0; i < pointsCount; i++) {
+			//calculate angle and current radius
 			const t = (i / (pointsCount - 1)) * 2 * Math.PI * turns;
-			const r = (t / (2 * Math.PI * turns)) * maxRadius; // від 0 до maxRadius
+			const r = (t / (2 * Math.PI * turns)) * maxRadius; 
+			//get coords of the point
 			const x = centerX + r * Math.cos(t);
 			const y = centerY + 1.5*r * Math.sin(t) - 0.05 ;
 			points.push({ x, y });
@@ -113,7 +109,7 @@ export default function LineTracking() {
 	
 		return points;
 	};
-
+	//generate whole template 
 	const generateTemplate = () => {
 		const spiral = generateArchimedeanSpiral();
 		const zigzag = [
@@ -134,35 +130,33 @@ export default function LineTracking() {
 		return result;
 	};
 
+	//create a template 
 	useEffect(() => {
 		if(width>0 && height>0){
 			//update additional data
 			additionalData.current.windowHeight = height;
 			additionalData.current.windowWidth = width;
-			//generate template string
+			//generate template string and adapt to current screen sizes
 			const template = normalizePoints(generateTemplate());
-			console.log('width and height', width, height)
 			const templateSvg = convertPointsToPath(template);
 			setSvgPathD(templateSvg)
 
 			//save the first point to set the mark position
 			const firstPoint = template[0] ;
-			console.log('stert point', firstPoint)
 			setStartMarkPos({x: firstPoint.x, y: firstPoint.y})
 			//normalise check points coords
 			setCheckPoints(normalizePoints(checkPoints))
-
-
 		}
 		
 	}, [width, height]);
 	
+	//by end of the round move to the next one or finish the test
 	const handleEndRound = () => {
 		//check current round
 		if (currentRound === 1) {
 			linesRound1.current = path; //save round one path
 			setPath([]); //clear the path for round 2
-			// Завершився перший раунд, змінюємо на другий і показуємо модальне вікно з правилами
+			//go to the second round
 			setCurrentRound(2);
 			setRound2Modal(true);  //show modal with the rules
 			additionalData.current.completionRound1 = checkPointIndex.current/checkPoints.length;
@@ -180,8 +174,6 @@ export default function LineTracking() {
 
 	//function to adjust coordinates of the points according to the screen width and height
 	const normalizePoints = (coords) => {
-		// console.log('width', width, height)
-		console.log('start position', startMarkPos.x, startMarkPos.y)
 
 		return coords.map(({ x, y }) => ({
 			x: x * width,
@@ -203,6 +195,7 @@ export default function LineTracking() {
 			{ translateY: offset.value.y }
 		],
 	}));
+
 	//gesture that implements touch processing
 	const panGesture = Gesture.Pan()
 		.onBegin((e) => {
@@ -248,7 +241,7 @@ export default function LineTracking() {
 		return result;
 	};
 
-
+	//send data to the backend and show results
 	const sendDataToBackend = async (data) => {
 		const requestBody = {
 			userLinesRound1: convertPointsToPath(linesRound1.current),
@@ -256,64 +249,33 @@ export default function LineTracking() {
 			templateLines: svgPathD,
 			additionalData: additionalData.current,
 		}
-		// console.log('passed tehe request body ',additionalData.current);
 
-		const token = await AsyncStorage.getItem('authToken'); //get authorization token
-		try {
-			const response = await fetch('http://192.168.0.12:5000/api/result/line/saveResponse', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${token}`
-				},
-				body: JSON.stringify(requestBody),  //transform object into json string
-			})
-			const result = await response.json();
-			if (response.ok) {
-				// console.log('got to results')
-				//go to result page
-				navigation.navigate('Results', { result });
-			}
-		} catch (error) {
-			Alert.alert('Failure', 'Can not send answers');
-		}		
+		await sendRequest({
+			url: 'http://192.168.0.12:5000/api/result/line/saveResponse',
+			body: requestBody,
+			setIsAuthenticated,
+			navigation,
+			onSuccess: result => navigation.navigate('Results', { result })
+		})
+		
 	};
 		
 	return (
-		<View 
-			style={styles.container} 
-			// onLayout={(event) => {
-			// 	const { width, height , pageX, pageY} = event.nativeEvent.layout;
-			// 	console.log('Measured from layout:', width, height);
-			// 	setWidth(width);
-			// 	setHeight(height);
-			// 	statusBarHeight.current = pageY;
-			// 	console.log('y is' , pageY)
-			// }}
-			ref={viewRef}
-		>
+		<View style={styles.container} ref={viewRef}>
 
 		<RulesModal 
 			visible={round1Modal} 
-			rules='Round 1 rules: lorem ipsum' 
-			onClose={() => {
-				setRound1Modal(false);
-				
-
-			}} 
+			rules='This test consists of two rounds, in the first round, using your dominant hand, move the target object (green circle) to the end of the path. Try not to go outside the path.' 
+			onClose={() => {setRound1Modal(false)}} 
 		/>
 		
 		<RulesModal 
 			visible={round2Modal} 
-			rules='Round 2 rules: lorem ipsum' 
-			onClose={() => {
-				setRound2Modal(false);
-			}}
+			rules='Now your task is the same, but do it with your non-dominant hand.' 
+			onClose={() => {setRound2Modal(false)}}
 		/>
 		<>
-			
-			<View>
-
+		<View>
 			<Svg
 				width={width}
 				height={height}
@@ -335,15 +297,13 @@ export default function LineTracking() {
 				} 
 			</Svg>
 			</View>
-			<GestureDetector gesture={panGesture}>
-				
-				<Animated.View
-					ref={localRef}
+			<GestureDetector gesture={panGesture}> 
+				<Animated.View //target object (circle)
 					style={[{
 						width: LINE_WIDTH/2,
 						height: LINE_WIDTH/2,
 						borderRadius: LINE_WIDTH/4,
-						position: 'absolute', // обов'язково, інакше translate не буде працювати правильно
+						position: 'absolute', 
 						top: startMarkPos.y,
 						left: startMarkPos.x,
 						backgroundColor: '#4CAF50',
@@ -355,7 +315,6 @@ export default function LineTracking() {
 				/>
 			
 			</GestureDetector>
-			<Text>{startMarkPos.y}  {startMarkPos.x} </Text>
 
 			{checkPoints.map((point, index) => ( //check points 
 				<View 
@@ -364,7 +323,7 @@ export default function LineTracking() {
 						width: 5,
 						height: 5,
 						backgroundColor: '#fff',
-						borderRadius: 3, // щоб були круглі
+						borderRadius: 3,
 						position: 'absolute',
 						top: point.y,
 						left: point.x,

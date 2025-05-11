@@ -1,16 +1,17 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Image, Dimensions, StyleSheet, View, PanResponder } from "react-native";
+import React, { useState, useRef } from 'react';
+import { Image} from "react-native";
 
 import Animated, { useSharedValue, useAnimatedStyle, runOnJS} from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
 
-
+//penny element from transferring pennies test
 export default function Penny({index, setElements, round, setCoinData, targetZonePos , coinSize}) {
     const startCoords = useRef({ x: 0, y: 0 });//start coords that will be send to the backend
     const startTime = useRef(0); //start time that will be send to the backend
 
-	const [gotToBox, setGotToBox] = useState(false);
+	const [gotToBox, setGotToBox] = useState(false); //to check if coin is in the box
+
 	//for hand change points detection
     const lastSpeed = useRef(0); 
     const angleHistory=useRef([]);
@@ -33,10 +34,7 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 		if (coin) {
 			coin.timeEnd = time;
 			coin.time = time - coin.timeStart;
-		} else {
-			console.warn("No active dropped coin found to mark as lifted.");
 		}
-		// console.log('dropped coins', droppedCoinPoints.current);
 	};
 
 	//change coin status left/fight
@@ -71,9 +69,10 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 			);
 	
 			if (existingIndex === -1) {
+				//if it is first record for this coin in this round
 				return [...prevCoinData, coinData];
 			}
-	
+			//if there was already a record of this coin, there is no need to update the starting time and coordinates
 			const updatedCoin = {
 				...prevCoinData[existingIndex],
 				end_coordinates: coinData.end_coordinates,
@@ -92,6 +91,7 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 	
     //identify possible hand change points based on speed and ange changes
     const getChangeHand = (event) => {
+		//get current speed and angle
 		const speed = Math.sqrt(event.velocityX ** 2 + event.velocityY ** 2); 
 		const directionRadians = Math.atan2(event.translationY, event.translationX);
 		const directionDegrees = directionRadians * (180 / Math.PI);
@@ -101,7 +101,7 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 		if (angleHistory.current.length > 13) {
 			angleHistory.current.shift();
 		}
-	
+		//calculate average angle change
 		const avgAngleChange = Math.abs(
 			angleHistory.current[angleHistory.current.length - 1] - 
 			angleHistory.current[0]
@@ -109,7 +109,6 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 	
 		//check if speed and angle chenge are significant
 		if (lastSpeed.current < 500 && speed > 500 && avgAngleChange > 0.05) {
-			// console.log(`	Можлива зміна руки! Speed ${speed}, coords ${event.absoluteX}, ${event.absoluteY}`);
 			//add hand change point
 			handChangePoints.current.push({
 				x: event.absoluteX,
@@ -124,8 +123,7 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 	//function for drop zone identification
     const getDropZone = (coinLayout) => {
 		const {x , y} = coinLayout;
-
-		// console.log('coin layout ', x, y ,'and target zone',targetZonePos.x, targetZonePos.y, '+width',  )
+		//check if coords are in the target zone
 		return (
 			x >= targetZonePos.x &&
 			x <= targetZonePos.x + targetZonePos.width &&
@@ -135,22 +133,18 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 
       };
 
-
-
-
 	//function to handle end of the coin movement
 	const handleDrop = async (e) => {
 		const pos = {x:e.absoluteX, y:e.absoluteY}
 		//check if coin is in drop zone
 		const dropZone = getDropZone(pos); 
 		if (dropZone) {
-			
+			//change coin state 
 			round === 1 ? moveCoin(index, 'right') : moveCoin(index, 'left');
 			setGotToBox(true);
 
 		} else {
-			// console.log('diff between event', e.absoluteX, e.absoluteY)
-			//fi coin not in drop zone - register error
+			//if coin is not in the drop zone - register error
 			registerDroppedCoin(e.absoluteX, e.absoluteY, Date.now());
 			droppedCoin.current = true;
 		}
@@ -165,23 +159,17 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 			],
 		};
 		});
-	
+	//gesture to handle the movement
 	const panGesture = Gesture.Pan()
 		.onBegin((e) => {
 			startTime.current = Date.now(); //start time for coin movement
-			console.log('start time is ', startTime.current);
 
 			if(droppedCoin.current){
-				console.log("#########Помилка!", droppedCoin.current);
-				//coin is picked
-				// registerDroppedCoin(position.x._value, position.y._value, Date.now());
-				// registerDroppedCoin(e.absoluteX, e.absoluteY, Date.now());
+				//coin is picked after error
 				registerLiftedCoin(e.absoluteX, e.absoluteY, Date.now());
 
-				// console.log(`error points detail ${position.x._value}`);
 			}else{
 				startCoords.current = {x: e.absoluteX, y: e.absoluteY}
-				// console.log('set start', startCoords.current)
 			}
 			droppedCoin.current = false;
  
@@ -191,26 +179,24 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 				x: event.translationX + start.value.x,
 				y: event.translationY + start.value.y,
 			};
-			getChangeHand(event);
-			// runOnJS(getChangeHand)(event)
+			getChangeHand(event); //detect hand changes during movement
 
 		})
 		.onEnd((e) => {
 			
-			// setActiveCoin(null);
-			const endCoords = { x: e.absoluteX, y: e.absoluteY };
-            // collectCoinData(index, startCoords.current, endCoords);
+			const endCoords = { x: e.absoluteX, y: e.absoluteY };//save end coords
 
 			start.value = {
 				x: offset.value.x,
 				y: offset.value.y,
 			};
-			handleDrop(e);
-            collectCoinData(index, startCoords.current, endCoords);
+			handleDrop(e); //check if it is a error drop or coin is in the taget zone
+            collectCoinData(index, startCoords.current, endCoords); //save data about this movement
 
 
 		})
 		.runOnJS(true);
+
 		const gesture = Gesture.Simultaneous(panGesture);
           		
               
@@ -220,14 +206,11 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 
 		<GestureDetector gesture={gesture}>
 		<Animated.View
-			// ref={localRef}
 			style={[
 				{
 					width: coinSize,
 					height: coinSize,
-					// position: 'absolute', // <- ДОДАЙ ЦЕ
 					marginBottom: 10,
-
 					zIndex: 3,
 				},
 				animatedStyle,
@@ -250,14 +233,3 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
     );
 }
 
-// const styles = StyleSheet.create({
-//     coinContainer: {
-//         // position: "absolute",
-//     },
-
-//     // coinImage: {
-//     //     width: coinSize,
-//     //     height: coinSize,
-//     //     resizeMode: "contain",
-//     // },
-// });

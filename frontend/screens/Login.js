@@ -1,21 +1,22 @@
-import { StatusBar } from 'expo-status-bar';
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, TextInput, Pressable, StyleSheet, Text } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Home from "./Home";
 import CustomButton from '../shared/CustomButton.js';
+import { AuthContext } from '../shared/AuthContext';
 
-export default function Login({ setIsAuthenticated }) {
-	const navigation = useNavigation(); // Ініціалізація навігації
+export default function Login() {
+	const { setIsAuthenticated } = useContext(AuthContext);
 
-	const [username, setUsername] = useState('');
+	const [username, setUsername] = useState(''); //input data
 	const [password, setPassword] = useState('');
 	const [handOrientation, setHandOrientation] = useState('right');
-	const [isRegister , setIsRegister] = useState(false)
 	const [age, setAge] = useState('');
-	const hands = [
+
+
+	const [isRegister , setIsRegister] = useState(false); //register or login state
+
+	const hands = [ //for check box
         { label: 'Right Hand', value: 'right' },
         { label: 'Left Hand', value: 'left' }
     ];
@@ -29,32 +30,29 @@ export default function Login({ setIsAuthenticated }) {
 				body: JSON.stringify({ username, password })
 			});
 			const data = await response.json();
-			console.log("Received:", data);
+
 			if (response.ok) {
-				await AsyncStorage.setItem('authToken', data.token);  // зберігаємо токен
+				await AsyncStorage.setItem('authToken', data.token);  //save the token
 				Toast.show({
 					type: 'success',
 					text1: 'Logged in',
 					text2: 'You have been logged in successfully.',
 				});
-				// console.log('Token:', data.token);
 				setIsAuthenticated(true);
-				// navigation.navigate('Home');
 			} 
 		} catch (error) {
-			setIsRegister(true);
+			setIsRegister(true);//if login returns error, user has to register
 
 			Toast.show({
 				type: 'error',
 				text1: 'Log in error',
 				text2:'Something went wrong',
 			});
-			// console.error(error);
 		}
 	};
 
 	const handleRegister = async () => {
-		setIsRegister(true)
+		setIsRegister(true); 
 
 		if (!username || !password || !age) {
 			Toast.show({
@@ -62,9 +60,9 @@ export default function Login({ setIsAuthenticated }) {
 				text1: 'Empty fields',
 				text2: 'Please fill in all fields: username, password, and age.',
 			});
-			return; // Якщо одне з полів порожнє, не відправляємо запит
+			return; // if any of the fields is empty
 		}
-		if (isNaN(age) || Number(age) <= 0) {
+		if (isNaN(age) || Number(age) <= 0) { //incorrect age format
 			Toast.show({
 				type: 'error',
 				text1: 'Invalid age',
@@ -81,16 +79,14 @@ export default function Login({ setIsAuthenticated }) {
 			});
 			const data = await response.json();
 			if (response.ok) {
-				await AsyncStorage.setItem('authToken', data.token);  // зберігаємо токен
+				await AsyncStorage.setItem('authToken', data.token);  //save the token
 
 				Toast.show({
 					type: 'success',
 					text1: 'Register',
 					text2: 'You have been registered successfully.',
 				});
-				console.log('Token:', data.token);
 				setIsAuthenticated(true);
-				// navigation.navigate('Home');
 			} 
 		} catch (error) {
 			Toast.show({
@@ -103,20 +99,18 @@ export default function Login({ setIsAuthenticated }) {
 
 	return (
 		<View style={styles.container}>
-
-			
 			<TextInput
-			placeholder="Username"
-			value={username}
-			onChangeText={setUsername}
-			style={styles.input}
+				placeholder="Username"
+				value={username}
+				onChangeText={setUsername}
+				style={styles.input}
 			/>
 			<TextInput
-			placeholder="Password"
-			value={password}
-			secureTextEntry
-			onChangeText={setPassword}
-			style={styles.input}
+				placeholder="Password"
+				value={password}
+				secureTextEntry
+				onChangeText={setPassword}
+				style={styles.input}
 			/>
 
 			{isRegister && (
@@ -129,8 +123,8 @@ export default function Login({ setIsAuthenticated }) {
 						style={styles.input}
 					/>
 
-			
-			<View style={styles.handOrientation}>
+					{/* hand orientation checkbox */}
+					<View style={styles.handOrientation}>
 					{hands.map((hand) => (
 						<Pressable
 							key={hand.value}
@@ -149,7 +143,6 @@ export default function Login({ setIsAuthenticated }) {
 			)}
 			
 			<View style={styles.buttonContainer}>
-				{/* <Button title="Register" onPress={handleRegister} color='blue' /> */}
 				<CustomButton
 					title="Register"
 					onPress={handleRegister}
@@ -161,7 +154,6 @@ export default function Login({ setIsAuthenticated }) {
 					onPress={handleLogin}
 					buttonStyle={{ backgroundColor: isRegister ? '#ccc' : '#4CAF50' ,  width: '80%'}} 	
 				/>
-				{/* <Button title="Login" onPress={handleLogin} color='blue' /> */}
 			</View>
 
 		</View>
@@ -175,9 +167,7 @@ export default function Login({ setIsAuthenticated }) {
 			justifyContent: 'center',
 			alignItems: 'center',
 			padding: '10%',
-			// backgroundColor: '#FFFFFF',
-			// backgroundColor: '#C4E3D7'
-		backgroundColor: '#ccc'
+			backgroundColor: '#ccc'
 
 
 		},
@@ -191,11 +181,9 @@ export default function Login({ setIsAuthenticated }) {
 			backgroundColor: '#fff',
 		},
 		buttonContainer: {
-			// width: '100%',
 			flexDirection: 'row',
-			justifyContent: 'center', // або 'center'
+			justifyContent: 'center', 
 			alignItems: 'center',
-			// gap: 10,
 		},
 
 		handOrientation: {
@@ -215,7 +203,6 @@ export default function Login({ setIsAuthenticated }) {
 			flexDirection: 'row',
 			alignItems: 'center',
 			
-			// marginBottom: 10,
 		},
 		checkbox: {
 			width: 20,

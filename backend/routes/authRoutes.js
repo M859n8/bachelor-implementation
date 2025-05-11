@@ -7,13 +7,13 @@ const router = express.Router();
 
 router.post('/register', authController.register);
 router.post('/login', authController.login);
-// router.post('/verify', authController.verify);
+//check authentication endpoint
 router.post('/check', authMiddleware, (req, res) => {
     res.json({ message: "User authenticated", user: req.user });
   });
-  router.post('/user-info',authMiddleware, userInfoController.getUserInfo);
+//user info endpoint
+router.post('/user-info',authMiddleware, userInfoController.getUserInfo);
 
 
-// module.exports = router;
 
 export default router; 

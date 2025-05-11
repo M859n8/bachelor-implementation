@@ -1,19 +1,16 @@
 import React from 'react';
 import { StyleSheet, View, Image, TouchableOpacity, Text } from 'react-native';
 
+// Component for rendering multiple-choice tasks
 const ChoiceTask = ({ task, onSelect }) => {
-	console.log('choice task', task)
 	return (
 		<View style={{ gap: 10 }}>
 			<View style={{ alignItems: 'center' }}>
-				{/* <Image 
-					source={task.image} 
-					style={{ width: 200, height: 200, resizeMode: 'contain' }} 
-				/> */}
+			
 				<Text style={styles.title}>Find flipped image</Text>
 			</View>
 			<View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}>
-				{task.choices.map((choice, index) => (
+				{task.choices.map((choice, index) => ( //single variants
 					<TouchableOpacity key={index} onPress={() => onSelect(index)}>
 						<Image 
 							source={choice.image}
@@ -27,11 +24,11 @@ const ChoiceTask = ({ task, onSelect }) => {
 };
 const styles = StyleSheet.create({
 	title: {
-	  fontSize: 44,
-	  fontWeight: 'bold',
-	  textAlign: 'center',
-	  color: '#333',
-	  marginBottom: 10,
+		fontSize: 44,
+		fontWeight: 'bold',
+		textAlign: 'center',
+		color: '#333',
+		marginBottom: 10,
 	},
   });
   

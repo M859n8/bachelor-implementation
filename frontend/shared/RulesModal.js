@@ -1,11 +1,10 @@
 import React from 'react';
-import { Modal, View, Text, Button, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import {View, Text, StyleSheet } from 'react-native';
 import CustomButton from '../shared/CustomButton.js';
 
+//modal that is shown at the begining of each test
 export default function RulesModal({ visible, rules, onClose }) {
-    const navigation = useNavigation();
-
+   //used view instead of classic modal
     return (
 		<>
         {visible && (
@@ -22,44 +21,18 @@ export default function RulesModal({ visible, rules, onClose }) {
 }
 
 const styles = StyleSheet.create({
-    // overlay: {
-    //     position: 'absolute',
-	// 	top: 0,
-	// 	left: 0,
-	// 	right: 0,
-	// 	bottom: 0,
-	// 	backgroundColor: 'rgba(0,0,0,0.5)', // затемнення фону
-	// 	justifyContent: 'center',
-	// 	alignItems: 'center',
-	// 	zIndex: 1000,
-    // },
-    // modalContainer: {
-    //     width: '80%',
-    //     padding: 20,
-    //     backgroundColor: 'white',
-    //     borderRadius: 10,
-    //     alignItems: 'center',
-    // },
-    // title: {
-    //     fontSize: 18,
-    //     fontWeight: 'bold',
-    //     marginBottom: 10,
-    // },
-    // score: {
-    //     fontSize: 24,
-    //     marginBottom: 20,
-    // },
+   
 	overlay: {
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.6)', // більше затемнення
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 1000,
-        paddingHorizontal: 20, // для малих екранів
+        paddingHorizontal: 20, 
     },
     modalContainer: {
         width: '100%',

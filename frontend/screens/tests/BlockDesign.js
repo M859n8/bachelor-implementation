@@ -1,33 +1,31 @@
 import React from 'react';
-import { StyleSheet, Text, View, Dimensions, Button, Modal, TouchableOpacity, Image, Alert, useWindowDimensions } from 'react-native';
+import { StyleSheet, View, Dimensions, TouchableOpacity, Image} from 'react-native';
 import { useState, useRef, useEffect } from 'react';
-import {useSharedValue, useAnimatedRef} from 'react-native-reanimated';
-import { Gesture, GestureHandlerRootView, GestureDetector } from 'react-native-gesture-handler';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useIsFocused } from '@react-navigation/native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import {useSharedValue} from 'react-native-reanimated';
+import { useNavigation} from '@react-navigation/native';
 import CustomButton from '../../shared/CustomButton.js';
 
-import * as ScreenOrientation from 'expo-screen-orientation';
+import { useContext } from 'react';
+import { AuthContext } from '../../shared/AuthContext.js';
 
 import RulesModal from '../../shared/RulesModal.js';
 import Block from '../../shared/Block.js';
 import Grid from '../../shared/Grid.js';
 import Timer from '../../shared/Timer.js';
+import {sendRequest} from '../../shared/sendRequest.js';
 
 export default function BlockDesign() {
-	// const [width, setWidth ] = useState(0);
-	// const [height, setHeight] = useState(0);
+	const navigation = useNavigation(); //using for navigation to the result page
+	const { setIsAuthenticated } = useContext(AuthContext); //using for updating auth flag based on server response
+
 	const { width, height } = Dimensions.get('window');
 
-	
-	const [rulesModal, setRulesModal] = useState(true);
+	const [rulesModal, setRulesModal] = useState(true); //rules modal at the start 
 	const [timerIsRunning, setTimerIsRunning] = useState(false); //state for timer
 	
 	const [blocks, setBlocks] = useState([]); //blocks array
 	const gridLayout = useSharedValue({ x: 0, y: 0 }); //grid position
-	const blockRefs= useRef([]); // array for blocks refs
-	const gridRef = useRef(null); //grid fer
+	const gridRef = useRef(null); //grid ref for position measuring
 
 	const templates = { //templates array
 		0: require('../../assets/blockDesign/block1.png'),
@@ -44,7 +42,6 @@ export default function BlockDesign() {
 	const [allRoundsData, setAllRoundsData] = useState([]); //data for all rounds, this array will be send to backend
 	const [roundStartTime, setRoundStartTime] = useState(null); //to save each round start time
 
-	const navigation = useNavigation(); //for navigation home
 
 	const [backgroundZoomed, setBackgroundZoomed] = useState(false); //state for zooming template picture
 	const handleImagePress = () => {
@@ -56,7 +53,6 @@ export default function BlockDesign() {
 		
 		if (!rulesModal) { //measure grid position after closing rules modal
 			  gridRef.current?.measure((x, y, width, height, pageX, pageY) => {
-				// console.log('Grid coords after navigation:', { pageX, pageY });
 				gridLayout.value = { x: pageX, y: pageY }; 
 			  });
 		  }
@@ -64,31 +60,28 @@ export default function BlockDesign() {
 
 
 	useEffect(() => { //for each round calculate grid, cell and block size
-		// if(width>0 && height>0){
 		
-			// console.log('blocks', width, height);
-			const minDimension = Math.min(width, height);
+		const minDimension = Math.min(width, height);
 
-			const dimention = currentRound === 0 ? 3 : 4; //3 cells only on zero round
-			setGridDimention(dimention)
-			const currentCellSize = minDimension * 0.45 / dimention;
-			setCellSize(currentCellSize);
-			setBlockSize(currentCellSize);
-		
-			//initialise blocks
-			const totalBlocks = dimention * dimention;
-			const newBlocks = Array.from({ length: totalBlocks }, (_, i) => ({
-				id: i,
-				position: { row: 0, col: 0},
-				color: "white",
-				rotation: 0,
-				changesCount: 0,
-			}));
-
-			setBlocks(newBlocks);
-		// }
+		const dimention = currentRound === 0 ? 3 : 4; //3 cells only on zero round
+		setGridDimention(dimention)
+		const currentCellSize = minDimension * 0.45 / dimention;
+		setCellSize(currentCellSize);
+		setBlockSize(currentCellSize);
 	
-	}, [currentRound]); //[width, height]
+		//initialise blocks
+		const totalBlocks = dimention * dimention;
+		const newBlocks = Array.from({ length: totalBlocks }, (_, i) => ({
+			id: i,
+			position: { row: 0, col: 0},
+			color: "white",
+			rotation: 0,
+			changesCount: 0,
+		}));
+
+		setBlocks(newBlocks);
+	
+	}, [currentRound]); 
 
 	
 	const goToNextRound = () => {
@@ -110,7 +103,8 @@ export default function BlockDesign() {
 			setCurrentRound((prev) => prev + 1);
 			setRoundStartTime(Date.now()); 
 		} else {
-			//otherwise set final data for all rounds (i do not use useState because it does not have time to update)
+			//final data send directly because useState does not have time to 
+			//save data about last round due to asynchrony
 			const finalData = [...allRoundsData, currentRoundData];
 			sendDataToBackend(finalData); 
 		}
@@ -138,44 +132,28 @@ export default function BlockDesign() {
 	};
 
     const sendDataToBackend = async (data) => {
-		//stoop the timer
+		//stop the timer
 		setTimerIsRunning(false);
-		// console.log(JSON.stringify(allRoundsData, null, 2));
+		const requestBody={ roundBlocks : data};
 
-        const token = await AsyncStorage.getItem('authToken'); //get authorization token
-		try {
-            const response = await fetch('http://192.168.0.12:5000/api/result/block/saveResponse', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({roundBlocks: data}),  //transform object into json string
-            })
-			const result = await response.json();
-            if (response.ok) {
-				//go to result page
-				navigation.navigate('Results', { result });
-            }
-        } catch (error) {
-        	Alert.alert('Failure', 'Can not send answers');
-        }		
+		//send data to the backend
+		await sendRequest({
+			url: 'http://192.168.0.12:5000/api/result/block/saveResponse',
+			body: requestBody,
+			setIsAuthenticated,
+			navigation,
+			onSuccess: result => navigation.navigate('Results', { result })
+		});
+
+  	
 	}
 
 
   return (
-    <View 
-		style={styles.container} 
-		// onLayout={(event) => {
-		// 	const { width, height } = event.nativeEvent.layout;
-		// 	console.log('Measured from layout:', width, height);
-		// 	setWidth(width);
-		// 	setHeight(height);
-		// }}
-	>
+    <View style={styles.container} >
 		<RulesModal 
 			visible={rulesModal} 
-			rules='Complete a template using blocks.' 
+			rules='The game has three rounds. You have to complete a template from blocks as quickly as possible and with the fewest moves. The blocks change color with a single tap (there are three colors:  white, mixed and red) and the angle of rotation with a double tap.' 
 			onClose={() => {
 				setRulesModal(false);
 				setRoundStartTime(Date.now());
@@ -191,7 +169,7 @@ export default function BlockDesign() {
 			onPress={handleImagePress}
 		>
 			<Image 
-			source={templates[currentRound]} // Ваша URL картинки
+			source={templates[currentRound]} 
 			style={[styles.image, backgroundZoomed ? styles.zoomedImage : {}]} 
 			resizeMode="contain"
 			/>
@@ -216,7 +194,8 @@ export default function BlockDesign() {
 			}}>
 			{blocks.map((block, index) => (
 				<Block  
-					key={block.id + '_' + currentRound}  //враховуємо також раунд, щоб реакт повністю перемалював весь блок 
+					//create key from block id and round id, so that react completely redraws the entire block
+					key={block.id + '_' + currentRound}  
 					blockId={block.id} 
 					gridPosition={gridLayout} 
 					setBlocks={setBlocks}
@@ -239,24 +218,22 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
-		backgroundColor: '#F5F5F5', // Колір фону
+		backgroundColor: '#F5F5F5', 
 
 	},
 	
 	imageContainer: {
-		// padding: 5,
 		backgroundColor: 'white',
 		zIndex: 10, 
-	  },
-	  image: {
+	},
+	image: {
 		width: 100,
 		height: 100,
-		// borderRadius: 5,
 		borderRadius: 5,
 		borderColor: '#fff',
 		borderWidth: 2,
-	  },
-	  zoomedImage: {
+	},
+	zoomedImage: {
 		width: 500, 
 		height: 500,
 		
@@ -264,16 +241,6 @@ const styles = StyleSheet.create({
 		borderColor: '#fff',
 		borderWidth: 2,
 		zIndex: 1,
-	  },
-	  dot: {
-		width: 10,
-		height: 10,
-		borderRadius: 5,
-		backgroundColor: 'red',
-		position: 'absolute',
-		left: 331,
-		top: 362,
-		zIndex: 10
+	},
 
-	  }
 });

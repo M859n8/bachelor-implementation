@@ -1,36 +1,26 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Modal, Button, Image, TouchableOpacity, Alert, Dimensions  } from 'react-native';
-import { useState, useEffect, useRef } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-// import Orientation from 'react-native-orientation-locker';
+import { StyleSheet, View, Image, TouchableOpacity, Alert, Dimensions  } from 'react-native';
+import React, { useState, useRef } from 'react';
 import CustomButton from '../../shared/CustomButton.js';
-
 import generateObjects from '../../shared/GenerateBells.js';
-// import generateObjects from '../../shared/GenerateBells.js';
 import RulesModal from '../../shared/RulesModal.js';
 import Timer from '../../shared/Timer.js';
 import { useNavigation } from '@react-navigation/native';
+import { useContext } from 'react';
+import { AuthContext } from '../../shared/AuthContext.js';
 
+import {sendRequest} from '../../shared/sendRequest.js';
 
-export default function BellsCancellation({route}) {
-	const navigation = useNavigation(); 
-
+export default function BellsCancellation() {
+	const navigation = useNavigation(); //using for navigation to the result page
+	const { setIsAuthenticated } = useContext(AuthContext); //using for updating auth flag based on server response
 	const [rulesModal, setRulesModal] = useState(true);
-	// const [resultsModal, setResultsModal] = useState(false);
-	// const [results, setResults] = useState({ finalScore: 100 });
 
 	const [timerIsRunning, setTimerIsRunning] = useState(false); 
 
 
     const [objects, setObjects] = useState(()=> generateObjects()); //array with objects 
-    const [isLoading, setIsLoading] = useState(false); 
-    // const [additionalData, setAdditionalData] = useState({
-    //     startTime: null,
-    //     endTime: null,
-    //     screenWidth: 0,
-    //     screenHeight: 0,
-    // });
-    const startTime = useRef(0); 
+    const [isLoading, setIsLoading] = useState(false); //loading state for end test button
+    const startTime = useRef(0); //save the start time
 
     const imageMap = {
         0: require("../../assets/bells/processed_0.png"),
@@ -46,128 +36,65 @@ export default function BellsCancellation({route}) {
         10: require("../../assets/bells/processed_10.png"),
         11: require("../../assets/bells/processed_11.png"),
         12: require("../../assets/bells/processed_12.png"),
-        // 13: require("../../assets/bells/processed_13.png"),
         13: require("../../assets/bells/processed_14.png"),
 
     };
     
-    // const objects = useTestObjects();
-    // // setObjects(useTestObjects());
-
-
-    // console.log(objects);
-
-     // Стан для відслідковування натиснутого елементу
-     const [clickedObjects, setClickedObjects] = useState([]);
-
-    //  useEffect(() => {
-    //     // Заблокуємо орієнтацію екрану в портретному режимі на час тесту
-    //     Orientation.lockToPortrait();  // Якщо хочемо заблокувати в портретному режимі
-        
-
-    //     // Очищаємо при розмонтуванні компонента
-    //     return () => {
-    //         Orientation.unlockAllOrientations();  // Відкриває доступ до зміни орієнтації після завершення тесту
-    //     };
-    // }, []);
-
-
-
-
+	//function that handles click on object
     const handleImageClick = (clickedImg) => {
-		console.log('entered');
-      
+		//check if obj have not been touched before and upd touch flag
         setObjects((prevObjects) =>
 			prevObjects.map((img) => {
 				if (img.id === clickedImg.id && img.touched === false) {
-					console.log(`got coords ${clickedImg.x}, ${clickedImg.y}, id ${img.id}, type ${img.type}`);
 					return { ...img, touched: true, time: Date.now() };
 				}
 				return img;
 			})
 		);
-            // console.log(`time a : ${Date.now()}`);
             
-        // console.log(objects);
     };
-    
-    // useEffect(()=>{
-    //     console.log(clickedObjects);
 
-    // }, [clickedObjects]);
-
- 
-
+	//send data to the backend
     const endGame = async () => {
-        // setGameOver(true);
         setIsLoading(true);
 		setTimerIsRunning(false);
+		//fill bell object array and array with error clicked objects
         const bellsObjects = objects.filter(obj => obj.type === 0);
-		// console.log('bells', bellsObjects);
         const otherObjects = objects.filter(obj => obj.type !== 0 && obj.touched === true);
-		// console.log('other', otherObjects)
-
-
-
+		//set additional data about general game process
         const additionalData = {
             startTime: startTime.current,
-            endTime: Date.now(),  // Оновлюємо тільки endTime
+            endTime: Date.now(),  //set the end time now
             fieldWidth: Dimensions.get('window').width * 0.9,
             fieldHeight:  Dimensions.get('window').height * 0.75,
 			allObjectsCount: objects.length,
         };
 
-
+		//form a request body
         const requestBody ={
             bellsObjects : bellsObjects,
             additionalData : additionalData,
 			otherObjects : otherObjects,
         }
 
-        const token = await AsyncStorage.getItem('authToken');
-        // console.log("Coin data being sent: ", coinData);
-        console.log('bells objects', requestBody.bellsObjects)
-        console.log('other objects', requestBody.otherObjects)
+		//send request using separate component from ../shared/ directory
+		await sendRequest({
+			url: 'http://192.168.0.12:5000/api/result/bells/saveResponse',
+			body: requestBody,
+			setIsAuthenticated,
+			navigation,
+			onSuccess: result => navigation.navigate('Results', { result })
+		});
 
-
-        //  треба буде десь якось дані про час мвж вибором монеток протягом раунду брати. можна це навіть на бекенді робити
-        try {
-            console.log("phase 1");
-            const response = await fetch('http://192.168.0.12:5000/api/result/bells/saveResponse', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-
-                },
-                body: JSON.stringify(requestBody),  //перетворює масив або об'єкт на JSON-рядок
-            })
-			const result = await response.json();
-
-            if (response.ok) {
-                navigation.navigate('Results', { result });
-            }
-        } catch (error) {
-        Alert.alert('Failure', 'Can not send answers');
-
-        }
+       
     };
 
     return (
         <View style={styles.container}>
-            {/* <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-            >
-                <View style={styles.modalContainer}>
-                    <Text style={styles.modalText}>Among the objects in the picture, click on all the bells as quickly as possible. When you find all the bells, end the game.</Text>
-                    <Button title="Start" onPress={handleModalClose} />
-                </View>
-            </Modal> */}
+    
 			<RulesModal 
 				visible={rulesModal} 
-				rules='Among the objects in the picture, click on all the bells as quickly as possible. When you find all the bells, end the game.' 
+				rules='The page shows a space with various objects. Find all the elements in the shape of a bell. When you are sure that all bells are selected, click on the `End test` button.' 
 				onClose={() => {
 					setRulesModal(false);
 					startTime.current = Date.now();
@@ -176,41 +103,30 @@ export default function BellsCancellation({route}) {
 				}} 
 			/>
 
-			{/* <ResultsModal 
-				visible={resultsModal} 
-				results={results} 
-				onClose={() => setResultsModal(false)} 
-			/> */}
+			
 		<Timer isRunning={timerIsRunning} startTime={startTime.current} />
             
 		<View  style={styles.gameArea}>
 
 			{objects.map((img) => (
 				<TouchableOpacity
-				key={img.id}
-				onPress={() => handleImageClick(img)} // Обробка натискання
-				style={[styles.bellImg, { left: img.x, top: img.y }]}
+					key={img.id}
+					onPress={() => handleImageClick(img)} 
+					style={[styles.bellImg, { left: img.x, top: img.y }]}
 				>
 
-					{/* <View key={img.id} style={[styles.bellImg, { left: img.x, top: img.y }]}> */}
-						<Image 
-							source={imageMap[img.type] || require("../../assets/bells/processed_0.png")} 
-							style={[styles.image, (img.touched && img.type === 0) ? { opacity: 0.1 } : {}]}
+					<Image 
+						source={imageMap[img.type] || require("../../assets/bells/processed_0.png")} 
+						style={[styles.image, (img.touched && img.type === 0) ? { opacity: 0.1 } : {}]}
 
-							// Закреслюємо зображення} 
-						/>
-					{/* </View> */}
+					/>
 				</TouchableOpacity>
 			))}
 		</View>
 		<CustomButton onPress={endGame} 
-				title={isLoading ? 'Loading ...' : 'End Game'}
-				disabled={isLoading}
+			title={isLoading ? 'Loading ...' : 'End Game'}
+			disabled={isLoading}
 		/>
-
-	
-            
-
         </View>
     );
 }
@@ -240,9 +156,10 @@ const styles = StyleSheet.create({
     }, 
 
     gameArea: {
-        width: "95%", // Обмежуємо розмір ігрового поля
+		// size of the game field (important for result calculation)
+        width: "95%", 
         height: "80%",
-        backgroundColor: "white", // Фон для поля
+        backgroundColor: "white", 
         borderWidth: 2,
         borderColor: "black",
         position: "relative",
@@ -250,11 +167,11 @@ const styles = StyleSheet.create({
 
     bellImg: {
 
-        position: "absolute", // Фіксує положення на екрані
+        position: "absolute", 
     },
     image: {
-        width: 40,  // Розмір зображення (можна змінити)
+        width: 40,  //size of the imj (important for pos calculation)
         height: 40,
-        resizeMode: "contain", // Адаптація зображення
+        resizeMode: "contain", 
     },
 });

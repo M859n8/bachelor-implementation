@@ -1,10 +1,8 @@
 import express from 'express';
-import cors from 'cors';// const connection = require('./db-config');
+import cors from 'cors';
 
 
-
-
-const app = express(); // фреймворк для створення веб-сервера.
+const app = express(); 
 
 const port = process.env.PORT || 5000;
 
@@ -13,25 +11,20 @@ import testRoutes from './routes/testRoutes.js';
 
 
 app.use(cors());
-// app.use(cors({
-//     origin: 'http://192.168.0.12:8081', // Дозволяємо тільки запити від React Native Metro Bundler
-//     methods: 'GET,POST,PUT,DELETE', //дозволені методи 
-//     allowedHeaders: 'Content-Type,Authorization' //дозволені заголовки
-//   }));
-// app.use(express.json()); 
-app.use(express.json({ limit: '1mb' })); //щоб надсилалося більше 42 фіч в комплекс фігюр
+// Increase request body size limit (for comlex figure test)
+app.use(express.json({ limit: '1mb' })); 
 
 app.get('/', (req, res) => {
     res.send('Server is running!');
   });
-  
-app.use('/api/auth', authRoutes);  //маршрути для аутентифікації 
-app.use('/api/result', testRoutes); //маршрути для обробки тестів
 
-
+// Authentication routes: Handle user authentication processes  
+app.use('/api/auth', authRoutes);  
+// Test routes: Manage test-related requests
+app.use('/api/result', testRoutes); 
 
 
 // Starting server
 app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`); //при старті виводить це у консоль
+    console.log(`Server is running on http://localhost:${port}`); 
 });

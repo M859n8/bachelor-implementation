@@ -1,4 +1,3 @@
-import { createCanvas, loadImage } from 'canvas';
 import sharp from 'sharp';
 import { PNG } from 'pngjs';
 import fs from 'fs';

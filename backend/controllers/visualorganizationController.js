@@ -63,7 +63,7 @@ const visualorganizationController ={
 				const maxSimilarity = Math.max(...similarities);
 				totalSimilarity += maxSimilarity;
 				textCount++;
-			} else if (answer.type === 'multichoice') {
+			} else if (answer.type === 'multiple-choice') {
 			//if it is spatial relation task
 
 				if (answer.isCorrect) {
