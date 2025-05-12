@@ -1,3 +1,10 @@
+/**
+ * Author: Maryna Kucher
+ * Description: frontend entry point; sets up navigation, context providers, 
+ * and wraps the app structure.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Motor Functions
+ */
+
 import React from 'react';
 import { SafeAreaView } from 'react-native';
 import { NavigationContainer } from "@react-navigation/native"

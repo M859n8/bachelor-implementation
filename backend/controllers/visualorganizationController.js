@@ -63,7 +63,7 @@ const visualorganizationController ={
 				const maxSimilarity = Math.max(...similarities);
 				totalSimilarity += maxSimilarity;
 				textCount++;
-			} else if (answer.type === 'multiple-choice') {
+			} else if (answer.type === 'multichoice') {
 			//if it is spatial relation task
 
 				if (answer.isCorrect) {
@@ -75,6 +75,7 @@ const visualorganizationController ={
 		//calculate two types of results
 		const textScore = textCount > 0 ? (totalSimilarity / textCount) * 100 : 0;
 		const choiceScore = choiceCount > 0 ? (correctChoiceCount / choiceCount) * 100 : 0;
+
 		// get overall result
 		const finalScore = (textScore + choiceScore)/2;
 

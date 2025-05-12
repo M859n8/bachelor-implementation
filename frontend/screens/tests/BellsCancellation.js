@@ -1,4 +1,4 @@
-import { StyleSheet, View, Image, TouchableOpacity, Alert, Dimensions  } from 'react-native';
+import { StyleSheet, View, Image, TouchableOpacity, Dimensions  } from 'react-native';
 import React, { useState, useRef } from 'react';
 import CustomButton from '../../shared/CustomButton.js';
 import generateObjects from '../../shared/GenerateBells.js';

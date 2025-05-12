@@ -1,3 +1,8 @@
+/**
+ * Author: Maryna Kucher
+ * Description: registers root component.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Motor Functions
+ */
 import { registerRootComponent } from 'expo';
 
 import App from './App';

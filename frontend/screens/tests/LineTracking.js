@@ -103,7 +103,7 @@ export default function LineTracking() {
 			const r = (t / (2 * Math.PI * turns)) * maxRadius; 
 			//get coords of the point
 			const x = centerX + r * Math.cos(t);
-			const y = centerY + 1.5*r * Math.sin(t) - 0.05 ;
+			const y = centerY + 1.5*r * Math.sin(t) - 0.05 ; //verticaly elongated
 			points.push({ x, y });
 		}
 	

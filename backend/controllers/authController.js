@@ -35,6 +35,7 @@ const authController = {
 			if (!user) {
 				return res.status(400).json({ message: 'Invalid credentials' });
 			}
+			//call main backend and get info 
 			//check password
 			const isMatch = bcrypt.compareSync(password, user.password);
 			if (!isMatch) {
