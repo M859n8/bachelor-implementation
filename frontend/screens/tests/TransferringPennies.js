@@ -1,3 +1,8 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Main file for the Transferring Pennies Test.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions
+ */
 import { StyleSheet, View, Dimensions} from 'react-native';
 import { useState, useEffect , useRef} from 'react';
 import Penny from '../../shared/Penny.js';
@@ -15,8 +20,8 @@ export default function TransferringPennies() {
 	const [rulesModal, setRulesModal] = useState(true); //round 1 modal
 	const [round2Modal, setRound2Modal] = useState(false); //round 2 modal
 
-	const navigation = useNavigation(); //using for navigation to the result page
-	const { setIsAuthenticated } = useContext(AuthContext); //using for updating auth flag based on server response
+	const navigation = useNavigation(); //used to navigate to the result page
+	const { setIsAuthenticated } = useContext(AuthContext); //used to update the auth flag based on server response
 
 	const [timerIsRunning, setTimerIsRunning] = useState(false); //for timer handling
 
@@ -26,7 +31,8 @@ export default function TransferringPennies() {
 	const { width, height } = Dimensions.get('window');
 	const minDimension = Math.min(width, height);
 
-	const coinSize = minDimension * 0.06; //each coin has to be 10% of the drop area and drop area is 60% of the screen 
+	//each coin has to be 10% of the drop area and the drop area is 60% of the screen 
+	const coinSize = minDimension * 0.06;
 
    // array based on which coins are rendered
 	const [elements, setElements] = useState([
@@ -53,15 +59,13 @@ export default function TransferringPennies() {
 
 	const [round, setRound] = useState(1); // current round. can be 1 or 2
 
-
-
 	const leftZoneRef = useRef(null); //ref on each zone, for coords measurement
 	const rightZoneRef = useRef(null);
 
 	const [leftZonePos, setLeftZonePos] = useState({ x: 0, y: 0 }); //saves zone position
 	const [rightZonePos, setRightZonePos] = useState({ x: 0, y: 0 });
 
-	//measure right and left zines position
+	//measure right and left zones position
 	const measureZones = () => {
 		if (leftZoneRef.current) {
 		leftZoneRef.current.measure((x, y, width, height, pageX, pageY) => {
@@ -75,7 +79,7 @@ export default function TransferringPennies() {
 		}
 	};
 
-	//measure the positions of the zones at each change of orientation
+	//measure the positions of the zones at each orientation change event
 	useEffect(() => {
 		const subscription = ScreenOrientation.addOrientationChangeListener((evt) => {
 			measureZones();
@@ -101,12 +105,12 @@ export default function TransferringPennies() {
 	
 	//check round completion after each coin update
 	useEffect(() => {
-		checkRoundCompletion(); //when element changes status, check round completion
+		checkRoundCompletion(); 
 	}, [elements]); 
 
 
     const checkRoundCompletion = () => {
-		//check if all elements in correct zone
+		//check if all elements are in correct zone
 		const allInZone = round === 1
 			? elements.every(el => el.status === 'right')
 			: elements.every(el => el.status === 'left');
@@ -127,7 +131,7 @@ export default function TransferringPennies() {
 	
 
 	const distance = (point1, point2) => {
-		// distance between two dots
+		//calculate distance between two dots
 		return Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2));
 	}
 	
@@ -141,10 +145,10 @@ export default function TransferringPennies() {
 
 			// get movement direction
 			const goingLeft = startX > endX;
-			//check if is is array
+			//check if it is array
 			const points = Array.isArray(coin.hand_change_points) ? coin.hand_change_points : [];
 
-			//delete extreme points. that are <1/8 and >7/8 of the general path
+			//delete extreme points that are <1/8 and >7/8 of the general path
 			const extremePointsDeleted = points.filter((point) => {
 				const relativeX = goingLeft
 					? point.x -endX // movement to the left
@@ -212,6 +216,7 @@ export default function TransferringPennies() {
 			coinData : normalizedData,
             additionalData : additionalData.current
 		}
+		//send the request using a separate component from ../shared/directory
 		await sendRequest({
 			url: 'http://192.168.0.12:5000/api/result/pennies/saveResponse',
 			body: requestBody,
@@ -251,7 +256,7 @@ export default function TransferringPennies() {
 			<Timer isRunning={timerIsRunning} startTime={additionalData.current.timeStartRound1}/>
 
             <View style={styles.gameArea}>
-				{/* Left zone  */}
+			{/* Left zone  */}
             <View style={[styles.dropArea, {}]} ref={leftZoneRef}>
                 
                 {round === 1 && !rulesModal && elements.map((el) => (

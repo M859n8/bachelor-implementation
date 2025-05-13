@@ -1,3 +1,8 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Authentication screen for user login and registration.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions
+ */
 import React, { useState, useContext } from 'react';
 import { View, TextInput, Pressable, StyleSheet, Text } from 'react-native';
 import Toast from 'react-native-toast-message';
@@ -24,6 +29,7 @@ export default function Login() {
 
 	const handleLogin = async () => {
 		try {
+			//send login request to the backend
 			const response = await fetch('http://192.168.0.12:5000/api/auth/login', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -31,15 +37,18 @@ export default function Login() {
 			});
 			const data = await response.json();
 
-			if (response.ok) {
-				await AsyncStorage.setItem('authToken', data.token);  //save the token
-				Toast.show({
-					type: 'success',
-					text1: 'Logged in',
-					text2: 'You have been logged in successfully.',
-				});
-				setIsAuthenticated(true);
-			} 
+			if (!response.ok) {
+				throw new Error('Login failed');
+			}
+
+			await AsyncStorage.setItem('authToken', data.token);  //save the token
+			Toast.show({
+				type: 'success',
+				text1: 'Logged in',
+				text2: 'You have been logged in successfully.',
+			});
+			setIsAuthenticated(true);
+			
 		} catch (error) {
 			setIsRegister(true);//if login returns error, user has to register
 
@@ -54,7 +63,7 @@ export default function Login() {
 	const handleRegister = async () => {
 		setIsRegister(true); 
 
-		if (!username || !password || !age) {
+		if (!username || !password || !age) { //check mandatory data
 			Toast.show({
 				type: 'error',
 				text1: 'Empty fields',
@@ -72,22 +81,25 @@ export default function Login() {
 		}
 
 		try {
+			//send register request to the backend
 			const response = await fetch('http://192.168.0.12:5000/api/auth/register', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ username, password, age, handOrientation })
 			});
 			const data = await response.json();
-			if (response.ok) {
-				await AsyncStorage.setItem('authToken', data.token);  //save the token
+			if (!response.ok) {
+				throw new Error('Register failed');
+			}
+			await AsyncStorage.setItem('authToken', data.token);  //save the token
 
-				Toast.show({
-					type: 'success',
-					text1: 'Register',
-					text2: 'You have been registered successfully.',
-				});
-				setIsAuthenticated(true);
-			} 
+			Toast.show({
+				type: 'success',
+				text1: 'Register',
+				text2: 'You have been registered successfully.',
+			});
+			setIsAuthenticated(true);
+			
 		} catch (error) {
 			Toast.show({
 				type: 'error',
@@ -113,7 +125,7 @@ export default function Login() {
 				style={styles.input}
 			/>
 
-			{isRegister && (
+			{isRegister && ( //additional inputs for the register state
 				<>
 					<TextInput
 						placeholder="Age"
@@ -152,7 +164,7 @@ export default function Login() {
 				<CustomButton
 					title="Login"
 					onPress={handleLogin}
-					buttonStyle={{ backgroundColor: isRegister ? '#ccc' : '#4CAF50' ,  width: '80%'}} 	
+					buttonStyle={{ backgroundColor: isRegister ? '#adadad' : '#4CAF50' ,  width: '80%'}} 	
 				/>
 			</View>
 

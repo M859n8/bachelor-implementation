@@ -1,3 +1,8 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Controller for handling user registration and login.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions.
+ */
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import userModel from '../models/user.js';
@@ -8,7 +13,7 @@ const authController = {
 		try {
 			//get register data from request
 			const { username, password, age, handOrientation } = req.body;
-			//check in db if user with this username exists
+			//check in database if user with this username exists
 			const existingUser = await userModel.findByUsername(username);
 			if (existingUser) {
 				return res.status(400).json({ message: 'Username already exists' });
@@ -35,7 +40,6 @@ const authController = {
 			if (!user) {
 				return res.status(400).json({ message: 'Invalid credentials' });
 			}
-			//call main backend and get info 
 			//check password
 			const isMatch = bcrypt.compareSync(password, user.password);
 			if (!isMatch) {

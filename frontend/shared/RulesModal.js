@@ -1,3 +1,8 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Rules component that appears at the beginning of each test.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions.
+ */
 import React from 'react';
 import {View, Text, StyleSheet } from 'react-native';
 import CustomButton from '../shared/CustomButton.js';

@@ -1,8 +1,13 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Timer component for time-limited tests.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions.
+ */
 import { useEffect, useRef, useState,  } from 'react';
 import {  Text, StyleSheet, View} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons'; 
 
-//timer tests that require timer visualization
+
 export default function Timer({ isRunning, startTime}) {
     const [time, setTime] = useState(0);
     const intervalRef = useRef(null);

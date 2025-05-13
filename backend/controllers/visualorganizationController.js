@@ -1,9 +1,15 @@
-// import connection from "../config/db.js";
-import connection from './../db-config.js';
+/**
+ * Author: Maryna Kucher
+ * Description: Controller responsible for processing and storing results 
+ * of the Visual Organization Test.
+ * 
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions.
+ */
 import stringSimilarity from "string-similarity";
 import userModel from '../models/user.js';
 
-const correctAnswers = {
+//correct answers with synonyms for picture organization tasks
+const correctAnswers = { 
 	0: ["fish"],
 	1: ["saw"],
 	2: ["table", "desk"],
@@ -35,6 +41,7 @@ const correctAnswers = {
 
 const visualorganizationController ={
 
+	// main method that calculates and stores the test result
 	saveResponse: async (req, res) => {
 		const {userAnswers} = req.body;
 		const user_id = req.user.id;
@@ -51,7 +58,7 @@ const visualorganizationController ={
 
 		// calculate the similarity for each answer
 		userAnswers.forEach((answer, index ) => {
-			//if it is picture organization task
+			//if it is a picture organization task
 			if (answer.type === 'text') {
 				//get possible ansvers for this question
 				const possibleAnswers = correctAnswers[answer.index] || [];
@@ -64,7 +71,7 @@ const visualorganizationController ={
 				totalSimilarity += maxSimilarity;
 				textCount++;
 			} else if (answer.type === 'multichoice') {
-			//if it is spatial relation task
+				//if it is a spatial relation task
 
 				if (answer.isCorrect) {
 					correctChoiceCount++;

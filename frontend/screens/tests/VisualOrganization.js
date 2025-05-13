@@ -1,3 +1,8 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Main file for the Visual Organization Test.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions
+ */
 import { StyleSheet, Text, View, Modal, Image, TextInput,  Dimensions } from 'react-native';
 import { useState, useRef, useMemo  } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, Keyboard} from 'react-native';
@@ -54,10 +59,9 @@ const images2 = [
 	
   
 export default function VisualOrganization() {
-	const navigation = useNavigation(); //using for navigation to the result page
-	const { setIsAuthenticated } = useContext(AuthContext); //using for updating auth flag based on server response
+	const navigation = useNavigation(); //used to navigate to the result page
+	const { setIsAuthenticated } = useContext(AuthContext); //used to update the auth flag based on server response
 	const [rulesModal, setRulesModal] = useState(true); //rules at the start of the test
-
 
 	const [textResponse, setTextResponse] = useState(''); //for text field
 	const inputRef = useRef(null); //ref on input field, for keybord activation
@@ -137,17 +141,18 @@ export default function VisualOrganization() {
 			};
 		});
 		
-		//merge
+		//merge task arrays
 		const combinedTasks = [...selectedFromImages1, ...selectedFromImages2];
 
 		return combinedTasks
 
 	};
+	//generates the test set only once and stores it in a ref
 	testSet.current = useMemo(() => generateTestSet(), []);
 
 	//after each text answer handle submit
 	const handleSubmit = async (id, sendEmpty = false) => {
-		//check if testresponse is not empty
+		//check if test response is not empty
 		if (!textResponse.trim() && !sendEmpty) {
 			//show modal if response is empty 
 			setShowEmptyConfirm(true);
@@ -174,7 +179,7 @@ export default function VisualOrganization() {
 
 	//after each multiple-choice answer
 	const handleChoiceSelect = (choiceIndex) => {
-		//check if it was correct
+		//check if answer is correct
 		const currentTask = testSet.current[currentImageIndex];
 		const isCorrect = choiceIndex === currentTask.correctIndex;
 		//update results
@@ -197,6 +202,8 @@ export default function VisualOrganization() {
   
 
     const sendToBackend = async () => {
+		setIsLoading(true);
+		//send the request using a separate component from ../shared/directory
 		await sendRequest({
 			url: 'http://192.168.0.12:5000/api/result/visual/saveResponse',
 			body: {userAnswers: results.current},
@@ -236,6 +243,7 @@ export default function VisualOrganization() {
 							setShowEmptyConfirm(false);
 							handleSubmit(testSet.current[currentImageIndex].index, true);
 						}}
+						isLoading={isLoading}
 					/>
 				</View>
 			</View>
@@ -243,6 +251,7 @@ export default function VisualOrganization() {
 		</Modal>
 		{!rulesModal && ( //after rules are closed
 		<KeyboardAvoidingView //activate keyboard
+			//ensures the keyboard doesn't cover input fields by adjusting layout
 			behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 			style={{ flex: 1 }}
 		>
@@ -250,43 +259,43 @@ export default function VisualOrganization() {
 			contentContainerStyle={{ flexGrow: 1 }}
 			keyboardShouldPersistTaps="handled"
 		>
-			<View style={styles.mainZone}>
-				<Text style={styles.counter}>{currentImageIndex} / {testSet.current.length-1} </Text>
-			
-				{testSet.current[currentImageIndex].type === 'text' ? ( //render tests based on type
-					<>
-						<View style={styles.card}>
-							<Image 
-								source={testSet.current[currentImageIndex].image} 
-								style={[styles.image, {width: cardSize, height: cardSize}]} 
-								resizeMode="contain"
-							/>
-						</View>
-						<TextInput
-							value={textResponse}
-							ref={inputRef}
-							onChangeText={setTextResponse}
-							placeholder="Enter your answer"
-							style = {styles.textInput}
+		<View style={styles.mainZone}>
+			<Text style={styles.counter}>{currentImageIndex} / {testSet.current.length-1} </Text>
+		
+			{testSet.current[currentImageIndex].type === 'text' ? ( //render tests based on their types
+				<>
+					<View style={styles.card}>
+						<Image 
+							source={testSet.current[currentImageIndex].image} 
+							style={[styles.image, {width: cardSize, height: cardSize}]} 
+							resizeMode="contain"
 						/>
-					
-					
-						<CustomButton
-							title="Send"
-							onPress={()=> handleSubmit(testSet.current[currentImageIndex].index) }
-							isLoading={isLoading}
-						/>
-					</>
-				) : (
-					<ChoiceTask 
-						task={testSet.current[currentImageIndex]}
-						onSelect={(choiceIndex) => handleChoiceSelect(choiceIndex)}
-
+					</View>
+					<TextInput
+						value={textResponse}
+						ref={inputRef}
+						onChangeText={setTextResponse}
+						placeholder="Enter your answer"
+						style = {styles.textInput}
 					/>
-				)}
-
 				
-			</View>
+				
+					<CustomButton
+						title="Send"
+						onPress={()=> handleSubmit(testSet.current[currentImageIndex].index) }
+						isLoading={isLoading}
+					/>
+				</>
+			) : (
+				<ChoiceTask 
+					task={testSet.current[currentImageIndex]}
+					onSelect={(choiceIndex) => handleChoiceSelect(choiceIndex)}
+
+				/>
+			)}
+
+			
+		</View>
 		</ScrollView>
 		</KeyboardAvoidingView>)}
       </View>

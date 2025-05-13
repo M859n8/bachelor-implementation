@@ -1,6 +1,10 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Context for managing and providing authentication state across the app.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions
+ */
 import React, { createContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
 
 export const AuthContext = createContext();
 

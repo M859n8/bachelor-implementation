@@ -1,7 +1,16 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Controller responsible for processing and storing results 
+ * of the Block Design Test.
+ * 
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions.
+ */
 import userModel from '../models/user.js';
 import roundTemplates from '../assets/roundTemplates.js';
 
 const blockDesignController = {
+
+	// main method that calculates and stores the test result
     saveResponse: async (req, res) => {
         const {roundBlocks}= req.body;
         const user_id = req.user.id;
@@ -92,7 +101,7 @@ const blockDesignController = {
 	checkBlocksPosition: (roundData, template)=>{
 		const userBlocks = roundData.blocks;
 		let errorsCount =0;
-		//get pos from template
+		//get position from the template
 		template.correctBlocks.forEach(correctBlock => {
 			const { row, col, color: correctColor, rotation: correctRotation } = correctBlock;
 			//check row and col

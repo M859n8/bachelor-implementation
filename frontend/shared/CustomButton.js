@@ -1,3 +1,8 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Reusable custom button component with loading state.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions
+ */
 import React from 'react';
 import { Button } from 'react-native-elements';
 

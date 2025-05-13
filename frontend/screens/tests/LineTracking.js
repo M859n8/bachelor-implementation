@@ -1,3 +1,8 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Main file for the Complex Figure Test.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions
+ */
 import React, { useRef, useState, useEffect} from 'react';
 import { StyleSheet, View, Text} from 'react-native';
 import Svg, { Path} from 'react-native-svg';
@@ -15,24 +20,24 @@ import {useSharedValue,useAnimatedStyle} from 'react-native-reanimated';
 export default function LineTracking() {
 	const LINE_WIDTH = 30; //width of the template path
 
-	const navigation = useNavigation(); //using for navigation to the result page
-	const { setIsAuthenticated } = useContext(AuthContext); //using for updating auth flag based on server response
+	const navigation = useNavigation(); //used to navigate to the result page
+	const { setIsAuthenticated } = useContext(AuthContext); //used to update the auth flag based on server response
 
-	const [path, setPath] = useState([]); //user path
+	const [path, setPath] = useState([]); //path created by user
 
-	const [currentRound, setCurrentRound] = useState(1); //current rount
-	const [round2Modal, setRound2Modal] = useState(false); //modal with fules for each round
+	const [currentRound, setCurrentRound] = useState(1); //current round
+	const [round2Modal, setRound2Modal] = useState(false); //modal with rules for each round
 	const [round1Modal, setRound1Modal] = useState(true);
 
 	const linesRound1 = useRef([]); //save lines from the first round
 
-	const [startMarkPos, setStartMarkPos] = useState({x: 0, y: 0}); //save template start pos
+	const [startMarkPos, setStartMarkPos] = useState({x: 0, y: 0}); //save template and mark start pos
 	
 	const viewRef = useRef(null); //ref of the main view, allows us to measure top shift
 
 	const [svgPathD, setSvgPathD] = useState(''); //template path
 
-	const start = useSharedValue({ x: 0, y: 0 }); //mark start pos
+	const start = useSharedValue({ x: 0, y: 0 }); //start pos of the mark
 	const offset = useSharedValue({ x: 0, y: 0 }); //offset during movement
 
 	const [width, setWidth ] = useState(0); //view size
@@ -225,10 +230,10 @@ export default function LineTracking() {
 				x: offset.value.x,
 				y: offset.value.y,
 			};
-			handleEndRound(); //after each gesture end process end round
+			handleEndRound(); //at the end of gesture process end round
 
-		})
-		.runOnJS(true);
+		}) 
+		.runOnJS(true); //allows me to call JS functions from animation
 
 	//convert points to svg path 
 	const convertPointsToPath = (points) => {
@@ -249,7 +254,7 @@ export default function LineTracking() {
 			templateLines: svgPathD,
 			additionalData: additionalData.current,
 		}
-
+		//send the request using a separate component from ../shared/directory
 		await sendRequest({
 			url: 'http://192.168.0.12:5000/api/result/line/saveResponse',
 			body: requestBody,

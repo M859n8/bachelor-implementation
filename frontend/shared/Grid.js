@@ -1,3 +1,8 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Grid component for the Block Design Test.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions.
+ */
 import { StyleSheet, View} from 'react-native';
 
 
@@ -10,7 +15,7 @@ export default function Grid({cellSize, dimention}){
 	  <View style={[styles.grid, {width: gridWidth, aspectRatio: 1}]}>
 		{Array.from({ length: dimention }).map((_, rowIndex) => (
 		  <View key={rowIndex} style={styles.row}>
-			{Array.from({ length: dimention }).map((_, colIndex) => (
+			{Array.from({ length: dimention }).map((_, colIndex) => ( //sigle cell
 			  <View key={colIndex} style={[styles.cell, { width: cellSize, aspectRatio: 1,}]}/>
 			
 			))}

@@ -1,9 +1,14 @@
+"""
+Author: Maryna Kucher
+Description: This script normalizes user-drawn SVG data, simplifying 
+its path structure while preserving the overall topology.
+Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions
+"""
+
 import numpy as np
 import sys
 
 import svgpathtools
-from svgwrite import Drawing
-from sklearn.metrics.pairwise import cosine_similarity
 
 # extract lines from svg image
 def extract_lines(svg_path):
@@ -23,7 +28,7 @@ def extract_lines(svg_path):
             end_x, end_y = segment.end.real, segment.end.imag
 
             length = abs(segment.length())  # save segment length
-            angle = np.arctan2(end_y - start_y, end_x - start_x)  # save angle
+            angle = np.arctan2(end_y - start_y, end_x - start_x) # save angle
             
             # add segment to path 
             path_points.append([start_x, start_y, end_x, end_y, length, angle])
@@ -32,7 +37,7 @@ def extract_lines(svg_path):
         extracted_lines.append(path_points)
     return extracted_lines  
 
-# (required for generation)debug // example lines processing does not require a normalization
+# (required for generation)debug: example lines processing does not require a normalization
 def extract_example_lines(svg_path):
     # get all paths from svg
     paths, _ = svgpathtools.svg2paths(svg_path)
@@ -63,7 +68,7 @@ def angle_difference(angle1, angle2):
     diff = abs(angle1 - angle2)
     return min(diff, 2 * np.pi - diff)
 
-# function fot merging separate lines
+# function for merging separate lines
 def merge_lines(path, angle_threshold=np.deg2rad(30), distance_threshold=5):
     merged_path = []
     i = 0  
@@ -113,21 +118,21 @@ def merge_segments(features, angle_threshold=np.deg2rad(30), distance_threshold=
 		#after merging, segments from different paths will be on the same level
     return merged_features
 
-# clean lines which length is smaller than min_length
+# remove lines whose length is less than min_length
 def clean_small_lines(features, min_length):
     cleaned_lines = []
 
     for path in features:
         if not path: 
             continue
-
+		# get the length of the segment
         length = path[4]
 		# check length
         if length >= min_length:
             cleaned_lines.append(path)
     return cleaned_lines
 
-# function that cleans anomaly zero length segments 
+# function that removes anomaly zero length segments 
 def clean_zero_lines(features):
 	cleaned_lines = []
 
@@ -145,7 +150,7 @@ def clean_zero_lines(features):
 		cleaned_lines.append(path_segments)
 	return cleaned_lines
 
-#debug
+#debug: saves normalized svg
 def save_lines_to_svg(lines, output_path):
     paths = []
     
@@ -174,6 +179,8 @@ def normalize_drawings(svg_user):
 	merged_lines = merge_lines(merged_features)
 	# clean small lines 
 	result_features = clean_small_lines(merged_lines, 5.0)
-	# save_lines_to_svg(result_features, './assets/normalizedOutput.svg') # debug
+
+	# debug
+	# save_lines_to_svg(result_features, './assets/normalizedOutput.svg') 
 	return result_features
 

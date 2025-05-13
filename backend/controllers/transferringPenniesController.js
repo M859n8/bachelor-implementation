@@ -1,13 +1,21 @@
-// import {spawn} from 'child_process';
+/**
+ * Author: Maryna Kucher
+ * Description: Controller responsible for processing and storing results 
+ * of the Transferring Pennies Test.
+ * 
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions.
+ */
 import userModel from '../models/user.js';
 
-const COINS_PER_ROUND = 9; 
-const REFERENCE_SPEED = 4; //(18*20/15 ) * 0.4 (after testing changed to 4)
-const REFERENCE_WIDTH = 18; //inches
+const COINS_PER_ROUND = 9; //value for the implemented test
+//(18 inches*20 coins/15 seconds ) * 0.4 (after testing changed to 4)
+const REFERENCE_SPEED = 4; 
+
 
 
 const transferringPenniesController ={
-	
+
+	// main method that calculates and stores the test result
 	saveResponse: async (req, res) => {
 		const {coinData, additionalData} = req.body;
 		const user_id = req.user.id;
@@ -23,7 +31,7 @@ const transferringPenniesController ={
 		const {resultLeft, resultRight} = transferringPenniesController.assessCoordination(features);
 		
 		try {
-			//save to db
+			//save to database
 			await userModel.saveToDatabase(user_id, "movementSpeed", finalScore)
 			await userModel.saveToDatabase(user_id, "bilateralCoordination", resultLeft)
 			//return to user
@@ -65,11 +73,12 @@ const transferringPenniesController ={
 			let paramsL, paramsR;
 
 			if(entry.round == 1){
-				//for the first round movement was performed with left hand before hand change point and right hand after
+				//for the first round, the movement was performed with left hand 
+				// before hand change point and right hand after
 				paramsL = transferringPenniesController.calculateParams(coordStart, handChangeCoord, timeStart, timeHandChange, errors, wholeDistance);
 				paramsR = transferringPenniesController.calculateParams(handChangeCoord,coordEnd, timeHandChange, timeEnd, errors, wholeDistance);	
 			}else{
-				//for the secons round first was right hand, than left
+				//for the second round, the first was right hand, than left
 				paramsR = transferringPenniesController.calculateParams(coordStart, handChangeCoord, timeStart, timeHandChange, errors, wholeDistance);
 				paramsL = transferringPenniesController.calculateParams(handChangeCoord,coordEnd, timeHandChange, timeEnd, errors, wholeDistance);
 			
@@ -90,7 +99,8 @@ const transferringPenniesController ={
 		return results;
 	},
 
-	//calculate four params for left/right hand comparation (speed, part of path, errors number and time)
+	//calculate four params for left/right hand comparation 
+	//(speed, part of path, errors number and time)
 	calculateParams : (coordStart, coordEnd, timeStart, timeEnd, errors, wholeDistance) => {
 
 		const errInZone = errors.filter(err => 
@@ -160,6 +170,7 @@ const transferringPenniesController ={
 
 	},
 	
+	//calculate the percentage ratio of two values
 	percentageRatio: (value1, value2) => {
 		let total = value1 + value2; 
 		if (total === 0) return { percentage1: 0, percentage2: 0 }; //avoid dividing by 0

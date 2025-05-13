@@ -1,3 +1,10 @@
+"""
+Author: Maryna Kucher
+Description: Generates training data for the machine learning model
+based on predefined shape templates.
+Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions
+"""
+
 import json
 import random
 import numpy as np
@@ -53,9 +60,10 @@ def process_files(template_features,output_dir, max_sim,file_name_iterator, step
 	#minimum simularity value (max is set in the file name)
 	min_sim=0.1
 	total_lines = len(template_features)
-	max_iterations = total_lines // step_lines # each step delete last two lines
-
-	step_percent = (max_sim-min_sim)/max_iterations #calculate percentage reduction per step
+	#on each step delete last two lines
+	max_iterations = total_lines // step_lines
+	#calculate percentage reduction per step
+	step_percent = (max_sim-min_sim)/max_iterations 
 
 	for i in range(max_iterations):
 		# calculate percentage limits for the current number of features
@@ -69,6 +77,7 @@ def process_files(template_features,output_dir, max_sim,file_name_iterator, step
 		current_features = template_features[:total_lines - i * step_lines]
 		if len(current_features) < 2:
 			break  # can not build a graph from less then two lines
+		
 		# print('range', current_min, current_max, 'current features length' , len(current_features), 'max iterations' , max_iterations)
 
 		# build the graph

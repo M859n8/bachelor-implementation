@@ -1,3 +1,8 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Block component for the Block Design Test.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions.
+ */
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
 import {
@@ -8,15 +13,16 @@ import { StyleSheet, View } from 'react-native';
 import debounce from 'lodash.debounce';
 import { useCallback } from 'react';
 
+
 export default function Block({ blockId, gridPosition, updateBlockValue, blockSize, cellSize }) {
 	const isPressed = useSharedValue(false); 
 	const offset = useSharedValue({ x: 0, y: 0 }); //current block position during drag
 
 	const colors = ['white', 'mixed', 'red']; //possible collors 
-	const colorIndex = useSharedValue(0);
-	const rotation = useSharedValue(0);
+	const colorIndex = useSharedValue(0); //current color
+	const rotation = useSharedValue(0); //current rotation
 
-	const localRef = useAnimatedRef();
+	const localRef = useAnimatedRef(); //for measuring block position
 
 	//calculate row and col at the end of the movement
 	const checkBlockPosition = (relativeX, relativeY) =>{
@@ -34,7 +40,7 @@ export default function Block({ blockId, gridPosition, updateBlockValue, blockSi
 		[] 
 	);
 
-	//animation for whole square 
+	//animation for whole block 
 	const animatedStyles = useAnimatedStyle(() => {
 		return {
 		transform: [
@@ -47,10 +53,11 @@ export default function Block({ blockId, gridPosition, updateBlockValue, blockSi
 
 		};
   	});
-	//styles for inner half of the square
+	//styles for inner half of the block
 	const innerAnimatedStyles = useAnimatedStyle(() => {
 		return {
-			backgroundColor: colors[colorIndex.value] === 'red'  ? 'red' : 'white', //changes only for a whole red square
+			//changes only for a whole red square
+			backgroundColor: colors[colorIndex.value] === 'red'  ? 'red' : 'white', 
 
 		};
 
@@ -59,7 +66,7 @@ export default function Block({ blockId, gridPosition, updateBlockValue, blockSi
 	//tap gesture for color change
 	const tapGesture = Gesture.Tap()
 		.onEnd(() => {
-
+			//get new color index
 			const newIndex = (colorIndex.value + 1) % colors.length;
 			colorIndex.value = newIndex;
 			//update block state
@@ -67,7 +74,7 @@ export default function Block({ blockId, gridPosition, updateBlockValue, blockSi
 
 			debouncedActionEnd();
 		})
-		.runOnJS(true);
+		.runOnJS(true); //allows me to call JS functions from animation
 
 	//gesture for angle change
 	const doubleTapGesture = Gesture.Tap()

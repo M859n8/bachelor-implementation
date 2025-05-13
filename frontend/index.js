@@ -1,7 +1,7 @@
 /**
  * Author: Maryna Kucher
  * Description: registers root component.
- * Part of Bachelor's Thesis: Digital Assessment of Human Motor Functions
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions
  */
 import { registerRootComponent } from 'expo';
 

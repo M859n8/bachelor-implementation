@@ -1,8 +1,15 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Controller responsible for processing and storing results 
+ * of the Bells Cancellation Test.
+ * 
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions.
+ */
 import userModel from '../models/user.js';
-
 
 const bellsCancellationController = {
 
+	// main method that calculates and stores the test result
     saveResponse: async (req, res) => {
         const {bellsObjects, additionalData, otherObjects }= req.body;
         const user_id = req.user.id;
@@ -64,7 +71,7 @@ const bellsCancellationController = {
 			{ age: 75, refTime: 136 },
 			{ age: 80, refTime: 139 }
 		]
-		//find the largest record whose age does not exceed age
+		//find the largest record where age does not exceed user age
 		const closest = [...timeByAge]
 			.reverse()
 			.find(entry => age >= entry.age);
@@ -99,11 +106,11 @@ const bellsCancellationController = {
 		const rightRatio = rightTotal > 0 ? rightMissed / rightTotal : 0;
 
 		const pathologyAsymThreshold = REF_ERRORS_COUNT / (REF_TARGETS_COUNT /2);
-		const asymmetryDiff = leftRatio - rightRatio; //to calculate asymetry direction
+		const asymmetryDiff = leftRatio - rightRatio; //to calculate asymmetry direction
 		//compare with pathology threshold
 		const symmetryScore = Math.max(0, (1 - (Math.abs(asymmetryDiff) / pathologyAsymThreshold)) * 100);
 
-		//get asymetry direction
+		//get asymmetry direction
 		let direction = "balanced";
 		if (asymmetryDiff > 0.1) direction = "left-side neglect";
 		else if (asymmetryDiff < -0.1) direction = "right-side neglect";
@@ -121,14 +128,14 @@ const bellsCancellationController = {
 		);
 	
 		return {
-			symmetryScore: symmetryScore , //to user //db
-			asymmetryDirection: direction, //to user // db
-			finalScore: finalScore  //to user
+			symmetryScore: symmetryScore , 
+			asymmetryDirection: direction, 
+			finalScore: finalScore  
 		};
 
 	},
 
-	//collects data by zones, calls evaluation function. Assesses differenciation by forms
+	//Collects data by zones, calls evaluation function. Assesses differenciation by forms
     calculateResults: (bellsObjects, additionalData, otherObjects, age) => {
 		
 		const zoneStats = {

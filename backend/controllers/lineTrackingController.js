@@ -1,15 +1,21 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Controller responsible for processing and storing results 
+ * of the Line Tracking Test.
+ * 
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions.
+ */
 import sharp from 'sharp';
 import { PNG } from 'pngjs';
-import fs from 'fs';
 
 import userModel from '../models/user.js';
 
 
-const LINE_WIDTH = 30;
+const LINE_WIDTH = 30; //template  line width
 
 const lineTrackingController = {
 
-	
+	// main method that calculates and stores the test result
     saveResponse: async (req, res) => {
 		const {userLinesRound1, userLinesRound2, templateLines, additionalData}= req.body;
         const user_id = req.user.id;
@@ -95,7 +101,7 @@ const lineTrackingController = {
 					totalUserDrawn++;
 	
 					if (templateAlpha === 0) {
-						// If there is nothing here in the template → out of bounds
+						// if there is nothing here in the template -> out of bounds
 						outOfBoundsCount++;
 
 						

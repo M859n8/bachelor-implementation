@@ -1,10 +1,15 @@
-import { useState, useEffect } from "react";
+/**
+ * Author: Maryna Kucher
+ * Description: Component for generating objects
+ * from the Bells Cancellation Test.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions
+ */
 import { Dimensions } from "react-native";
 
 //generates objects with coordinates for bells cancellation test
 const generateObjects = () => {
-
-    const GAME_WIDTH = Dimensions.get("window").width * 0.90; // 90% (defined in styles)
+	//field sizes defined in styles in main file
+    const GAME_WIDTH = Dimensions.get("window").width * 0.90; // 90% 
     const GAME_HEIGHT = Dimensions.get("window").height * 0.75; // 75% 
 
     const CELL_WIDTH = 52; //to accomodate an object of size 40
@@ -17,15 +22,15 @@ const generateObjects = () => {
     const TARGET_COUNT = Math.floor(TOTAL_OBJECTS / 10);
 
 
-    let objects = []; //array to save generated ojects
-    let takenPositions = new Set(); //set to save generated positions
+    let objects = []; //array for storing generated objects
+    let takenPositions = new Set(); //set for storing generated positions
 
     let i = 0; 
     for (let row = 0; row < GRID_ROWS; row++) {
         for (let col = 0; col < GRID_COLUMNS; col++) {
             let x, y;
             do {
-				//gerate coords for this zone but with random shift
+				//gerate coords for this cell but with random shift
                 x = col * CELL_WIDTH + Math.random() * (CELL_WIDTH * 0.7) + CELL_WIDTH * 0.01; 
                 y = row * CELL_HEIGHT + Math.random() * (CELL_HEIGHT * 0.7) + CELL_HEIGHT * 0.01;
             

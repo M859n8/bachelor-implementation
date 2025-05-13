@@ -1,9 +1,14 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Chart component for results visualization.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions
+ */
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { BarChart } from "react-native-gifted-charts";
 import Toast from 'react-native-toast-message';
 
-//charts for results visualized on home page
+//charts for results visualization on home page
 export default function Chart({ testResults}) {
 
 	const formatTestType = (str) => { //formate chart header

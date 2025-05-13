@@ -1,5 +1,11 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Displays results of a after each test session.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions
+ */
+
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import CustomButton from '../shared/CustomButton.js';
 
@@ -14,7 +20,7 @@ export default function ResultsScreen() {
 				<Text style={styles.title}>Your Results</Text>
 				<Text style={styles.score}>{result.finalScore}</Text>
 	
-				<CustomButton 
+				<CustomButton //navigation home
 					title="Go Home"
 					onPress={() => navigation.navigate('Home')}
 					buttonStyle={{ backgroundColor: '#4B8A68'}}

@@ -1,9 +1,12 @@
-import networkx as nx
+"""
+Author: Maryna Kucher
+Description: Converts a set of SVG lines into a graph structure
+with distinct vertices and edges.
+Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions
+"""
 import json
 import numpy as np
 from scipy.spatial import KDTree
-import matplotlib.pyplot as plt  #for drawing
-
 
  
 # build graph from given lines
@@ -19,7 +22,7 @@ def build_graph(lines, threshold=30):
 	# get all unique nodes
 	points = list(set([pt for edge in edges for pt in edge]))
 
-	# Use KDTree to cluster nearby points
+	# use KDTree to cluster nearby points
 	tree = KDTree(points)
 	clusters = {}
 	# dict with points where coordinates are keys and id is value
@@ -35,7 +38,8 @@ def build_graph(lines, threshold=30):
 
 		# calculate the average cluster position
 		avg_pt = tuple(np.mean(cluster_pts, axis=0))
-		merged_points[avg_pt] = len(merged_points)  # use the length of merged_points as an index
+		# use the length of merged_points as an index
+		merged_points[avg_pt] = len(merged_points)  
 
 		# mark all these points as part of the cluster
 		for idx in indices:
@@ -64,7 +68,6 @@ def build_graph(lines, threshold=30):
 	}
 	# convert to a JSON string
 	json_str = json.dumps(json_data)
-
 
 	return json_str
 

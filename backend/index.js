@@ -1,3 +1,8 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Entry point for the backend server.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions.
+ */
 import express from 'express';
 import cors from 'cors';
 

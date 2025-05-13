@@ -1,4 +1,8 @@
-import connection from './../db-config.js';
+/**
+ * Author: Maryna Kucher
+ * Description: Controller that returns user information from the users and test results table.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions.
+ */
 import userModel from '../models/user.js';
 
 //features organized by subdomains
@@ -20,7 +24,7 @@ const userInfoController = {
 			const user = await userModel.findById(userId);
 
 			
-			//Group the results by test_type
+			//group the results by test_type
 			const grouped = results.reduce((acc, { test_type, score, created_at }) => {
 				if (!acc[test_type]) acc[test_type] = [];
 				acc[test_type].push({ score, created_at });
@@ -64,7 +68,8 @@ const userInfoController = {
 				const sum = availableScores.reduce((acc, val) => acc + val, 0);
 				finalScores[subdomainName] = (sum / availableScores.length).toFixed(2);
 			} else {
-				finalScores[subdomainName] = null; //if there are no results for all tests, it will be null
+				//if there are no results for at least one test, the total result of the subdomain is null
+				finalScores[subdomainName] = null; 
 			}
 		}
 		return finalScores;

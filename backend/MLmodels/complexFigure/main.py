@@ -1,3 +1,10 @@
+"""
+Author: Maryna Kucher
+Description: Main pipeline script. Handles SVG-to-graph conversion and
+calls the trained model to assess similarity between user input and template.
+Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions
+"""
+
 import numpy as np
 import sys
 
@@ -17,5 +24,5 @@ if __name__ == "__main__":
 	#convert features to graph
 	json_user = convert_to_graph.build_graph(result_features)
 	similarity = predict.predict_similarity(json_user) #calculate similarity
-	#send it to stdout (backend will get it)
+	#send it to stdout (backend contriller will get it)
 	print(similarity)

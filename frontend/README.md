@@ -1,9 +1,5 @@
 # Frontend for Visual-Motor Coordination Tests
-This is the frontend part of a cross-platform mobile application for assessing cognitive and motor skills using interactive tests. Implemented with React Native and Expo.
-
-## Requirements
-- Node.js ≥ 18.x
-- npm ≥ 9.x or yarn
+This is the frontend part of a cross-platform mobile application for assessing human perceptual-motor skills using interactive tests. Implemented with React Native and Expo.
 
 ### Core Dependencies
 These are defined in package.json and installed automatically:
@@ -116,8 +112,9 @@ Go to the frontend directory:
 npm install
 ```
 2. Starting the server.
-To start the Expo development server and run the app on a simulator:
 ```bash
 npx expo start
 
 ```
+This command launches the Expo development server, allowing you to open the app in a web browser on localhost, or run it on a mobile simulator or physical device using the Expo Go app.
+

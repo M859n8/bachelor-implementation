@@ -1,13 +1,13 @@
 # Backend for Visual-Motor Coordination Tests
 
-This is the backend of the application for assessing perceptual motor skills.
+This is the backend of the application for assessing perceptual-motor skills.
 It accepts requests from the user, processes data from six tests, saves results to the database.
 
 **Stack:** Node.js, Express, Python (ML), MySQL
 
 ## Project Structure
 
-- `/controllers` — Express controllers for query processing
+- `/controllers` — Controllers for query processing
 - `/MLmodels` — Python scripts for SVG/graphics analysis
 - `/routes` — HTTP routes
 - `/models` — Database models
@@ -18,7 +18,7 @@ It accepts requests from the user, processes data from six tests, saves results 
 - `.env` Stores sensitive environment variables: tokens, ports, DB access. Not pushed to the repository.
 - `.env.example` Environment variable template.
 - `index.js` Entry point to the Node.js server. Initializes the Express application and connects routes.
-- `db-config.js` Configures the connection to a database (MySQL) via a connection pool.
+- `db-config.js` Configures the connection to a database (MySQL).
 - `init-db.js` Script for initial table creation or migrations. Used to initialize the database.
 - `package.json` Contains dependencies, startup scripts, and meta information about the project.
 
@@ -104,19 +104,19 @@ jwt.sign(
 
 ### bellsCancellationController
 
-* `saveResponse`
+* `saveResponse` — receives data from the frontend, calls evaluation functions, saves the result to the database and returns it to the user.
 * `analyzeZones` — evaluates by zones
 * `calculateResults` — collects data by zones, calls evaluation function. Assesses differenciation by forms.
 
 ### blockDesignController
 
-* `saveResponse`
+* `saveResponse` — receives data from the frontend, calls evaluation functions, saves the result to the database and returns it to the user.
 * `calculateResults` — calculate accuracy, speed and efficiency percent.
 * `checkBlocksPosition` — check if the block is in the correct position.
 
 ### lineTrackingController
 
-* `saveResponse`
+* `saveResponse` — receives data from the frontend, calls evaluation functions, saves the result to the database and returns it to the user.
 * `comparePaths` — creates svg and calls asssessment function.
 * `checkOutOfBounds` — calculate the percentage of pixels outside the bounds.
 
@@ -144,7 +144,6 @@ npm install
 ```
 
 2. Starting the server.
-   To start the server, use:
 
 ```bash
 node index.js

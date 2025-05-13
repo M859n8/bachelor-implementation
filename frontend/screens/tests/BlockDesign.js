@@ -1,3 +1,8 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Main file for the Block Design Test.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions
+ */
 import React from 'react';
 import { StyleSheet, View, Dimensions, TouchableOpacity, Image} from 'react-native';
 import { useState, useRef, useEffect } from 'react';
@@ -15,8 +20,8 @@ import Timer from '../../shared/Timer.js';
 import {sendRequest} from '../../shared/sendRequest.js';
 
 export default function BlockDesign() {
-	const navigation = useNavigation(); //using for navigation to the result page
-	const { setIsAuthenticated } = useContext(AuthContext); //using for updating auth flag based on server response
+	const navigation = useNavigation(); //used to navigate to the result page
+	const { setIsAuthenticated } = useContext(AuthContext); //used to update the auth flag based on server response
 
 	const { width, height } = Dimensions.get('window');
 
@@ -27,7 +32,7 @@ export default function BlockDesign() {
 	const gridLayout = useSharedValue({ x: 0, y: 0 }); //grid position
 	const gridRef = useRef(null); //grid ref for position measuring
 
-	const templates = { //templates array
+	const templates = { //templates sources array
 		0: require('../../assets/blockDesign/block1.png'),
 		1: require('../../assets/blockDesign/block2.png'),
 		2: require('../../assets/blockDesign/block3.png'),
@@ -39,7 +44,7 @@ export default function BlockDesign() {
 	const [currentRound, setCurrentRound] = useState(0); 
 	const totalRounds = 3;
 
-	const [allRoundsData, setAllRoundsData] = useState([]); //data for all rounds, this array will be send to backend
+	const [allRoundsData, setAllRoundsData] = useState([]); //data from all rounds, this array will be sent to backend
 	const [roundStartTime, setRoundStartTime] = useState(null); //to save each round start time
 
 
@@ -96,15 +101,15 @@ export default function BlockDesign() {
 			blocks: [...blocks],
 
 		};
-		//if it not last round
+		//if it is not last round
 		if (currentRound + 1 < totalRounds) {
 			setAllRoundsData((prev) => [...prev, currentRoundData]);
 			//go to next round
 			setCurrentRound((prev) => prev + 1);
 			setRoundStartTime(Date.now()); 
 		} else {
-			//final data send directly because useState does not have time to 
-			//save data about last round due to asynchrony
+			//final data are sent directly because useState does not have 
+			//time to update data about last round due to asynchrony
 			const finalData = [...allRoundsData, currentRoundData];
 			sendDataToBackend(finalData); 
 		}
@@ -136,7 +141,7 @@ export default function BlockDesign() {
 		setTimerIsRunning(false);
 		const requestBody={ roundBlocks : data};
 
-		//send data to the backend
+		//send data to the backend using separate component from ../shared/directory
 		await sendRequest({
 			url: 'http://192.168.0.12:5000/api/result/block/saveResponse',
 			body: requestBody,
@@ -164,7 +169,7 @@ export default function BlockDesign() {
 
 		<Timer isRunning={timerIsRunning} startTime={roundStartTime}/>
 
-		<TouchableOpacity 
+		<TouchableOpacity  //show template in the top right corner
 			style={[styles.imageContainer, { position: 'absolute', top: 10, right: 10 }]} 
 			onPress={handleImagePress}
 		>

@@ -1,3 +1,9 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Main file for the Bells Cancellation Test.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions
+ */
+
 import { StyleSheet, View, Image, TouchableOpacity, Dimensions  } from 'react-native';
 import React, { useState, useRef } from 'react';
 import CustomButton from '../../shared/CustomButton.js';
@@ -11,18 +17,17 @@ import { AuthContext } from '../../shared/AuthContext.js';
 import {sendRequest} from '../../shared/sendRequest.js';
 
 export default function BellsCancellation() {
-	const navigation = useNavigation(); //using for navigation to the result page
-	const { setIsAuthenticated } = useContext(AuthContext); //using for updating auth flag based on server response
+	const navigation = useNavigation(); //used to navigate to the result page
+	const { setIsAuthenticated } = useContext(AuthContext); //used to update the auth flag based on server response
 	const [rulesModal, setRulesModal] = useState(true);
 
 	const [timerIsRunning, setTimerIsRunning] = useState(false); 
 
-
     const [objects, setObjects] = useState(()=> generateObjects()); //array with objects 
     const [isLoading, setIsLoading] = useState(false); //loading state for end test button
-    const startTime = useRef(0); //save the start time
+    const startTime = useRef(0); //saves the start time
 
-    const imageMap = {
+    const imageMap = { //objects imajes with corresponding type
         0: require("../../assets/bells/processed_0.png"),
         1: require("../../assets/bells/processed_1.png"),
         2: require("../../assets/bells/processed_2.png"),
@@ -42,7 +47,7 @@ export default function BellsCancellation() {
     
 	//function that handles click on object
     const handleImageClick = (clickedImg) => {
-		//check if obj have not been touched before and upd touch flag
+		//check if obj has not been touched before and upd touch flag
         setObjects((prevObjects) =>
 			prevObjects.map((img) => {
 				if (img.id === clickedImg.id && img.touched === false) {
@@ -56,15 +61,16 @@ export default function BellsCancellation() {
 
 	//send data to the backend
     const endGame = async () => {
-        setIsLoading(true);
-		setTimerIsRunning(false);
+        setIsLoading(true); //button in the loading state
+		setTimerIsRunning(false); //stop the timer
+
 		//fill bell object array and array with error clicked objects
         const bellsObjects = objects.filter(obj => obj.type === 0);
         const otherObjects = objects.filter(obj => obj.type !== 0 && obj.touched === true);
 		//set additional data about general game process
         const additionalData = {
             startTime: startTime.current,
-            endTime: Date.now(),  //set the end time now
+            endTime: Date.now(),  //set the end time 
             fieldWidth: Dimensions.get('window').width * 0.9,
             fieldHeight:  Dimensions.get('window').height * 0.75,
 			allObjectsCount: objects.length,
@@ -77,7 +83,7 @@ export default function BellsCancellation() {
 			otherObjects : otherObjects,
         }
 
-		//send request using separate component from ../shared/ directory
+		//send the request using a separate component from ../shared/directory
 		await sendRequest({
 			url: 'http://192.168.0.12:5000/api/result/bells/saveResponse',
 			body: requestBody,
@@ -92,7 +98,7 @@ export default function BellsCancellation() {
     return (
         <View style={styles.container}>
     
-			<RulesModal 
+			<RulesModal //rules are shown at the start 
 				visible={rulesModal} 
 				rules='The page shows a space with various objects. Find all the elements in the shape of a bell. When you are sure that all bells are selected, click on the `End test` button.' 
 				onClose={() => {
@@ -108,7 +114,7 @@ export default function BellsCancellation() {
             
 		<View  style={styles.gameArea}>
 
-			{objects.map((img) => (
+			{objects.map((img) => ( //create objests with coordinates calculated with generateObjects()
 				<TouchableOpacity
 					key={img.id}
 					onPress={() => handleImageClick(img)} 

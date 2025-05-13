@@ -1,3 +1,8 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Middleware that verifies user authentication.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions.
+ */
 import jwt from "jsonwebtoken";
 
 const authMiddleware = (req, res, next) => {

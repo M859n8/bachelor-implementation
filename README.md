@@ -1,12 +1,20 @@
 # Digital Assessment of Human Motor Functions: Focusing on Visual Perception and Perceptual Motor Coordination
 
-This project is a full-stack application for conducting and analyzing digital cognitive and motor function tests. It includes a frontend built with React Native + Expo and a backend powered by Node.js + Express with a MySQL database.
+This project is a full-stack application for digital assessment of human perceptual-motor functions. It includes a frontend built with React Native + Expo and a backend powered by Node.js + Express with a MySQL database.
+
+## Requirements
+- **Node.js** ≥ 18.x
+- **npm** ≥ 9.x or **yarn** 
+- **Expo** 
+- **React Native** 
+- **Express** 
+- **MySQL** 
 
 ## Project Structure
 
 ```
-/frontend   → React Native + Expo app (tests, UI, interactions)
-/backend    → Node.js + Express server (API, database logic)
+/frontend   -> React Native + Expo app (tests, UI, interactions)
+/backend    -> Node.js + Express server (API, database logic)
 ```
 
 ## Frontend
@@ -71,7 +79,7 @@ npm install
 npx expo start
 ```
 
-This will launch the Expo DevTools interface, where you can run the app on an emulator or physical device.
+This command launches the Expo development server, allowing you to open the app in a web browser on localhost, or run it on a mobile simulator or physical device using the Expo Go app.
 
 ## Tests Implemented
 

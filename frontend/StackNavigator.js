@@ -1,6 +1,10 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Implements navigation depending on the user's authentication status.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions
+ */
 import React from 'react';
 import { createStackNavigator } from "@react-navigation/stack"
-import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from './shared/AuthContext';
 
 import Home from "./screens/Home";
@@ -19,7 +23,6 @@ const Stack = createStackNavigator();
 export default function StackNavigator() {
 
 	const { isAuthenticated } = React.useContext(AuthContext);
-  	const navigation = useNavigation();  
 
 
 	return (

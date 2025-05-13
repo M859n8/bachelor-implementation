@@ -1,3 +1,9 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Home screen of the application. Displays a list of available tests 
+ * and visualizes the user's performance using charts.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions
+ */
 import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -15,9 +21,10 @@ export default function Home() {
     const navigation = useNavigation();
 	const [width, setWidth] = useState(0); //saves width for correct test list sizes
 
-	const [radius, setRadius] = useState(0);
+	const [radius, setRadius] = useState(0); //radius of the test elemnt button
 
-    const handleLayout = (event) => {
+	//сalled after layout to retrieve the button's width and calculate its radius
+    const handleLayout = (event) => { 
         const { width } = event.nativeEvent.layout;
         setRadius(width / 2);
     };
@@ -79,6 +86,7 @@ export default function Home() {
 	//prepare backend data for charts
 	const prepareToChart = (resultsByType, resultsByDomain) => {
 		const testData = {};
+		//results by subdomain
 		//set subdomain as label and result as value
 		const subdomainData = Object.entries(resultsByDomain).map(([subdomain, result]) => ({
 			label: subdomain,
@@ -87,6 +95,7 @@ export default function Home() {
 		}));
 		testData['overall'] = subdomainData;
 	
+		//results by skills type
 		//set date as label and result as value
 		Object.entries(resultsByType).forEach(([testType, results]) => {
 			testData[testType] = results.map(({ score, created_at }) => {
@@ -110,11 +119,12 @@ export default function Home() {
     
     return (
 		<View style={styles.container} onLayout={(event) => {
-			const { width } = event.nativeEvent.layout; //measure width for correct test list sizes
+			//measure width of the view for correct test list sizes
+			const { width } = event.nativeEvent.layout; 
 			setWidth(width);
 		  }}>
 		<CustomButton title="Logout" onPress={handleLogout} />
-		{width > 0 && ( //if width was measured
+		{width > 0 && ( //show list if view width was measured
 		<FlatList
 			data={tests}
 			numColumns={3}

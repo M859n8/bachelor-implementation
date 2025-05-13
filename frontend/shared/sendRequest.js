@@ -1,4 +1,9 @@
-
+/**
+ * Author: Maryna Kucher
+ * Description: Send request function that sends test performance data 
+ * to the backend and receives results.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions.
+ */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 
@@ -41,6 +46,7 @@ export async function sendRequest({
 		const result = await response.json();
 
 		if (response.ok) { //perform on success bechaviour
+			//usually redirect to the result page
 			if (typeof onSuccess === 'function') {
 				onSuccess(result);
 			}

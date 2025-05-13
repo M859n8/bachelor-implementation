@@ -1,3 +1,8 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Configures database connection.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions.
+ */
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 

@@ -1,3 +1,8 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Main file for the Complex Figure Test.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions
+ */
 import { Gesture, GestureHandlerRootView, GestureDetector } from 'react-native-gesture-handler';
 import { StyleSheet, View, TouchableOpacity, Image} from 'react-native';
 import { useState} from 'react';
@@ -12,15 +17,14 @@ import { AuthContext } from '../../shared/AuthContext.js';
 import {sendRequest} from '../../shared/sendRequest.js';
 
 export default function ComplexFigure() {
-	const navigation = useNavigation(); //using for navigation to the result page
-	const { setIsAuthenticated } = useContext(AuthContext); //using for updating auth flag based on server response
+	const navigation = useNavigation(); //used to navigate to the result page
+	const { setIsAuthenticated } = useContext(AuthContext); //used to update the auth flag based on server response
 
 	const [rulesModal, setRulesModal] = useState(true); //rules at the start of the game
 
-
 	const [isLoading, setIsLoading] = useState(false);//loading status for end test button
 
-	const [lines, setLines] = useState([]); //array for lines
+	const [lines, setLines] = useState([]); //array for drawn lines
 	const [tool, setTool] = useState('pencil'); //active tool: 'pencil' or 'eraser'
 
 	const [backgroundZoomed, setBackgroundZoomed] = useState(false); //control template zoom
@@ -54,17 +58,17 @@ export default function ComplexFigure() {
 				//goes through lines and leaves only those that are not touched by the eraser
 				prevLines.filter((line) => {
 
-				//check each line point 
+				//check each point of the line
 				return line.every(
 					(point) => Math.sqrt((point.x - x) ** 2 + (point.y - y) ** 2) > 10 //
 				);
 				})
 			);
 		})
-		.runOnJS(true);
+		.runOnJS(true); //allows me to call JS functions from animation
 
 
-	//generate svg
+	//generate svg that will be sent to the backend
 	function generateSVGString() {
 		
 		return `
@@ -79,7 +83,7 @@ export default function ComplexFigure() {
 		`;
 	}
 
-	//handle `end test` button click and send data to the backend
+	//handle 'End test' button click and send data to the backend
 	async function sendToBackend() {
 		const svgString = generateSVGString();
 		setIsLoading(true); //upd loading state of the button
@@ -99,44 +103,44 @@ export default function ComplexFigure() {
 	  };
 
   	return (  
-	<>	
-	<RulesModal 
-		visible={rulesModal} 
-		rules='Recreate the drawing according to the given template. The template increases in size by clicking. You have drawing and erasing available. When the drawing is completed, click the end test button.' 
-		onClose={() => {
-			setRulesModal(false);
+		<>	
+		<RulesModal 
+			visible={rulesModal} 
+			rules='Recreate the drawing according to the given template. The template increases in size by clicking. You have drawing and erasing available. When the drawing is completed, click the end test button.' 
+			onClose={() => {
+				setRulesModal(false);
 
-		}} 
-	/>
-	<GestureHandlerRootView style={styles.container}>
-	
-		<View style={styles.buttonContainer}>
-			<TouchableOpacity //pencil button
-				style={[styles.button, tool === 'pencil' && styles.activeButton]}
-				onPress={() => setTool('pencil')}
-			>
-				<Icon name="edit-2" size={24} color={tool === 'pencil' ? 'white' : '#4CAF50'} />
-			</TouchableOpacity>
-
-			<TouchableOpacity //eraser button
-				style={[styles.button, tool === 'eraser' && styles.activeButton]}
-				onPress={() => setTool('eraser')}
-			>
-				<Icon name="trash-2" size={24} color={tool === 'eraser' ? 'white' : '#4CAF50'} />
-			</TouchableOpacity>
-		</View>
-		<TouchableOpacity  //template
-			style={[styles.imageContainer, { position: 'absolute', top: 10, right: 10 }]} 
-			onPress={handleImagePress}
-		>
-			<Image 
-			source={require("../../assets/complex_figure/complexFigure.png")} 
-			style={[styles.image, backgroundZoomed ? styles.zoomedImage : {}]} 
- 			resizeMode="contain"
-			/>
-
-		</TouchableOpacity>
+			}} 
+		/>
+		<GestureHandlerRootView style={styles.container}>
 		
+			<View style={styles.buttonContainer}>
+				<TouchableOpacity //pencil button
+					style={[styles.button, tool === 'pencil' && styles.activeButton]}
+					onPress={() => setTool('pencil')}
+				>
+					<Icon name="edit-2" size={24} color={tool === 'pencil' ? 'white' : '#4CAF50'} />
+				</TouchableOpacity>
+
+				<TouchableOpacity //eraser button
+					style={[styles.button, tool === 'eraser' && styles.activeButton]}
+					onPress={() => setTool('eraser')}
+				>
+					<Icon name="trash-2" size={24} color={tool === 'eraser' ? 'white' : '#4CAF50'} />
+				</TouchableOpacity>
+			</View>
+			<TouchableOpacity  //template
+				style={[styles.imageContainer, { position: 'absolute', top: 10, right: 10 }]} 
+				onPress={handleImagePress}
+			>
+				<Image 
+				source={require("../../assets/complex_figure/complexFigure.png")} 
+				style={[styles.image, backgroundZoomed ? styles.zoomedImage : {}]} 
+				resizeMode="contain"
+				/>
+
+			</TouchableOpacity>
+			{/* paint area */}
 			<GestureDetector gesture={tool === 'pencil' ? paintGesture : eraseGesture}>
 
 				<View style={styles.paintContainer}>
@@ -160,15 +164,15 @@ export default function ComplexFigure() {
 				</Svg>
 				</View>
 			</GestureDetector>
-	
-		<CustomButton
-			title="End test"
-			onPress={() => sendToBackend()}
-			isLoading={isLoading}
-		/>
+		
+			<CustomButton
+				title="End test"
+				onPress={() => sendToBackend()}
+				isLoading={isLoading}
+			/>
 
-	</GestureHandlerRootView>
-	</>
+		</GestureHandlerRootView>
+		</>
   	);
 }
 

@@ -1,3 +1,8 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Penny component for the Transferring Pennies Test.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions.
+ */
 import React, { useState, useRef } from 'react';
 import { Image} from "react-native";
 
@@ -10,7 +15,7 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
     const startCoords = useRef({ x: 0, y: 0 });//start coords that will be send to the backend
     const startTime = useRef(0); //start time that will be send to the backend
 
-	const [gotToBox, setGotToBox] = useState(false); //to check if coin is in the box
+	const [gotToBox, setGotToBox] = useState(false); //to check if coin is in the target zone
 
 	//for hand change points detection
     const lastSpeed = useRef(0); 
@@ -27,7 +32,7 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 	const registerDroppedCoin = (x, y, time) => {
 		droppedCoinPoints.current.push({ x, y, timeStart: time, timeEnd: null, time: null });
 	};
-	//function for processing coin lifting
+	//function for coin lifting processing
 	const registerLiftedCoin = (x, y, time) => {
 		const coin = droppedCoinPoints.current.find(c => c.timeEnd === null);
 	
@@ -48,7 +53,7 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 	};
     
 
-	//group all data about coin that will be send to the backend
+	//group all coin data that will be send to the backend
     const collectCoinData = (coinId, startCoords, endCoords) => {
 		const endTime = Date.now();
 	
@@ -72,7 +77,8 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 				//if it is first record for this coin in this round
 				return [...prevCoinData, coinData];
 			}
-			//if there was already a record of this coin, there is no need to update the starting time and coordinates
+			// if there was already a record of this coin, 
+			// there is no need to update the starting time and coordinates
 			const updatedCoin = {
 				...prevCoinData[existingIndex],
 				end_coordinates: coinData.end_coordinates,
@@ -107,7 +113,7 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 			angleHistory.current[0]
 		);
 	
-		//check if speed and angle chenge are significant
+		//check if speed and angle change are significant
 		if (lastSpeed.current < 500 && speed > 500 && avgAngleChange > 0.05) {
 			//add hand change point
 			handChangePoints.current.push({
@@ -190,12 +196,13 @@ export default function Penny({index, setElements, round, setCoinData, targetZon
 				x: offset.value.x,
 				y: offset.value.y,
 			};
-			handleDrop(e); //check if it is a error drop or coin is in the taget zone
-            collectCoinData(index, startCoords.current, endCoords); //save data about this movement
+			handleDrop(e); //check if it is an error drop or coin is in the taget zone
+			//save data about this movement
+            collectCoinData(index, startCoords.current, endCoords); 
 
 
 		})
-		.runOnJS(true);
+		.runOnJS(true); //allows me to call JS functions from animation
 
 		const gesture = Gesture.Simultaneous(panGesture);
           		

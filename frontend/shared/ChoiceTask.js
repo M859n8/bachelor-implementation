@@ -1,7 +1,13 @@
+/**
+ * Author: Maryna Kucher
+ * Description: Component for rendering multiple-choice tasks
+ * from the Visual Organization Test.
+ * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions
+ */
 import React from 'react';
 import { StyleSheet, View, Image, TouchableOpacity, Text } from 'react-native';
 
-// Component for rendering multiple-choice tasks
+
 const ChoiceTask = ({ task, onSelect }) => {
 	return (
 		<View style={{ gap: 10 }}>
