@@ -17,12 +17,13 @@ These are defined in package.json and installed automatically:
 ```bash
 /
 ├── App.js                     # Entry point of the application
+├── index.js 				   # registers root component
 ├── StackNavigator.js          # Manages navigation between screens
 ├── package.json               # Project dependencies and scripts
 ├── app.json                   # Expo and app configuration
 ├── assets/                    # Static resources (images, fonts, etc.)
 ├── screens/                   # App screens (Home, Login, Tests, etc.)
-├── screens/shared/            # Individual test screens
+├── screens/tests/             # Individual test screens
 ├── shared/                    # Reusable UI components (charts, modals, etc.)
 
 ```
