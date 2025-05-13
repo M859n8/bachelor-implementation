@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "MyApp5",
-    "slug": "MyApp5",
+    "name": "MotorCognitiveApp",
+    "slug": "MotorCognitiveApp",
     "version": "1.0.0",
 	"orientation": "default",
     "icon": "./assets/icon.png",
@@ -19,7 +19,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.MyApp5"
+      "package": "com.anonymous.MotorCognitiveApp"
     },
     "web": {
       "favicon": "./assets/favicon.png"

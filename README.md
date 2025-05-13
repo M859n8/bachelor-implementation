@@ -81,6 +81,11 @@ npx expo start
 
 This command launches the Expo development server, allowing you to open the app in a web browser on localhost, or run it on a mobile simulator or physical device using the Expo Go app.
 
+3. **Replace the API URL**
+
+Make sure to update the API URL to point to your backend.
+You need to replace the existing URL (for example, `http://192.168.0.12:5000/`) with the URL of your own backend, including the correct port. 
+
 ## Tests Implemented
 
 * Bells Cancellation
