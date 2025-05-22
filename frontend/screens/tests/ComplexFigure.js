@@ -88,7 +88,7 @@ export default function ComplexFigure() {
 		const svgString = generateSVGString();
 		setIsLoading(true); //upd loading state of the button
 		await sendRequest({
-			url: 'http://192.168.0.12:5000/api/result/figure/saveResponse',
+			url: 'http://localhost:5000/api/result/figure/saveResponse',
 			body: {svg: svgString},
 			setIsAuthenticated,
 			navigation,

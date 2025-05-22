@@ -85,7 +85,7 @@ export default function BellsCancellation() {
 
 		//send the request using a separate component from ../shared/directory
 		await sendRequest({
-			url: 'http://192.168.0.12:5000/api/result/bells/saveResponse',
+			url: 'http://localhost:5000/api/result/bells/saveResponse',
 			body: requestBody,
 			setIsAuthenticated,
 			navigation,

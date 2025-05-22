@@ -5,7 +5,7 @@
  * Part of Bachelor's Thesis: Digital Assessment of Human Perceptual-Motor Functions
  */
 import React, { useEffect, useState, useContext } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Platform} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Chart from '../shared/Chart.js';
@@ -50,13 +50,46 @@ export default function Home() {
 		}
 	};
 
+	const handleRegister= async () => {
+		console.log('got to handle register ')
+		try {
+			const response = await fetch('https://pc013089.fit.vutbr.cz/backend/api/auth/registration', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+
+				},
+				body: JSON.stringify({
+					"username": "mk",
+					"email": "mk1@gmail.com",
+					"password1": "1111A@11",
+					"password2": "1111A@11"
+				}),
+			});
+
+			if(response.ok){
+				console.log('Successfully registered')
+			}else{
+				console.log('response not ok')
+			}
+			
+		} catch (error) {
+			console.log('register error ')
+			Toast.show({
+				type: 'error',
+				text1: 'Register error',
+				text2: 'Something went wrong while register.',
+			});
+		}
+	};
+
 
 	useEffect(() => {
 		//get user results about previous assessments
 		const fetchUserData = async () => { 
 			try {
 				const token = await AsyncStorage.getItem('authToken');
-				const response = await fetch('http://192.168.0.12:5000/api/auth/user-info', {
+				const response = await fetch('http://localhost:5000/api/auth/user-info', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -124,6 +157,8 @@ export default function Home() {
 			setWidth(width);
 		  }}>
 		<CustomButton title="Logout" onPress={handleLogout} />
+		<CustomButton title="Register" onPress={handleRegister} />
+
 		{width > 0 && ( //show list if view width was measured
 		<FlatList
 			data={tests}
@@ -202,6 +237,9 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowRadius: 4,
         elevation: 3,
+		...(Platform.OS === 'web' && { //fixed width for web 
+			padding: 40,
+		  }),
     },
     profileTitle: {
         fontSize: 18,
@@ -213,6 +251,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
 		gap: '30%',
+		...(Platform.OS === 'web' && { //fixed width for web 
+			gap: 50,
+		  }),
         marginBottom: 8,
     },
     profileLabel: {

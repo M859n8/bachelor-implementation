@@ -30,7 +30,7 @@ export default function Login() {
 	const handleLogin = async () => {
 		try {
 			//send login request to the backend
-			const response = await fetch('http://192.168.0.12:5000/api/auth/login', {
+			const response = await fetch('http://localhost:5000/api/auth/login', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ username, password })
@@ -82,7 +82,7 @@ export default function Login() {
 
 		try {
 			//send register request to the backend
-			const response = await fetch('http://192.168.0.12:5000/api/auth/register', {
+			const response = await fetch('http://localhost:5000/api/auth/register', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ username, password, age, handOrientation })

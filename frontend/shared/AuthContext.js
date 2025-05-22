@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
 		}
 	
 		try {
-			const response = await fetch('http://192.168.0.12:5000/api/auth/check', {
+			const response = await fetch('http://localhost:5000/api/auth/check', {
 				method: 'POST',
 				headers: { Authorization: `Bearer ${token}` },
 			});

@@ -143,7 +143,7 @@ export default function BlockDesign() {
 
 		//send data to the backend using separate component from ../shared/directory
 		await sendRequest({
-			url: 'http://192.168.0.12:5000/api/result/block/saveResponse',
+			url: 'http://localhost:5000/api/result/block/saveResponse',
 			body: requestBody,
 			setIsAuthenticated,
 			navigation,

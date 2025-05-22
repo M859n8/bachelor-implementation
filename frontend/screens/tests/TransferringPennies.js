@@ -218,7 +218,7 @@ export default function TransferringPennies() {
 		}
 		//send the request using a separate component from ../shared/directory
 		await sendRequest({
-			url: 'http://192.168.0.12:5000/api/result/pennies/saveResponse',
+			url: 'http://localhost:5000/api/result/pennies/saveResponse',
 			body: requestBody,
 			setIsAuthenticated,
 			navigation,
