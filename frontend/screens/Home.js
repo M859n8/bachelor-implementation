@@ -50,38 +50,38 @@ export default function Home() {
 		}
 	};
 
-	const handleRegister= async () => {
-		console.log('got to handle register ')
-		try {
-			const response = await fetch('https://pc013089.fit.vutbr.cz/backend/api/auth/registration', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
+	// const handleRegister= async () => {
+	// 	console.log('got to handle register ')
+	// 	try {
+	// 		const response = await fetch('https://pc013089.fit.vutbr.cz/backend/api/auth/registration', {
+	// 			method: 'POST',
+	// 			headers: {
+	// 				'Content-Type': 'application/json'
 
-				},
-				body: JSON.stringify({
-					"username": "mk",
-					"email": "mk1@gmail.com",
-					"password1": "1111A@11",
-					"password2": "1111A@11"
-				}),
-			});
+	// 			},
+	// 			body: JSON.stringify({
+	// 				"username": "mk",
+	// 				"email": "mk1@gmail.com",
+	// 				"password1": "1111A@11",
+	// 				"password2": "1111A@11"
+	// 			}),
+	// 		});
 
-			if(response.ok){
-				console.log('Successfully registered')
-			}else{
-				console.log('response not ok')
-			}
+	// 		if(response.ok){
+	// 			console.log('Successfully registered')
+	// 		}else{
+	// 			console.log('response not ok')
+	// 		}
 			
-		} catch (error) {
-			console.log('register error ')
-			Toast.show({
-				type: 'error',
-				text1: 'Register error',
-				text2: 'Something went wrong while register.',
-			});
-		}
-	};
+	// 	} catch (error) {
+	// 		console.log('register error ')
+	// 		Toast.show({
+	// 			type: 'error',
+	// 			text1: 'Register error',
+	// 			text2: 'Something went wrong while register.',
+	// 		});
+	// 	}
+	// };
 
 
 	useEffect(() => {
@@ -157,7 +157,7 @@ export default function Home() {
 			setWidth(width);
 		  }}>
 		<CustomButton title="Logout" onPress={handleLogout} />
-		<CustomButton title="Register" onPress={handleRegister} />
+		{/* <CustomButton title="Register" onPress={handleRegister} /> */}
 
 		{width > 0 && ( //show list if view width was measured
 		<FlatList
@@ -181,8 +181,8 @@ export default function Home() {
 					<Text style={styles.profileValue}>{userInfo.age}</Text>
 				  </View>
 				  <View style={styles.profileRow}>
-					<Text style={styles.profileLabel}>Hand Orientation:</Text>
-					<Text style={styles.profileValue}>{userInfo.handOrientation}</Text>
+					<Text style={styles.profileLabel}>Email:</Text>
+					<Text style={styles.profileValue}>{userInfo.email}</Text>
 				  </View>
 				</View>
 			  )}

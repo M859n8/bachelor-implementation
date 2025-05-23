@@ -8,26 +8,25 @@ import db from '../db-config.js';
 
 const userModel = {
 	//creates user after registration
-	createUser: async (username, password, age, handOrientation) => {
-		const hashedPassword = bcrypt.hashSync(password, 10);
+	createUser: async (username, email, age) => {
 		const [result] = await db.execute(
-			'INSERT INTO users (username, password, age, handOrientation) VALUES (?, ?, ?, ?)',
-			[username, hashedPassword, age, handOrientation]
+			'INSERT INTO users (username, email, age) VALUES (?, ?, ?)',
+			[username, email, age]
 		);
 		return result.insertId;
 	},
-	//finds user by username after login
-	findByUsername: async (username) => {
+	//finds user by email after login
+	findByEmail: async (email) => {
 		const [rows] = await db.execute(
-			'SELECT * FROM users WHERE username = ?',
-			[username]
+			'SELECT * FROM users WHERE email = ?',
+			[email]
 		);
 		return rows[0];
 	},
 	// finds user by id 
     findById: async (id) => {
         const [rows] = await db.execute(
-            'SELECT id, username, age, handOrientation FROM users WHERE id = ?',
+            'SELECT id, username, email, age FROM users WHERE id = ?',
             [id]
         );
         return rows[0];

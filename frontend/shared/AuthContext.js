@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-	const [isAuthenticated, setIsAuthenticated] = useState(null); 
+	const [isAuthenticated, setIsAuthenticated] = useState(false); 
 
 	//send request to the backend and check authorization
 	const checkAuth = async () => {

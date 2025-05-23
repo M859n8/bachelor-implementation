@@ -57,50 +57,48 @@ const authController = {
 		console.log('got here ')
 		try {
 			//get register data from request
-			const { login } = req.body;
-			console.log('username', login)
-			//check in database if user with this username exists
-			const existingUser = await userModel.findByUsername(login);
+			const { username, email, age } = req.body;
+
+			//check in database if user with this email exists
+			const existingUser = await userModel.findByEmail(email);
 			if (!existingUser) {
-				console.log('not found')
-				return res.status(400).json({ message: 'Username does not exists' });
+				existingUser = await userModel.createUser(username, email, age);
 			}
 			console.log('existing user ', existingUser)
 			
 			//create a jwt token
 			const token = jwt.sign({ id: existingUser.id, username: existingUser.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
 			console.log('token', token )
-			try {
-				const response = await fetch('https://pc013089.fit.vutbr.cz/backend/api/auth/registration/', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
+			// try {
+			// 	const response = await fetch('https://pc013089.fit.vutbr.cz/backend/api/auth/registration/', {
+			// 		method: 'POST',
+			// 		headers: {
+			// 			'Content-Type': 'application/json'
 	
-					},
-					body: JSON.stringify({
-						"username": "maryna",
-						"email": "mk11@gmail.com",
-						"password1": "11@@22KM",
-						"password2": "11@@22KM"
-					}),
-				});
-				console.log('response ', response)
-				if(response.ok){
-					console.log('Successfully registered')
+			// 		},
+			// 		body: JSON.stringify({
+			// 			"username": "maryna",
+			// 			"email": "mk11@gmail.com",
+			// 			"password1": "11@@22KM",
+			// 			"password2": "11@@22KM"
+			// 		}),
+			// 	});
+			// 	console.log('response ', response)
+			// 	if(response.ok){
+			// 		console.log('Successfully registered')
 					
-				}else{
-					console.log('response not ok')
-					// const text = await response.text();
-					// console.log(text);
+			// 	}else{
+			// 		console.log('response not ok')
+			// 		// const text = await response.text();
+			// 		// console.log(text);
 
-				}
+			// 	}
 				
-			} catch (error) {
-				console.log('register error ')
-			}
+			// } catch (error) {
+			// 	console.log('register error ')
+			// }
 			return res.status(201).json({ token });
 		} catch (err) {
-			console.log('rerro')
 			res.status(500).json({ message: 'Server error' });
 		}
 

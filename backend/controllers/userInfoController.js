@@ -38,7 +38,7 @@ const userInfoController = {
 				user: {
 				username: user.username,
 				age: user.age,
-				handOrientation: user.handOrientation
+				email: user.email
 
 				},
 				groupedResults: grouped || [],

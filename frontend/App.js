@@ -14,13 +14,16 @@ import { useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function getParamsFromURL(url) {
+	console.log('params from uerl')
     if (!url) return {};
     const queryString = url.split('?')[1];
     if (!queryString) return {};
     const params = new URLSearchParams(queryString);
+	console.log(params)
     return {
-        login: params.get('login'),
-        token: params.get('token'),
+        username: params.get('username'),
+        email: params.get('email'),
+        age: params.get('age'),
     };
 }
 
@@ -40,17 +43,16 @@ function MainApp() {
                 url = await Linking.getInitialURL();
             }
 
-            const { login, token } = getParamsFromURL(url);
-            if (login && token) {
-                // логіка логіну
-                console.log('Login:', login);
-                console.log('Token:', token);
+            const { username, email, age } = getParamsFromURL(url);
+			console.log('username', username, 'email', email, 'age', age);
+
+            if (username && email && age) {
 				try {
 					//send login request to the backend
 					const response = await fetch('http://localhost:5000/api/auth/loginAuth', {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ login })
+						body: JSON.stringify({ username, email, age })
 					});
 					const data = await response.json();
 		
