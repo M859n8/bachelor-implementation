@@ -159,7 +159,7 @@ export default function Home() {
 		<CustomButton title="Logout" onPress={handleLogout} />
 		{/* <CustomButton title="Register" onPress={handleRegister} /> */}
 
-		{width > 0 && ( //show list if view width was measured
+		{/* {width > 0 && ( //show list if view width was measured
 		<FlatList
 			data={tests}
 			numColumns={3}
@@ -211,11 +211,11 @@ export default function Home() {
 		  ListFooterComponent={ //results charts
 			<View style={styles.resultsPart}>
 			  <Text style={styles.profileTitle}>Results charts</Text>
-			  <Chart testResults={chartData}/>
+			  <Chart testResults={chartData}/> 
 			</View>
   
 		  }
-		/>)}
+		/>)} */}
 	   </View>
 
     );

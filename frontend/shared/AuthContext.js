@@ -13,6 +13,7 @@ export const AuthProvider = ({ children }) => {
 
 	//send request to the backend and check authorization
 	const checkAuth = async () => {
+		console.log('grt to check auth')
 		const token = await AsyncStorage.getItem('authToken');
 		
 		if (!token) { //no token in local storage
